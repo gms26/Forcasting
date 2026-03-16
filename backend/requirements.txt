@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+pandas
+numpy
+prophet
+statsmodels
+pmdarima
+google-generativeai
+reportlab
+matplotlib
+python-multipart
+python-dotenv
+scikit-learn
+pytest
+httpx
