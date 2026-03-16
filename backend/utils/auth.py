@@ -1,91 +1,59 @@
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel, EmailStr, Field
-from passlib.context import CryptContext
-import sqlite3
+from pydantic import BaseModel
 import jwt
 import os
 from datetime import datetime, timedelta
 
 router = APIRouter()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Constants for JWT
 SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-key-for-smartforecast")
 ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours
 
-def get_db():
-    # Store sqlite DB in the backend folder
-    db_path = os.path.join(os.path.dirname(__file__), 'users.db')
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
-    try:
-        yield conn
-    finally:
-        conn.close()
-
-# Initialize DB
-def init_db():
-    db_path = os.path.join(os.path.dirname(__file__), 'users.db')
-    conn = sqlite3.connect(db_path)
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT UNIQUE NOT NULL,
-            hashed_password TEXT NOT NULL
-        )
-    ''')
-    conn.commit()
-    conn.close()
-
-# Run init immediately
-init_db()
-
-class UserCreate(BaseModel):
-    email: EmailStr
-    password: str = Field(..., max_length=70, min_length=4)
+# Demo credentials for interview/test purposes
+DEMO_USER = {
+    "username": "admin",
+    "password": "admin123"
+}
 
 class UserLogin(BaseModel):
-    email: str
+    username: str
     password: str
-
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(hours=24)
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-@router.post("/register")
-def register_user(user: UserCreate, db: sqlite3.Connection = Depends(get_db)):
-    cursor = db.cursor()
-    # Check existing
-    cursor.execute("SELECT email FROM users WHERE email = ?", (user.email,))
-    if cursor.fetchone():
-        raise HTTPException(status_code=400, detail="Email already registered")
-        
-    hashed = get_password_hash(user.password)
-    cursor.execute("INSERT INTO users (email, hashed_password) VALUES (?, ?)", (user.email, hashed))
-    db.commit()
-    
-    # Return JWT token exactly like login so user is instantly logged in
-    access_token = create_access_token(data={"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer", "email": user.email}
-
 @router.post("/login")
-def login_user(user: UserLogin, db: sqlite3.Connection = Depends(get_db)):
-    cursor = db.cursor()
-    cursor.execute("SELECT * FROM users WHERE email = ?", (user.email,))
-    user_row = cursor.fetchone()
+def login_user(user: UserLogin):
+    """
+    Simple login function that checks against demo credentials.
+    Returns a JWT token on success.
+    """
+    if user.username == DEMO_USER["username"] and user.password == DEMO_USER["password"]:
+        access_token = create_access_token(data={"sub": user.username})
+        return {
+            "access_token": access_token, 
+            "token_type": "bearer", 
+            "username": user.username,
+            "message": "Login successful"
+        }
     
-    if not user_row or not verify_password(user.password, user_row['hashed_password']):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
-        
-    access_token = create_access_token(data={"sub": user_row['email']})
-    return {"access_token": access_token, "token_type": "bearer", "email": user_row['email']}
+    raise HTTPException(
+        status_code=401, 
+        detail="Invalid username or password"
+    )
+
+# Keeping register endpoint for potential future use, but making it non-functional for demo
+@router.post("/register")
+def register_user():
+    raise HTTPException(
+        status_code=403,
+        detail="Registration is disabled for this demo version. Use admin/admin123."
+    )

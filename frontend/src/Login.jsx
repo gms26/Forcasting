@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { Activity, Lock, Mail, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Activity, Lock, User, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 
 const Login = ({ onLogin }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isRegistering, setIsRegistering] = useState(false);
+  // Pre-fill with demo credentials as requested
+  const [username, setUsername] = useState('admin');
+  const [password, setPassword] = useState('admin123');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -14,17 +14,17 @@ const Login = ({ onLogin }) => {
     setLoading(true);
     setError(null);
     
-    const endpoint = isRegistering ? '/auth/register' : '/auth/login';
-    
     try {
-      const res = await axios.post(`http://127.0.0.1:8000${endpoint}`, {
-        email,
+      const res = await axios.post(`http://127.0.0.1:8000/auth/login`, {
+        username,
         password
       });
       
       const { access_token } = res.data;
-      console.log("Login successful, token received:", access_token.substring(0, 10) + "...");
       localStorage.setItem('auth_token', access_token);
+      localStorage.setItem('username', res.data.username);
+      
+      // On success, notify parent component which handles redirection
       onLogin(true);
     } catch (err) {
       console.error("Login Error:", err);
@@ -38,61 +38,63 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-navy-900 flex items-center justify-center p-4 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4 transition-colors duration-300">
       
-      {/* Decorative blobs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+      {/* Decorative background elements */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      </div>
 
-      <div className="relative bg-white dark:bg-navy-800 w-full max-w-md p-8 rounded-2xl shadow-xl border border-slate-100 dark:border-navy-700">
+      <div className="relative bg-white dark:bg-slate-800 w-full max-w-md p-10 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700">
         
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-orange-50 dark:bg-orange-500/10 text-orange-500 mb-6">
-            <Activity className="w-8 h-8" />
+        {/* Logo and Header */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-indigo-600 shadow-lg shadow-indigo-200 dark:shadow-none mb-6">
+            <Activity className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-            {isRegistering ? 'Create Account' : 'Welcome Back'}
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-3">
+            SmartForecast AI
           </h1>
           <p className="text-slate-500 dark:text-slate-400 font-medium">
-            {isRegistering ? 'Join SmartForecast AI today' : 'Log in to your predictive dashboard'}
+            Professional Predictive Analytics Dashboard
           </p>
         </div>
 
         {error && (
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-xl border border-red-100 dark:border-red-800/30 flex items-center gap-2 animate-shake">
-            <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-red-500"></span>
+            <span className="shrink-0 w-2 h-2 rounded-full bg-red-500"></span>
             {error}
           </div>
         )}
 
-        {/* Form */}
+        {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Email Address / Username
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+              Username
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Mail className="h-5 w-5 text-slate-400" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <User className="h-5 w-5 text-slate-400" />
               </div>
               <input
                 type="text"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="block w-full pl-10 pr-3 py-3 border border-slate-200 dark:border-navy-600 rounded-xl bg-slate-50 dark:bg-navy-900/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                placeholder="you@company.com"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="block w-full pl-12 pr-4 py-3.5 border border-slate-200 dark:border-slate-600 rounded-2xl bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                placeholder="Enter username"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
               Password
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Lock className="h-5 w-5 text-slate-400" />
               </div>
               <input
@@ -100,52 +102,40 @@ const Login = ({ onLogin }) => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="block w-full pl-10 pr-3 py-3 border border-slate-200 dark:border-navy-600 rounded-xl bg-slate-50 dark:bg-navy-900/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                placeholder="••••••••"
+                className="block w-full pl-12 pr-4 py-3.5 border border-slate-200 dark:border-slate-600 rounded-2xl bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                placeholder="Enter password"
               />
             </div>
           </div>
 
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center">
-              <input id="remember-me" type="checkbox" className="h-4 w-4 text-orange-500 focus:ring-orange-500 border-slate-300 rounded cursor-pointer" />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
-                Remember me
-              </label>
-            </div>
-            <div className="text-sm">
-              <a href="#" className="font-medium text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
-                Forgot password?
-              </a>
-            </div>
-          </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all mt-8 group disabled:opacity-70"
+            className="w-full flex justify-center items-center gap-2 py-4 px-6 border border-transparent rounded-2xl shadow-lg text-base font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all mt-8 group disabled:opacity-70 disabled:pointer-events-none"
           >
             {loading ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
             ) : (
               <>
-                {isRegistering ? 'Create Account' : 'Access Dashboard'} 
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                Access Dashboard
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </>
             )}
           </button>
         </form>
         
-        <div className="mt-8 text-center bg-slate-50 dark:bg-navy-900/50 rounded-xl p-4 border border-slate-100 dark:border-navy-700">
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            {isRegistering ? 'Already have an account?' : "Don't have an account yet?"}
-            <button 
-              onClick={() => setIsRegistering(!isRegistering)}
-              className="ml-2 font-bold text-orange-500 hover:text-orange-600 transition-colors"
-            >
-              {isRegistering ? 'Log In' : 'Sign Up Free'}
-            </button>
-          </p>
+        {/* Demo Credentials Note */}
+        <div className="mt-10 text-center">
+          <div className="inline-block px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-full border border-indigo-100 dark:border-indigo-800/30">
+            <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+              Demo credentials: <span className="underline">admin</span> / <span className="underline">admin123</span>
+            </p>
+          </div>
         </div>
+
+        <p className="mt-8 text-center text-xs text-slate-400 dark:text-slate-500">
+            SmartForecast AI &copy; 2026. All rights reserved.
+        </p>
       </div>
     </div>
   );
