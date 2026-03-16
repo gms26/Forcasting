@@ -9,10 +9,10 @@ import logging
 
 from utils.data_parser import validate_csv
 from forecasting.moving_average import run_forecast as run_ma
-from forecasting.arima_model import run_forecast as run_arima
+from forecasting.arima_model import run_forecast as run_arima, clear_arima_cache
 from forecasting.holt_winters import run_forecast as run_hw
 from forecasting.prophet_model import run_forecast as run_prophet
-from llm.gemini_explainer import generate_explanation
+from llm.gemini_explainer import get_gemini_explanation
 from utils.pdf_generator import generate_pdf_report
 from utils.auth import router as auth_router
 
@@ -45,6 +45,7 @@ async def upload_file(file: UploadFile = File(...)):
     
     contents = await file.read()
     try:
+        clear_arima_cache()
         df = pd.read_csv(io.StringIO(contents.decode('utf-8')))
         processed_data, preview = validate_csv(df)
         return {"message": "File uploaded successfully", "preview": preview, "data": processed_data}
@@ -112,13 +113,19 @@ async def get_explanation(request: dict):
         hist_vals = [d['value'] for d in hist_data]
         future_vals = forecast_data # Already a list of floats in new format
         
-        explanation = generate_explanation(
+        # Calculate trend direction for explainer
+        trend_direction = "Increasing" if future_vals[-1] > future_vals[0] else "Decreasing"
+        metrics_dict = request.get('metrics', {})
+
+        explanation = get_gemini_explanation(
             model_name=request.get('model_name', 'Unknown'),
-            period=request.get('forecast_period', 30),
-            hist_vals=hist_vals,
-            forecast_vals=future_vals,
-            metrics=request.get('metrics', {}),
-            freq="daily" # Defaulting for simplicity in explanation
+            periods=request.get('forecast_period', 30),
+            historical_values=hist_vals,
+            forecast_values=future_vals,
+            trend_direction=trend_direction,
+            mae=metrics_dict.get('mae', 0.0),
+            rmse=metrics_dict.get('rmse', 0.0),
+            mape=metrics_dict.get('mape', 0.0)
         )
         return {"explanation": explanation}
     except Exception as e:
@@ -163,6 +170,7 @@ async def download_csv_get():
 
 @app.get("/sample")
 async def get_sample_data():
+    clear_arima_cache()
     try:
         # Navigate to sample_data/sales_data.csv from backend/main.py
         current_dir = os.path.dirname(__file__)

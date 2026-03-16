@@ -1,77 +1,79 @@
 import os
-import pandas as pd
-import numpy as np
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Configure the Gemini API key
-api_key = os.getenv("GEMINI_API_KEY", "")
-try:
-    if api_key:
-        genai.configure(api_key=api_key)
-except Exception as e:
-    print(f"Failed to configure Gemini API: {e}")
-
-def generate_explanation(model_name: str, period: int, hist_vals: list, forecast_vals: list, metrics: dict, freq: pd.Timedelta = pd.Timedelta(days=1)) -> str:
-    """
-    Generates an explanation of the forecast using Gemini 1.5 Flash.
-    """
-    fallback_msg = (
-        f"Based on the {model_name} model for the next {period} points, the trend indicates stable growth. "
-        "Seasonality patterns appear typical for this dataset. "
-        f"Recommendation: Monitor actuals against the forecast closely, as the MAPE is {metrics.get('mape', 'N/A')}%. "
-        "Risk Note: Unexpected market changes could cause deviations beyond the confidence interval."
-    )
-    
-    if not api_key:
-        return fallback_msg
-
+def get_gemini_explanation(
+    model_name: str,
+    periods: int,
+    historical_values: list,
+    forecast_values: list,
+    trend_direction: str,
+    mae: float,
+    rmse: float,
+    mape: float
+) -> str:
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        
-        # Prepare metric strings to avoid float formatting errors on 'N/A'
-        mae_str = f"{metrics.get('mae', 0):.2f}" if isinstance(metrics.get('mae'), (int, float)) else "N/A"
-        rmse_str = f"{metrics.get('rmse', 0):.2f}" if isinstance(metrics.get('rmse'), (int, float)) else "N/A"
-        mape_val = metrics.get('mape')
-        mape_str = f"{mape_val:.2f}%" if isinstance(mape_val, (int, float)) else "N/A"
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            return get_fallback_explanation(
+                model_name, periods, trend_direction, mape)
 
-        unit = "days"
-        if len(hist_vals) > 1:
-            # Simple unit heuristic
-            try:
-                td = pd.to_timedelta(freq)
-                if td < pd.Timedelta(hours=1): unit = "minutes"
-                elif td < pd.Timedelta(days=1): unit = "hours"
-                elif td > pd.Timedelta(days=27) and td < pd.Timedelta(days=32): unit = "months"
-                elif td > pd.Timedelta(days=6): unit = "weeks"
-            except:
-                pass
+        client = genai.Client(api_key=api_key)
+
+        hist_values = historical_values[-10:] \
+            if len(historical_values) >= 10 \
+            else historical_values
+        fore_values = forecast_values[:10] \
+            if len(forecast_values) >= 10 \
+            else forecast_values
+
+        hist_str = ", ".join(
+            [str(round(float(v), 2)) for v in hist_values])
+        forecast_str = ", ".join(
+            [str(round(float(v), 2)) for v in fore_values])
 
         prompt = f"""
-        You are an expert Data Scientist analyzing time series forecasting results.
-        
-        Model Used: {model_name}
-        Forecast Period: Next {period} {unit}
-        Last 10 Historical Values: {hist_str}
-        First 10 Forecasted Values: {future_str}
-        Expected Trend Direction: {trend_direction}
-        Model Accuracy: MAE={mae_str}, RMSE={rmse_str}, MAPE={mape_str}
-        
-        Provide a concise, professional business explanation with the following structure:
-        1. Overall trend summary in 2 sentences.
-        2. Seasonality pattern if detected.
-        3. A business insight or recommendation based on these figures.
-        4. A risk or uncertainty note.
-        
-        CRITICAL: Ensure perfect spelling and grammar. Double check the word 'occurring'.
-        Keep formatting simple with bullet points or short paragraphs. Avoid asterisks formatting.
-        """
-        
-        response = model.generate_content(prompt)
-        return response.text.replace('*', '')
-        
+You are a business data analyst. Analyze this forecast.
+
+Model: {model_name}
+Forecast Period: Next {periods} days
+Last 10 Historical Values: {hist_str}
+Next 10 Forecasted Values: {forecast_str}
+Trend Direction: {trend_direction}
+MAE: {mae}, RMSE: {rmse}, MAPE: {mape}%
+
+Provide in under 120 words:
+1. Trend Summary
+2. Seasonality Pattern
+3. Business Recommendation  
+4. Risk Note
+"""
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt
+        )
+        return response.text
+
     except Exception as e:
         print(f"Gemini API Error: {str(e)}")
-        return fallback_msg
+        return get_fallback_explanation(
+            model_name, periods, trend_direction, mape)
+
+
+def get_fallback_explanation(
+    model_name: str,
+    periods: int,
+    trend_direction: str,
+    mape: float
+) -> str:
+    return (
+        f"Based on the {model_name} model for the next "
+        f"{periods} days, the trend indicates "
+        f"{trend_direction} growth. "
+        f"Recommendation: Monitor actuals closely. "
+        f"MAPE is {mape}%. "
+        f"Risk: Unexpected changes could cause deviations "
+        f"beyond the confidence interval."
+    )

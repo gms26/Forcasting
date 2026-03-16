@@ -5,7 +5,7 @@ numpy
 prophet
 statsmodels
 pmdarima
-google-generativeai
+google-genai
 reportlab
 matplotlib
 python-multipart

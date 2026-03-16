@@ -31,6 +31,12 @@ function App() {
   const [explanation, setExplanation] = useState('');
   const [isExplaining, setIsExplaining] = useState(false);
 
+  // Individual forecast states for the chart
+  const [forecastData, setForecastData] = useState([]);
+  const [confidenceUpper, setConfidenceUpper] = useState([]);
+  const [confidenceLower, setConfidenceLower] = useState([]);
+  const [forecastDates, setForecastDates] = useState([]);
+
   // Initialize theme and check auth
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'light';
@@ -99,21 +105,42 @@ function App() {
         data: data
       });
       
-      const { forecast, metrics: newMetrics } = res.data;
+      const { forecast, confidence_upper, confidence_lower, dates, ...newMetrics } = res.data;
       
-      // Merge history with forecast to prevent duplicates at the connection point
+      // Set individual states as requested
+      setForecastData(res.data.forecast);
+      setConfidenceUpper(res.data.confidence_upper);
+      setConfidenceLower(res.data.confidence_lower);
+      setForecastDates(res.data.dates);
+
+      // Map arrays to objects for other UI components if needed
+      const forecastFormatted = dates.map((d, i) => ({
+        date: d,
+        forecast: forecast[i],
+        ci_lower: confidence_lower[i],
+        ci_upper: confidence_upper[i]
+      }));
+      
+      // Merge history with forecast
       const combinedMap = {};
       data.forEach(d => {
         combinedMap[d.date] = { ...d };
       });
       
-      forecast.forEach(f => {
-        if (combinedMap[f.date]) {
-          // Connection point - add forecast key to existing historical point
-          combinedMap[f.date] = { ...combinedMap[f.date], ...f };
-        } else {
-          combinedMap[f.date] = f;
-        }
+      // 1. Point of connection: Add the last historical point's value as the 'forecast' value 
+      // for that same date if it doesn't already have one, or just ensure continuity.
+      const lastHistorical = data[data.length - 1];
+      if (lastHistorical) {
+        combinedMap[lastHistorical.date] = { 
+          ...combinedMap[lastHistorical.date], 
+          forecast: lastHistorical.value,
+          ci_lower: lastHistorical.value,
+          ci_upper: lastHistorical.value
+        };
+      }
+
+      forecastFormatted.forEach(f => {
+        combinedMap[f.date] = f;
       });
       
       const combined = Object.values(combinedMap).sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -121,7 +148,7 @@ function App() {
       setMetrics(newMetrics);
       
       // Run AI Insights automatically
-      generateInsight(forecast.filter(f => f.forecast !== undefined), selectedModel, newMetrics);
+      generateInsight(forecastFormatted, selectedModel, newMetrics);
       
     } catch (err) {
       const errorMsg = err.response?.data?.detail || err.message || "An unknown error occurred.";
@@ -140,7 +167,7 @@ function App() {
     
     try {
       const res = await axios.post('http://127.0.0.1:8000/compare', {
-        model_name: "All", // not needed actually
+        model_name: "All",
         forecast_period: period,
         data: data
       });
@@ -153,18 +180,27 @@ function App() {
         combinedMap[d.date] = { ...d };
       });
       
+      // Connection point for each model
+      const lastHistorical = data[data.length - 1];
+      
       Object.keys(results).forEach(mName => {
-        results[mName].forecast.forEach(f => {
-          if (combinedMap[f.date]) {
-            combinedMap[f.date] = { ...combinedMap[f.date], [mName]: f.forecast };
+        const mData = results[mName];
+        
+        // Add historical connection point
+        if (lastHistorical) {
+          combinedMap[lastHistorical.date][mName] = lastHistorical.value;
+        }
+
+        mData.dates.forEach((date, i) => {
+          if (combinedMap[date]) {
+            combinedMap[date] = { ...combinedMap[date], [mName]: mData.forecast[i] };
           } else {
-            combinedMap[f.date] = { date: f.date, [mName]: f.forecast };
+            combinedMap[date] = { date: date, [mName]: mData.forecast[i] };
           }
         });
       });
       
       const combined = Object.values(combinedMap).sort((a,b) => new Date(a.date) - new Date(b.date));
-      
       setForecastResult(combined);
       setMetrics(results);
       
@@ -303,10 +339,26 @@ function App() {
               </div>
             ) : (
               <>
-                {forecastResult ? (
+                {isForecasting && !isComparing && selectedModel === 'ARIMA' ? (
+                  <div className="flex-1 bg-white dark:bg-navy-800 rounded-xl border border-slate-100 dark:border-navy-700 flex flex-col items-center justify-center p-8 text-center min-h-[500px] animate-pulse">
+                    <div className="animate-spin rounded-full h-16 w-16 border-4 border-orange-500 border-t-transparent mb-8"></div>
+                    <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Optimizing ARIMA Parameters...</h3>
+                    <p className="text-slate-500 dark:text-slate-400 max-w-md">
+                      SmartForecast AI is finding the best statistical fit for your data. 
+                      This intensive process may take 10-20 seconds.
+                    </p>
+                  </div>
+                ) : forecastResult ? (
                   <>
                     <div className="h-[450px]">
-                      <ForecastChart data={forecastResult} isComparing={isComparing} />
+                      <ForecastChart 
+                        historicalData={data}
+                        forecastData={forecastData}
+                        confidenceUpper={confidenceUpper}
+                        confidenceLower={confidenceLower}
+                        forecastDates={forecastDates}
+                        isComparing={isComparing} 
+                      />
                     </div>
                     
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
