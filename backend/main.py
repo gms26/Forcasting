@@ -110,11 +110,20 @@ async def get_explanation(request: dict):
         hist_data = request.get('data', [])
         forecast_data = request.get('forecast', [])
         
-        hist_vals = [d['value'] for d in hist_data]
-        future_vals = forecast_data # Already a list of floats in new format
-        
-        # Calculate trend direction for explainer
+        # Handle both formats - list of dicts or list of floats
+        if hist_data and isinstance(hist_data[0], dict):
+            hist_vals = [float(d.get('value', 0)) for d in hist_data]
+        else:
+            hist_vals = [float(v) for v in hist_data]
+
+        if forecast_data and isinstance(forecast_data[0], dict):
+            future_vals = [float(d.get('value', d.get('forecast', 0))) for d in forecast_data]
+        else:
+            future_vals = [float(v) for v in forecast_data]
+
+        # Calculate trend direction
         trend_direction = "Increasing" if future_vals[-1] > future_vals[0] else "Decreasing"
+        
         metrics_dict = request.get('metrics', {})
 
         explanation = get_gemini_explanation(
@@ -128,8 +137,15 @@ async def get_explanation(request: dict):
             mape=metrics_dict.get('mape', 0.0)
         )
         return {"explanation": explanation}
+
     except Exception as e:
-        return JSONResponse(status_code=500, content={"detail": f"Explanation error: {str(e)}"})
+        import traceback
+        print(f"EXPLAIN ERROR: {str(e)}")
+        print(traceback.format_exc())
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Explain error: {str(e)}"}
+        )
 
 # Note: Keeping these as POST as they require the result data to generate the files
 # but adding GET versions if they can be used with cached/example data

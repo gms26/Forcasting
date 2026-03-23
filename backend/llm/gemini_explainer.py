@@ -44,14 +44,14 @@ Next 10 Forecasted Values: {forecast_str}
 Trend Direction: {trend_direction}
 MAE: {mae}, RMSE: {rmse}, MAPE: {mape}%
 
-Provide in under 120 words:
-1. Trend Summary
-2. Seasonality Pattern
-3. Business Recommendation  
-4. Risk Note
+Provide exactly this in under 120 words:
+1. Trend Summary: What direction is the data moving
+2. Pattern: Any seasonality or recurring pattern
+3. Recommendation: One clear business action
+4. Risk: One key uncertainty or risk factor
 """
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-flash-latest",
             contents=prompt
         )
         return response.text

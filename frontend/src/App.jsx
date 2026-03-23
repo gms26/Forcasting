@@ -76,13 +76,18 @@ function App() {
   const generateInsight = async (forecastData, m_name, m_metrics) => {
     setIsExplaining(true);
     try {
-      const res = await axios.post('http://127.0.0.1:8000/explain', {
+      const explainPayload = {
         data: data.slice(-10), // send only last 10 points
         forecast: forecastData,
         model_name: m_name,
         forecast_period: period,
         metrics: m_metrics
-      });
+      };
+      
+      console.log("Sending to /explain:", explainPayload);
+      const res = await axios.post('http://127.0.0.1:8000/explain', explainPayload);
+      console.log("Explain response:", res.data);
+      
       setExplanation(res.data.explanation);
     } catch (err) {
       console.error(err);
@@ -357,6 +362,7 @@ function App() {
                         confidenceUpper={confidenceUpper}
                         confidenceLower={confidenceLower}
                         forecastDates={forecastDates}
+                        comparisonData={forecastResult}
                         isComparing={isComparing} 
                       />
                     </div>

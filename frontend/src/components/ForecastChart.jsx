@@ -8,17 +8,31 @@ const ForecastChart = ({
   confidenceUpper, 
   confidenceLower, 
   forecastDates,
+  comparisonData,
   isComparing 
 }) => {
   
   // 1. Debug logging
   console.log("Chart props received:", { 
     historicalData, forecastData, confidenceUpper, 
-    confidenceLower, forecastDates 
+    confidenceLower, forecastDates, comparisonData, isComparing
   });
+
+  // Define colors for different models
+  const modelColors = {
+    "Moving Average": "#10b981", // Emerald
+    "ARIMA": "#8b5cf6",        // Violet
+    "Holt-Winters": "#f59e0b", // Amber
+    "Prophet": "#ec4899",      // Pink
+    "Forecast": "#f97316"      // Default Orange
+  };
 
   // 2. Data Structuring
   const chartData = useMemo(() => {
+    if (isComparing && comparisonData) {
+      return comparisonData;
+    }
+    
     if (!historicalData) return [];
 
     // Create a base array from historical data
@@ -42,14 +56,8 @@ const ForecastChart = ({
       ci_lower: confidenceLower[i]
     }));
 
-    // To connect the lines, we can optionally duplicate the last historical point in the forecast
-    // or just let Recharts handle the gap if preferred.
-    // The user requested: "Use null for missing values so lines dont connect across gaps"
-    // BUT also "connect them at the boundary".
-    // Usually, this means the first forecast point is the last historical point.
-    
     return [...history, ...forecast];
-  }, [historicalData, forecastData, confidenceUpper, confidenceLower, forecastDates]);
+  }, [historicalData, forecastData, confidenceUpper, confidenceLower, forecastDates, comparisonData, isComparing]);
 
   if (!chartData || chartData.length === 0) return null;
 
@@ -62,6 +70,9 @@ const ForecastChart = ({
           </div>
           {payload.map((entry, index) => {
             if (entry.dataKey === 'ci_upper' || entry.dataKey === 'ci_lower') return null;
+            // Don't show redundant entries
+            if (entry.dataKey === 'value' && payload.some(p => p.dataKey !== 'value' && p.value === entry.value)) return null;
+            
             return (
               <p key={index} style={{ color: entry.color }} className="flex justify-between gap-4">
                 <span>{entry.name}:</span>
@@ -82,15 +93,24 @@ const ForecastChart = ({
           <Activity className="w-5 h-5 text-orange-500" /> Forecast Visualization
         </h2>
         
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <div className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-full">
             <div className="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></div>
             <span className="text-xs font-medium text-blue-700 dark:text-blue-300">Historical</span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 rounded-full">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#f97316]"></div>
-            <span className="text-xs font-medium text-orange-700 dark:text-orange-300">Forecast</span>
-          </div>
+          {!isComparing ? (
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 rounded-full">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#f97316]"></div>
+              <span className="text-xs font-medium text-orange-700 dark:text-orange-300">Forecast</span>
+            </div>
+          ) : (
+            Object.entries(modelColors).filter(([name]) => name !== "Forecast").map(([name, color]) => (
+              <div key={name} className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-600 rounded-full">
+                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }}></div>
+                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{name}</span>
+              </div>
+            ))
+          )}
         </div>
       </div>
       
@@ -117,8 +137,6 @@ const ForecastChart = ({
             <Tooltip content={<CustomTooltip />} />
             <Legend verticalAlign="top" height={36} wrapperStyle={{ paddingBottom: '20px' }} />
             
-            {/* 3. Recharts ComposedChart Components */}
-            
             {/* Historical Line: Blue Solid */}
             <Line 
               type="monotone" 
@@ -128,9 +146,10 @@ const ForecastChart = ({
               strokeWidth={2} 
               dot={false}
               isAnimationActive={false}
+              connectNulls={true}
             />
 
-            {!isComparing && (
+            {!isComparing ? (
               <>
                 {/* Confidence Area: Light Orange Fill */}
                 <Area 
@@ -143,6 +162,7 @@ const ForecastChart = ({
                   name="95% Confidence"
                   tooltipType="none"
                   isAnimationActive={false}
+                  connectNulls={true}
                 />
                 
                 {/* Forecast Line: Orange Dashed */}
@@ -155,12 +175,27 @@ const ForecastChart = ({
                   strokeDasharray="5 5" 
                   dot={false}
                   isAnimationActive={false}
+                  connectNulls={true}
                 />
               </>
+            ) : (
+              // Comparison Lines
+              Object.entries(modelColors).filter(([name]) => name !== "Forecast").map(([name, color]) => (
+                <Line 
+                  key={name}
+                  type="monotone" 
+                  dataKey={name} 
+                  name={name} 
+                  stroke={color} 
+                  strokeWidth={2} 
+                  strokeDasharray="3 3"
+                  dot={false}
+                  isAnimationActive={false}
+                  connectNulls={true}
+                />
+              ))
             )}
             
-            {/* If comparing, we'd need additional model lines here, 
-                but keeping it simple per instructions for now. */}
           </ComposedChart>
         </ResponsiveContainer>
       </div>
