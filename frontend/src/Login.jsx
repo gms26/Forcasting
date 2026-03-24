@@ -10,6 +10,7 @@ const Login = ({ onLogin }) => {
   const [password, setPassword] = useState('admin123');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [statusMessage, setStatusMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,6 +18,16 @@ const Login = ({ onLogin }) => {
     setError(null);
     
     try {
+      // Step 1: Wake up backend (Render cold start handling)
+      setStatusMessage('Connecting to server...');
+      try {
+        await axios.get(`${API_BASE}/`, { timeout: 60000 });
+      } catch (pingErr) {
+        console.warn("Ping failed or timed out, proceeding anyway:", pingErr);
+      }
+
+      // Step 2: Proceed with actual login
+      setStatusMessage('Authenticating...');
       const res = await axios.post(`${API_BASE}/auth/login`, {
         username,
         password
@@ -36,6 +47,7 @@ const Login = ({ onLogin }) => {
       setError(msg);
     } finally {
       setLoading(false);
+      setStatusMessage('');
     }
   };
 
@@ -116,7 +128,10 @@ const Login = ({ onLogin }) => {
             className="w-full flex justify-center items-center gap-2 py-4 px-6 border border-transparent rounded-2xl shadow-lg text-base font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all mt-8 group disabled:opacity-70 disabled:pointer-events-none"
           >
             {loading ? (
-              <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+              <div className="flex flex-col items-center gap-2">
+                <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+                <span className="text-xs font-medium animate-pulse">{statusMessage}</span>
+              </div>
             ) : (
               <>
                 Access Dashboard
