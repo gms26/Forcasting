@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Download, FileText, FileSpreadsheet } from 'lucide-react';
 import axios from 'axios';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 const DownloadReport = ({ reportData, isComparing }) => {
   const [loadingPdf, setLoadingPdf] = useState(false);
   const [loadingCsv, setLoadingCsv] = useState(false);
@@ -12,7 +14,7 @@ const DownloadReport = ({ reportData, isComparing }) => {
   const downloadPdf = async () => {
     setLoadingPdf(true);
     try {
-      const response = await axios.post('http://127.0.0.1:8000/download/pdf', reportData, {
+      const response = await axios.post(`${API_BASE}/download/pdf`, reportData, {
         responseType: 'blob'
       });
       
@@ -33,7 +35,7 @@ const DownloadReport = ({ reportData, isComparing }) => {
   const downloadCsv = async () => {
     setLoadingCsv(true);
     try {
-      const response = await axios.post('http://127.0.0.1:8000/download/csv', reportData, {
+      const response = await axios.post(`${API_BASE}/download/csv`, reportData, {
         responseType: 'blob'
       });
       

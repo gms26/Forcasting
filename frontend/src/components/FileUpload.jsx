@@ -3,6 +3,8 @@ import { useDropzone } from 'react-dropzone';
 import { UploadCloud, FileText, Database } from 'lucide-react';
 import axios from 'axios';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 const FileUpload = ({ onDataLoaded }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -18,7 +20,7 @@ const FileUpload = ({ onDataLoaded }) => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/upload', formData, {
+      const response = await axios.post(`${API_BASE}/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       onDataLoaded(response.data.data, file.name);
@@ -39,7 +41,7 @@ const FileUpload = ({ onDataLoaded }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get('http://127.0.0.1:8000/sample');
+      const response = await axios.get(`${API_BASE}/sample`);
       onDataLoaded(response.data.data, 'Sample Dataset (Sales)');
     } catch (err) {
       setError('Could not load sample data. Is the backend running?');

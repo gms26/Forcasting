@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Activity, Lock, User, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 const Login = ({ onLogin }) => {
   // Pre-fill with demo credentials as requested
   const [username, setUsername] = useState('admin');
@@ -15,7 +17,7 @@ const Login = ({ onLogin }) => {
     setError(null);
     
     try {
-      const res = await axios.post(`http://127.0.0.1:8000/auth/login`, {
+      const res = await axios.post(`${API_BASE}/auth/login`, {
         username,
         password
       });

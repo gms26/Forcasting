@@ -11,6 +11,8 @@ import AIExplanation from './components/AIExplanation';
 import DownloadReport from './components/DownloadReport';
 import Login from './Login';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
@@ -85,7 +87,7 @@ function App() {
       };
       
       console.log("Sending to /explain:", explainPayload);
-      const res = await axios.post('http://127.0.0.1:8000/explain', explainPayload);
+      const res = await axios.post(`${API_BASE}/explain`, explainPayload);
       console.log("Explain response:", res.data);
       
       setExplanation(res.data.explanation);
@@ -104,7 +106,7 @@ function App() {
     setExplanation('');
     
     try {
-      const res = await axios.post('http://127.0.0.1:8000/forecast', {
+      const res = await axios.post(`${API_BASE}/forecast`, {
         model_name: selectedModel,
         forecast_period: period,
         data: data
@@ -171,7 +173,7 @@ function App() {
     setExplanation('');
     
     try {
-      const res = await axios.post('http://127.0.0.1:8000/compare', {
+      const res = await axios.post(`${API_BASE}/compare`, {
         model_name: "All",
         forecast_period: period,
         data: data
