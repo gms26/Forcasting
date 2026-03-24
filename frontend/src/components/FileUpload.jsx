@@ -1,35 +1,21 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { UploadCloud, FileText, Database } from 'lucide-react';
-import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
-const FileUpload = ({ onDataLoaded }) => {
-  const [loading, setLoading] = useState(false);
+const FileUpload = ({ onUpload, onLoadSample, loading }) => {
   const [error, setError] = useState(null);
 
   const onDrop = useCallback(async (acceptedFiles) => {
     const file = acceptedFiles[0];
     if (!file) return;
 
-    setLoading(true);
     setError(null);
-    
-    const formData = new FormData();
-    formData.append('file', file);
-
     try {
-      const response = await axios.post(`${API_BASE}/upload`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      onDataLoaded(response.data.data, file.name);
+      await onUpload(file);
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'File upload failed');
-    } finally {
-      setLoading(false);
+      setError(err.message || 'File upload failed');
     }
-  }, [onDataLoaded]);
+  }, [onUpload]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -37,16 +23,12 @@ const FileUpload = ({ onDataLoaded }) => {
     multiple: false
   });
 
-  const loadSampleData = async () => {
-    setLoading(true);
+  const handleSampleClick = async () => {
     setError(null);
     try {
-      const response = await axios.get(`${API_BASE}/sample`);
-      onDataLoaded(response.data.data, 'Sample Dataset (Sales)');
+      await onLoadSample();
     } catch (err) {
-      setError('Could not load sample data. Is the backend running?');
-    } finally {
-      setLoading(false);
+      setError('Could not load sample data.');
     }
   };
 
@@ -97,7 +79,7 @@ const FileUpload = ({ onDataLoaded }) => {
         </div>
         
         <button 
-          onClick={loadSampleData}
+          onClick={handleSampleClick}
           disabled={loading}
           className="mt-4 w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-navy-700 dark:hover:bg-navy-600 text-slate-700 dark:text-slate-200 font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
         >

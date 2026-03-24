@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, Lock, User, ArrowRight } from 'lucide-react';
-import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
-const Login = ({ onLogin }) => {
+const Login = ({ onLoginSubmit }) => {
   // Pre-fill with demo credentials as requested
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('admin123');
@@ -17,17 +14,7 @@ const Login = ({ onLogin }) => {
     setError(null);
     
     try {
-      const res = await axios.post(`${API_BASE}/auth/login`, {
-        username,
-        password
-      });
-      
-      const { access_token } = res.data;
-      localStorage.setItem('auth_token', access_token);
-      localStorage.setItem('username', res.data.username);
-      
-      // On success, notify parent component which handles redirection
-      onLogin(true);
+      await onLoginSubmit(username, password);
     } catch (err) {
       console.error("Login Error:", err);
       const msg = err.response?.data?.detail 

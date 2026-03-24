@@ -32,6 +32,7 @@ function App() {
   const [isForecasting, setIsForecasting] = useState(false);
   const [explanation, setExplanation] = useState('');
   const [isExplaining, setIsExplaining] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Individual forecast states for the chart
   const [forecastData, setForecastData] = useState([]);
@@ -73,6 +74,67 @@ function App() {
     setMetrics(null);
     setExplanation('');
     setIsComparing(false);
+  };
+
+  const handleFileUpload = async (file) => {
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const response = await axios.post(`${API_BASE}/upload`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      handleDataLoaded(response.data.data, file.name);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleLoadSampleData = async () => {
+    setIsUploading(true);
+    try {
+      const response = await axios.get(`${API_BASE}/sample`);
+      handleDataLoaded(response.data.data, 'Sample Dataset (Sales)');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    const response = await axios.post(`${API_BASE}/download/pdf`, reportData, {
+      responseType: 'blob'
+    });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `SmartForecast_Report_${reportData.model || 'Comparison'}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  const handleDownloadCsv = async () => {
+    const response = await axios.post(`${API_BASE}/download/csv`, reportData, {
+      responseType: 'blob'
+    });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `SmartForecast_Data_${reportData.model || 'Comparison'}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  const handleLoginSubmit = async (username, password) => {
+    const res = await axios.post(`${API_BASE}/auth/login`, {
+      username,
+      password
+    });
+    const { access_token } = res.data;
+    localStorage.setItem('auth_token', access_token);
+    localStorage.setItem('username', res.data.username);
+    setIsAuthenticated(true);
   };
 
   const generateInsight = async (forecastData, m_name, m_metrics) => {
@@ -249,7 +311,7 @@ function App() {
 
   // If not authenticated, show Login page
   if (!isAuthenticated) {
-    return <Login onLogin={setIsAuthenticated} />;
+    return <Login onLoginSubmit={handleLoginSubmit} />;
   }
 
   return (
@@ -295,7 +357,11 @@ function App() {
           
           {/* Left Sidebar */}
           <aside className="w-full lg:w-80 flex-shrink-0 space-y-6">
-            <FileUpload onDataLoaded={handleDataLoaded} />
+            <FileUpload 
+              onUpload={handleFileUpload} 
+              onLoadSample={handleLoadSampleData} 
+              loading={isUploading} 
+            />
             
             <div className={`transition-all duration-500 ${!data ? 'opacity-50 pointer-events-none' : ''}`}>
               <ModelSelector selectedModel={selectedModel} onChange={setSelectedModel} />
@@ -330,7 +396,10 @@ function App() {
               </div>
 
               {forecastResult && (
-                <DownloadReport reportData={reportData} isComparing={isComparing} />
+                <DownloadReport 
+                  onDownloadPdf={handleDownloadPdf} 
+                  onDownloadCsv={handleDownloadCsv} 
+                />
               )}
             </div>
           </aside>

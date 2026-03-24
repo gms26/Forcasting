@@ -1,30 +1,14 @@
 import React, { useState } from 'react';
 import { Download, FileText, FileSpreadsheet } from 'lucide-react';
-import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
-const DownloadReport = ({ reportData, isComparing }) => {
+const DownloadReport = ({ onDownloadPdf, onDownloadCsv }) => {
   const [loadingPdf, setLoadingPdf] = useState(false);
   const [loadingCsv, setLoadingCsv] = useState(false);
 
-  // If comparing, we might want to change the download behavior or restrict to CSV
-  // But ideally, we can download the comparison too. For now, support both.
-
-  const downloadPdf = async () => {
+  const handleDownloadPdf = async () => {
     setLoadingPdf(true);
     try {
-      const response = await axios.post(`${API_BASE}/download/pdf`, reportData, {
-        responseType: 'blob'
-      });
-      
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `SmartForecast_Report_${reportData.model || 'Comparison'}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      await onDownloadPdf();
     } catch (err) {
       alert("Failed to download PDF.");
     } finally {
@@ -32,20 +16,10 @@ const DownloadReport = ({ reportData, isComparing }) => {
     }
   };
 
-  const downloadCsv = async () => {
+  const handleDownloadCsv = async () => {
     setLoadingCsv(true);
     try {
-      const response = await axios.post(`${API_BASE}/download/csv`, reportData, {
-        responseType: 'blob'
-      });
-      
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `SmartForecast_Data_${reportData.model || 'Comparison'}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      await onDownloadCsv();
     } catch (err) {
       alert("Failed to download CSV.");
     } finally {
@@ -61,7 +35,7 @@ const DownloadReport = ({ reportData, isComparing }) => {
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <button 
-          onClick={downloadPdf}
+          onClick={handleDownloadPdf}
           disabled={loadingPdf}
           className="flex items-center justify-center gap-2 py-3 px-4 bg-navy-800 hover:bg-navy-900 text-white rounded-lg transition-colors disabled:opacity-70"
         >
@@ -74,7 +48,7 @@ const DownloadReport = ({ reportData, isComparing }) => {
         </button>
         
         <button 
-          onClick={downloadCsv}
+          onClick={handleDownloadCsv}
           disabled={loadingCsv}
           className="flex items-center justify-center gap-2 py-3 px-4 bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-500/30 font-medium rounded-lg transition-colors disabled:opacity-70"
         >
