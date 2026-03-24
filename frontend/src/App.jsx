@@ -126,17 +126,6 @@ function App() {
     link.remove();
   };
 
-  const handleLoginSubmit = async (username, password) => {
-    const res = await axios.post(`${API_BASE}/auth/login`, {
-      username,
-      password
-    });
-    const { access_token } = res.data;
-    localStorage.setItem('auth_token', access_token);
-    localStorage.setItem('username', res.data.username);
-    setIsAuthenticated(true);
-  };
-
   const generateInsight = async (forecastData, m_name, m_metrics) => {
     setIsExplaining(true);
     try {
@@ -311,7 +300,7 @@ function App() {
 
   // If not authenticated, show Login page
   if (!isAuthenticated) {
-    return <Login onLoginSubmit={handleLoginSubmit} />;
+    return <Login onLogin={setIsAuthenticated} />;
   }
 
   return (
