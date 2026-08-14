@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-from pmdarima import auto_arima
+from statsmodels.tsa.arima.model import ARIMA
 import warnings
 
 def run_forecast(data: list, periods: int) -> dict:
@@ -15,29 +15,35 @@ def run_forecast(data: list, periods: int) -> dict:
         train = df[:split]
         test = df[split:]
         
-        # Fit model and predict
+        # Fit model and predict (Simple Auto ARIMA)
+        best_aic = float("inf")
+        best_order = (1, 1, 1)
+        
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            try:
-                model = auto_arima(
-                    train['value'],
-                    max_p=3, max_q=3, max_d=2,
-                    stepwise=True, seasonal=False,
-                    suppress_warnings=True,
-                    error_action='ignore'
-                )
-            except Exception:
-                # Fallback to ARIMA(1,1,1) if fails
-                model = auto_arima(train['value'], start_p=1, start_q=1, max_p=1, max_q=1, d=1, stepwise=True, seasonal=False, suppress_warnings=True)
-
-        test_pred = model.predict(n_periods=len(test))
-        test_actual = test['value'].values
+            for p in [0, 1, 2]:
+                for d in [0, 1]:
+                    for q in [0, 1, 2]:
+                        try:
+                            model = ARIMA(train['value'].values, order=(p, d, q))
+                            fitted = model.fit()
+                            if fitted.aic < best_aic:
+                                best_aic = fitted.aic
+                                best_order = (p, d, q)
+                        except:
+                            continue
+            
+            # Refit on train with best order
+            train_model = ARIMA(train['value'].values, order=best_order).fit()
+            test_pred = train_model.forecast(steps=len(test))
+            test_actual = test['value'].values
+            
+            # Refit on whole data for future forecast
+            final_model = ARIMA(df['value'].values, order=best_order).fit()
+            forecast_result = final_model.get_forecast(steps=periods)
+            forecast_values = forecast_result.predicted_mean
+            conf_int = forecast_result.conf_int(alpha=0.05) # 95% confidence interval
         
-        # Refit on whole data for future forecast
-        model.fit(df['value'])
-        forecast_pred, conf_int = model.predict(n_periods=periods, return_conf_int=True)
-        
-        forecast_values = forecast_pred.values
         lower_values = conf_int[:, 0]
         upper_values = conf_int[:, 1]
         
