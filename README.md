@@ -2,6 +2,11 @@
 
 An AI-powered time series forecasting dashboard where users can upload CSV data, select a forecasting model, generate predictions with confidence intervals, get AI business insights from Google Gemini, compare all models, and download PDF/CSV reports.
 
+<p align="center">
+  <img src="assets/dashboard_1.png" width="48%" alt="SmartForecast AI Dashboard - Chart View" />
+  <img src="assets/dashboard_2.png" width="48%" alt="SmartForecast AI Dashboard - Model Comparison" />
+</p>
+
 ## Features
 - 📊 **Upload & Visualize**: Drag and drop CSV files and visualize historical data instantly.
 - 🤖 **Multiple AI Models**: Choose from Moving Average, ARIMA, Prophet, and Holt-Winters.
