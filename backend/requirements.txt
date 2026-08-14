@@ -3,8 +3,8 @@ uvicorn
 pandas
 numpy
 prophet
-statsmodels<0.14.0
-pmdarima
+statsmodels
+pmdarima>=2.2.0
 google-genai
 reportlab
 matplotlib
