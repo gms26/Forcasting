@@ -100,10 +100,13 @@ export default function App() {
       const response = await axios.post(`${API_BASE}/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
+      if (!Array.isArray(response.data)) {
+        throw new Error("Invalid response format from server. The API might not be configured correctly.");
+      }
       setUploadedData(response.data);
       setFileInfo(file);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Error uploading file.');
+      setError(err.response?.data?.detail || err.message || 'Error uploading file.');
     } finally {
       setIsLoading(false);
     }
@@ -115,10 +118,13 @@ export default function App() {
     
     try {
       const response = await axios.get(`${API_BASE}/sample`);
+      if (!Array.isArray(response.data)) {
+        throw new Error("Invalid response format from server. The API might not be configured correctly.");
+      }
       setUploadedData(response.data);
       setFileInfo({ name: 'sample_data.csv', size: 1024 * 45 }); // Dummy size
     } catch (err) {
-      setError(err.response?.data?.detail || 'Error loading sample data.');
+      setError(err.response?.data?.detail || err.message || 'Error loading sample data.');
     } finally {
       setIsLoading(false);
     }
@@ -175,7 +181,7 @@ export default function App() {
       generateInsight(response.data);
       
     } catch (err) {
-      setError(err.response?.data?.detail || 'Error running forecast.');
+      setError(err.response?.data?.detail || err.message || 'Error running forecast.');
     } finally {
       setIsLoading(false);
     }
@@ -198,7 +204,7 @@ export default function App() {
       setBestModel(response.data.best_model);
       
     } catch (err) {
-      setError(err.response?.data?.detail || 'Error comparing models.');
+      setError(err.response?.data?.detail || err.message || 'Error comparing models.');
     } finally {
       setIsCompareLoading(false);
     }

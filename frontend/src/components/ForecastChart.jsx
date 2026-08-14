@@ -15,7 +15,7 @@ import {
 export default function ForecastChart({ historicalData, forecastData }) {
   
   const chartData = useMemo(() => {
-    if (!historicalData || historicalData.length === 0) return [];
+    if (!Array.isArray(historicalData) || historicalData.length === 0) return [];
     
     // Convert historical data
     const hist = historicalData.map(d => ({
