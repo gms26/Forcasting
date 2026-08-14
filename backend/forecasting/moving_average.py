@@ -1,72 +1,66 @@
 import pandas as pd
 import numpy as np
-from utils.evaluator import evaluate_model
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-def run_forecast(df: pd.DataFrame, periods: int = 30) -> dict:
-    """
-    Moving Average forecaster with standardized return.
-    """
+def run_forecast(data: list, periods: int) -> dict:
     try:
-        df = df.copy()
+        df = pd.DataFrame(data)
         df['date'] = pd.to_datetime(df['date'])
         df = df.sort_values('date')
         
-        # Metrics evaluation
-        from forecasting.moving_average import _run_ma_internal
-        metrics = evaluate_model(df, _run_ma_internal, period=periods)
+        # Split: 80% train, 20% test
+        split = int(len(df) * 0.8)
+        train = df[:split]
+        test = df[split:]
         
-        window = 7
-        sma = df['value'].rolling(window=window, min_periods=1).mean()
-        last_sma_val = float(sma.iloc[-1])
+        # Fit model and predict
+        window_size = 7
         
-        y_trail = sma.tail(window).values
-        x_trail = np.arange(len(y_trail))
-        slope = 0.0
-        if len(y_trail) > 1:
-            valid_mask = ~np.isnan(y_trail)
-            if np.sum(valid_mask) > 1:
-                slope, _ = np.polyfit(x_trail[valid_mask], y_trail[valid_mask], 1)
-
-        std_dev = df['value'].tail(window).std() or 1.0
+        # Calculate MA on the whole dataset to get predictions for test and future
+        # For moving average, the "prediction" for future points is often just the last known average
+        # or extending the average. Let's do a rolling mean.
+        
+        rolling = df['value'].rolling(window=window_size)
+        rolling_mean = rolling.mean()
+        rolling_std = rolling.std().bfill()
+        
+        test_pred = rolling_mean.iloc[split:]
+        test_actual = test['value']
+        
+        # Handle NaNs from initial rolling window in test if split is very early
+        test_pred = test_pred.bfill()
+        
+        # Forecast future values
+        # Naive approach for MA: use the last known moving average for all future periods
+        last_ma = rolling_mean.iloc[-1]
+        last_std = rolling_std.iloc[-1]
+        
+        forecast_values = [last_ma] * periods
+        upper_values = [last_ma + 1.96 * last_std] * periods
+        lower_values = [last_ma - 1.96 * last_std] * periods
+        
+        # Generate future dates correctly
         last_date = df['date'].iloc[-1]
+        future_dates = pd.date_range(
+            start=last_date, 
+            periods=periods+1, 
+            freq='D'
+        )[1:]
         
-        freq = pd.infer_freq(df['date'])
-        if freq is None:
-            freq = df['date'].diff().median()
-            
-        future_dates = pd.date_range(start=last_date, periods=periods + 1, freq=freq)[1:]
+        # Calculate metrics on test set
+        mae = mean_absolute_error(test_actual, test_pred)
+        rmse = np.sqrt(mean_squared_error(test_actual, test_pred))
+        mape = np.mean(np.abs((test_actual - test_pred) / test_actual)) * 100
         
-        forecast_vals = []
-        conf_upper = []
-        conf_lower = []
-        
-        def clean_val(x):
-            if pd.isna(x) or x is None: return 0.0
-            return float(round(max(0, x), 2))
-            
-        for i in range(1, periods + 1):
-            f_val = last_sma_val + (slope * i)
-            margin = std_dev * (1.1 + 0.15 * i)
-            forecast_vals.append(clean_val(f_val))
-            conf_upper.append(clean_val(f_val + margin))
-            conf_lower.append(clean_val(f_val - margin))
-
         return {
-            "forecast": forecast_vals,
-            "confidence_upper": conf_upper,
-            "confidence_lower": conf_lower,
+            "forecast": [round(float(v), 2) for v in forecast_values],
+            "confidence_upper": [round(float(v), 2) for v in upper_values],
+            "confidence_lower": [round(float(v), 2) for v in lower_values],
             "dates": [str(d.date()) for d in future_dates],
-            "mae": float(round(metrics.get("mae", 0.0), 2)),
-            "rmse": float(round(metrics.get("rmse", 0.0), 2)),
-            "mape": float(round(metrics.get("mape", 0.0), 2))
+            "mae": round(float(mae), 2),
+            "rmse": round(float(rmse), 2),
+            "mape": round(float(mape), 2),
+            "model_name": "Moving Average"
         }
     except Exception as e:
-        print(f"MA Error: {e}")
-        return {
-            "forecast": [], "confidence_upper": [], "confidence_lower": [],
-            "dates": [], "mae": 0.0, "rmse": 0.0, "mape": 0.0
-        }
-
-def _run_ma_internal(df: pd.DataFrame, period: int = 30) -> list:
-    val = df['value'].tail(7).mean()
-    return [{"forecast": float(val)}] * period
+        raise Exception(f"Model error: {str(e)}")

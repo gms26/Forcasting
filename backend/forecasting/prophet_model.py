@@ -1,57 +1,72 @@
 import pandas as pd
+import numpy as np
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 from prophet import Prophet
-from utils.evaluator import evaluate_model
 import logging
 
-def run_forecast(df: pd.DataFrame, periods: int = 30) -> dict:
-    """
-    Prophet forecaster by Meta.
-    """
+# Suppress prophet logs
+logging.getLogger("cmdstanpy").setLevel(logging.WARNING)
+
+def run_forecast(data: list, periods: int) -> dict:
     try:
-        df_prophet = df.copy()
-        df_prophet['date'] = pd.to_datetime(df_prophet['date'])
-        df_prophet = df_prophet.rename(columns={'date': 'ds', 'value': 'y'})
+        df = pd.DataFrame(data)
+        df['date'] = pd.to_datetime(df['date'])
+        df = df.sort_values('date')
         
-        # Metrics
-        from forecasting.prophet_model import _run_prophet_internal
-        metrics = evaluate_model(df, _run_prophet_internal, period=periods)
+        # Prophet expects 'ds' and 'y'
+        prophet_df = df.rename(columns={'date': 'ds', 'value': 'y'})
         
-        model = Prophet(yearly_seasonality=True, weekly_seasonality=True, daily_seasonality=False)
-        model.fit(df_prophet)
+        # Split: 80% train, 20% test
+        split = int(len(prophet_df) * 0.8)
+        train = prophet_df[:split]
+        test = prophet_df[split:]
         
-        future = model.make_future_dataframe(periods=periods)
+        # Fit model on train and predict for test
+        model_test = Prophet(daily_seasonality=True)
+        model_test.fit(train)
+        
+        future_test = model_test.make_future_dataframe(periods=len(test), freq='D')
+        forecast_test = model_test.predict(future_test)
+        
+        test_pred = forecast_test['yhat'].iloc[-len(test):].values
+        test_actual = test['y'].values
+        
+        # Fit on all data for future forecast
+        model = Prophet(daily_seasonality=True)
+        model.fit(prophet_df)
+        
+        future = model.make_future_dataframe(periods=periods, freq='D')
         forecast = model.predict(future)
         
-        # Extract only the future part
-        future_forecast = forecast.tail(periods)
+        # Extract only the future predictions
+        future_forecast = forecast.iloc[-periods:]
         
-        def clean_val(x):
-            if pd.isna(x) or x is None: return 0.0
-            return float(round(max(0, x), 2))
-
+        forecast_values = future_forecast['yhat'].values
+        lower_values = future_forecast['yhat_lower'].values
+        upper_values = future_forecast['yhat_upper'].values
+        
+        # Generate future dates correctly
+        last_date = df['date'].iloc[-1]
+        future_dates = pd.date_range(
+            start=last_date, 
+            periods=periods+1, 
+            freq='D'
+        )[1:]
+        
+        # Calculate metrics on test set
+        mae = mean_absolute_error(test_actual, test_pred)
+        rmse = np.sqrt(mean_squared_error(test_actual, test_pred))
+        mape = np.mean(np.abs((test_actual - test_pred) / test_actual)) * 100
+        
         return {
-            "forecast": [clean_val(x) for x in future_forecast['yhat']],
-            "confidence_upper": [clean_val(x) for x in future_forecast['yhat_upper']],
-            "confidence_lower": [clean_val(x) for x in future_forecast['yhat_lower']],
-            "dates": [str(d.date()) for d in future_forecast['ds']],
-            "mae": float(round(metrics.get("mae", 0.0), 2)),
-            "rmse": float(round(metrics.get("rmse", 0.0), 2)),
-            "mape": float(round(metrics.get("mape", 0.0), 2))
+            "forecast": [round(float(v), 2) for v in forecast_values],
+            "confidence_upper": [round(float(v), 2) for v in upper_values],
+            "confidence_lower": [round(float(v), 2) for v in lower_values],
+            "dates": [str(d.date()) for d in future_dates],
+            "mae": round(float(mae), 2),
+            "rmse": round(float(rmse), 2),
+            "mape": round(float(mape), 2),
+            "model_name": "Prophet"
         }
     except Exception as e:
-        logging.error(f"Prophet Error: {e}")
-        return {
-            "forecast": [], "confidence_upper": [], "confidence_lower": [],
-            "dates": [], "mae": 0.0, "rmse": 0.0, "mape": 0.0
-        }
-
-def _run_prophet_internal(df: pd.DataFrame, period: int = 30) -> list:
-    try:
-        df_p = df.rename(columns={'date': 'ds', 'value': 'y'})
-        m = Prophet().fit(df_p)
-        future = m.make_future_dataframe(periods=period)
-        fcst = m.predict(future)
-        return [{"forecast": float(x)} for x in fcst.tail(period)['yhat']]
-    except:
-        last_val = df['value'].iloc[-1]
-        return [{"forecast": float(last_val)}] * period
+        raise Exception(f"Model error: {str(e)}")

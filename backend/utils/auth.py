@@ -1,59 +1,48 @@
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
-import jwt
-import os
 from datetime import datetime, timedelta
+from typing import Optional
+from jose import JWTError, jwt
+from fastapi import HTTPException, status, Depends
+from passlib.context import CryptContext
+from fastapi.security import OAuth2PasswordBearer
+import os
+from dotenv import load_dotenv
 
-router = APIRouter()
+load_dotenv()
 
-# Constants for JWT
-SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-key-for-smartforecast")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours
+SECRET_KEY = os.getenv("SECRET_KEY", "your_secret_key_here")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
-# Demo credentials for interview/test purposes
-DEMO_USER = {
-    "username": "admin",
-    "password": "admin123"
-}
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
-class UserLogin(BaseModel):
-    username: str
-    password: str
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
 
-def create_access_token(data: dict, expires_delta: timedelta = None):
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
-@router.post("/login")
-def login_user(user: UserLogin):
-    """
-    Simple login function that checks against demo credentials.
-    Returns a JWT token on success.
-    """
-    if user.username == DEMO_USER["username"] and user.password == DEMO_USER["password"]:
-        access_token = create_access_token(data={"sub": user.username})
-        return {
-            "access_token": access_token, 
-            "token_type": "bearer", 
-            "username": user.username,
-            "message": "Login successful"
-        }
-    
-    raise HTTPException(
-        status_code=401, 
-        detail="Invalid username or password"
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
     )
-
-# Keeping register endpoint for potential future use, but making it non-functional for demo
-@router.post("/register")
-def register_user():
-    raise HTTPException(
-        status_code=403,
-        detail="Registration is disabled for this demo version. Use admin/admin123."
-    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    return username

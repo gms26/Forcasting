@@ -1,66 +1,83 @@
-# SmartForecast AI — Forecasting Dashboard with AI Insights
+# SmartForecast AI 🚀
 
-SmartForecast AI is a fully featured time series forecasting dashboard built with React, FastAPI, statistical models, and Google Gemini 1.5 Flash for AI-powered business insights.
+An AI-powered time series forecasting dashboard where users can upload CSV data, select a forecasting model, generate predictions with confidence intervals, get AI business insights from Google Gemini, compare all models, and download PDF/CSV reports.
 
-## ✨ Features
-- **CSV Data Upload**: Supports date/value CSV files with automatic missing data imputation.
-- **Built-in Sample Data**: Instantly try the app using the "Try with Sample Data" button without uploading a CSV.
-- **Multiple Forecasting Models**:
-  - **Moving Average**: Quick, simple smoothing for short-term trends.
-  - **ARIMA**: Statistical model using auto-parameter tuning.
-  - **Holt-Winters**: Robust statistical framework excelling in strong seasonality (Exponential Smoothing).
-- **Interactive Visualization**: Recharts integration showing historical data, confidence intervals, and forecasted trends.
-- **AI Explanations**: Integrates with Google Gemini 1.5 Flash.
-- **Compare All Models**: Run all three models simultaneously to find the best MAPE score.
-- **Authentication**: Simple Professional Login Page to access the Dashboard.
-- **Exporting**: Download results as a professional PDF report or raw CSV data.
+## Features
+- 📊 **Upload & Visualize**: Drag and drop CSV files and visualize historical data instantly.
+- 🤖 **Multiple AI Models**: Choose from Moving Average, ARIMA, Prophet, and Holt-Winters.
+- ✨ **Gemini Insights**: Get AI-powered business insights and recommendations based on the forecast.
+- 🏆 **Compare Models**: Run all models simultaneously to find the best fit for your dataset.
+- 📄 **Export Reports**: Download comprehensive PDF reports and CSV data of your forecasts.
+- 🔒 **Secure Auth**: JWT-based authentication to secure your dashboard.
 
----
+## Tech Stack
+| Frontend | Backend | AI/ML |
+|----------|---------|-------|
+| React 18 | FastAPI | Prophet |
+| Vite     | Uvicorn | statsmodels (Holt-Winters) |
+| Tailwind | Pandas  | pmdarima (ARIMA) |
+| Recharts | Numpy   | Google Gemini |
+| Axios    | PyJWT   | scikit-learn |
 
-## 🚀 How to Run the App (Commands)
+## Setup Instructions
 
-You will need two separate terminal windows to run this application: one for the Backend, and one for the Frontend.
-
-### Terminal 1: Run the Backend (FastAPI + Python)
-1. Open a terminal and go to the `backend` folder.
-2. Activate your virtual environment and run the server:
-```bash
-cd smartforecast-ai/backend
-venv\Scripts\activate
-uvicorn main:app --reload
+### Environment Variables
+Create a `.env` file in the `backend/` directory:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+SECRET_KEY=your_secret_key_here
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
-*(The backend will start running on `http://localhost:8000`)*
+*Get your Gemini API key from [Google AI Studio](https://aistudio.google.com/).*
 
-### Terminal 2: Run the Frontend (React + Vite)
-1. Open a second terminal and go to the `frontend` folder.
-2. Start the Vite server:
-```bash
-cd smartforecast-ai/frontend
-npm run dev
-```
-*(The frontend will start running on `http://localhost:5173` or `http://127.0.0.1:5173`)*
+### Backend Setup
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+2. Create and activate a virtual environment (optional but recommended):
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Run the server:
+   ```bash
+   uvicorn main:app --reload
+   ```
 
----
+### Frontend Setup
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the dev server:
+   ```bash
+   npm run dev
+   ```
 
-## 🛠 Tech Stack
+## Demo Credentials
+To login to the local dashboard, use:
+- **Username**: admin
+- **Password**: admin123
 
-| Component | Technology |
-| --- | --- |
-| Frontend | React, Vite, Tailwind CSS, React Router |
-| Backend | FastAPI, Uvicorn |
-| Data Processing | Pandas, NumPy |
-| ML Models | `statsmodels`, `pmdarima` |
-| AI Integration | `google-generativeai` (Gemini 1.5 Flash) |
+## API Endpoints
 
-## 🔑 Setup Gemini API (Optional for AI Insights)
-1. Get a Gemini API key from [Google AI Studio](https://aistudio.google.com/).
-2. Create a `.env` file in the `backend/` directory.
-3. Add your key: `GEMINI_API_KEY=your_api_key_here`
-
-## 📝 Folder Structure
-```text
-smartforecast-ai/
-├── frontend/             # React application (UI, Login, Dashboard)
-├── backend/              # FastAPI server (Models, Explainer, PDF)
-└── sample_data/          # Synthetic sales dataset
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/auth/login` | Authenticate user and receive JWT |
+| GET | `/sample` | Load pre-generated sample sales data |
+| POST | `/upload` | Upload and parse CSV dataset |
+| POST | `/forecast` | Run selected forecasting model |
+| POST | `/compare` | Run all models and compare MAPE |
+| POST | `/explain` | Generate Gemini business insights |
+| POST | `/download/pdf` | Generate PDF report |
+| POST | `/download/csv` | Export forecast data as CSV |

@@ -11,8 +11,9 @@ matplotlib
 python-multipart
 python-dotenv
 scikit-learn
-pytest
-httpx
 PyJWT
-passlib
+passlib[bcrypt]
 python-jose
+httpx
+pytest
+pytest-asyncio

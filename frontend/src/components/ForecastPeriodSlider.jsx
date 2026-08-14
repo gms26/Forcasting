@@ -1,29 +1,29 @@
 import React from 'react';
-import { CalendarDays } from 'lucide-react';
+import { CalendarClock } from 'lucide-react';
 
-const ForecastPeriodSlider = ({ period, setPeriod }) => {
+export default function ForecastPeriodSlider({ period, onChange, disabled }) {
   return (
-    <div className="bg-white dark:bg-navy-800 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-navy-700 mt-6 animate-fade-in">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-          <CalendarDays className="w-5 h-5 text-orange-500" /> Forecast Period
-        </h2>
-        <span className="px-3 py-1 bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400 rounded-full text-sm font-semibold">
-          Next {period} Days
-        </span>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-medium text-gray-900">Forecast Horizon</h3>
+        <div className="flex items-center text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+          <CalendarClock className="h-4 w-4 mr-2" />
+          <span className="font-semibold text-sm">Next {period} Days</span>
+        </div>
       </div>
       
-      <div className="pt-2 pb-4">
-        <input 
-          type="range" 
-          min="7" 
-          max="365" 
+      <div className="px-2">
+        <input
+          type="range"
+          min="7"
+          max="365"
           step="1"
-          value={period} 
-          onChange={(e) => setPeriod(parseInt(e.target.value))} 
-          className="w-full h-2 bg-slate-200 dark:bg-navy-600 rounded-lg appearance-none cursor-pointer accent-orange-500"
+          value={period}
+          onChange={(e) => onChange(parseInt(e.target.value))}
+          disabled={disabled}
+          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         />
-        <div className="flex justify-between text-xs text-slate-400 mt-2 font-medium">
+        <div className="flex justify-between text-xs text-gray-400 mt-2 font-medium px-1">
           <span>7d</span>
           <span>90d</span>
           <span>180d</span>
@@ -32,6 +32,4 @@ const ForecastPeriodSlider = ({ period, setPeriod }) => {
       </div>
     </div>
   );
-};
-
-export default ForecastPeriodSlider;
+}

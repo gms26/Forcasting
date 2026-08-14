@@ -1,203 +1,225 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response, JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
 from pydantic import BaseModel
 import pandas as pd
-import io
+import json
 import os
-import logging
+import io
+from typing import Optional, List, Dict, Any
 
-from utils.data_parser import validate_csv
-from forecasting.moving_average import run_forecast as run_ma
-from forecasting.arima_model import run_forecast as run_arima, clear_arima_cache
-from forecasting.holt_winters import run_forecast as run_hw
-from forecasting.prophet_model import run_forecast as run_prophet
+from utils.auth import create_access_token, verify_password, get_password_hash, get_current_user, ACCESS_TOKEN_EXPIRE_MINUTES
+from utils.data_parser import parse_data
+from utils.pdf_generator import generate_forecast_pdf
 from llm.gemini_explainer import get_gemini_explanation
-from utils.pdf_generator import generate_pdf_report
-from utils.auth import router as auth_router
+from datetime import timedelta
 
-app = FastAPI(title="SmartForecast AI", description="Time Series Forecasting Dashboard API")
+# Import Models
+from forecasting import moving_average, arima_model, prophet_model, holt_winters
 
-# Configure CORS for frontend
+app = FastAPI(title="SmartForecast AI")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=False,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
+# Demo User
+FAKE_USERS_DB = {
+    "admin": {
+        "username": "admin",
+        "hashed_password": get_password_hash("admin123"),
+    }
+}
 
-class ForecastRequest(BaseModel):
-    model_name: str
-    forecast_period: int
-    data: list
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
-@app.get("/")
-def root():
-    return {"message": "SmartForecast AI API is running"}
+@app.post("/auth/login")
+async def login(request: LoginRequest):
+    user = FAKE_USERS_DB.get(request.username)
+    if not user or not verify_password(request.password, user["hashed_password"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user["username"]}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.get("/sample")
+async def get_sample():
+    sample_path = os.path.join(os.path.dirname(__file__), "..", "sample_data", "sales_data.csv")
+    if not os.path.exists(sample_path):
+        raise HTTPException(status_code=404, detail="Sample data not found.")
+    
+    df = pd.read_csv(sample_path)
+    return df.to_dict(orient="records")
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     if not file.filename.endswith('.csv'):
-        return JSONResponse(status_code=400, content={"detail": "Only CSV files are supported"})
+        raise HTTPException(status_code=400, detail="Only CSV files are allowed.")
     
-    contents = await file.read()
+    content = await file.read()
     try:
-        clear_arima_cache()
-        df = pd.read_csv(io.StringIO(contents.decode('utf-8')))
-        processed_data, preview = validate_csv(df)
-        return {"message": "File uploaded successfully", "preview": preview, "data": processed_data}
-    except Exception as e:
-        return JSONResponse(status_code=400, content={"detail": f"Error parsing CSV: {str(e)}"})
+        df = parse_data(content, is_json=False)
+        # Convert date back to string for JSON serialization
+        df['date'] = df['date'].dt.strftime('%Y-%m-%d')
+        return df.to_dict(orient="records")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-def get_model_function(name: str):
-    models = {
-        "Moving Average": run_ma,
-        "ARIMA": run_arima,
-        "Holt-Winters": run_hw,
-        "Prophet": run_prophet
-    }
-    if name in models:
-        return models[name]
-    raise ValueError(f"Invalid model name: {name}")
+class ForecastRequest(BaseModel):
+    data: List[Dict[str, Any]]
+    model: str
+    periods: int
 
 @app.post("/forecast")
-async def run_forecast_endpoint(request: ForecastRequest):
+async def forecast(request: ForecastRequest):
+    data = request.data
+    model_name = request.model
+    periods = request.periods
+    
     try:
-        df = pd.DataFrame(request.data)
-        model_func = get_model_function(request.model_name)
-        result = model_func(df, periods=request.forecast_period)
-        
-        if "error" in result:
-             return JSONResponse(status_code=500, content={"detail": result["error"]})
-             
+        if model_name == "Moving Average":
+            result = moving_average.run_forecast(data, periods)
+        elif model_name == "ARIMA":
+            result = arima_model.run_forecast(data, periods)
+        elif model_name == "Prophet":
+            result = prophet_model.run_forecast(data, periods)
+        elif model_name == "Holt-Winters":
+            result = holt_winters.run_forecast(data, periods)
+        else:
+            raise HTTPException(status_code=400, detail="Invalid model selected.")
+            
         return result
     except Exception as e:
-        return JSONResponse(status_code=500, content={"detail": f"Forecast error: {str(e)}"})
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/compare")
 async def compare_models(request: ForecastRequest):
-    try:
-        df = pd.DataFrame(request.data)
-        model_names = ["Moving Average", "ARIMA", "Holt-Winters", "Prophet"]
-        comparison = {}
-        best_model = None
-        min_mae = float('inf')
-
-        for name in model_names:
-            func = get_model_function(name)
-            res = func(df, periods=request.forecast_period)
-            comparison[name] = res
+    data = request.data
+    periods = request.periods
+    
+    results = []
+    models = {
+        "Moving Average": moving_average,
+        "ARIMA": arima_model,
+        "Prophet": prophet_model,
+        "Holt-Winters": holt_winters
+    }
+    
+    best_model = None
+    lowest_mape = float('inf')
+    
+    for name, module in models.items():
+        try:
+            res = module.run_forecast(data, periods)
+            res["model_name"] = name
+            results.append({
+                "model_name": name,
+                "mae": res["mae"],
+                "rmse": res["rmse"],
+                "mape": res["mape"]
+            })
             
-            # Identify best model based on MAE
-            if res.get("mae", float('inf')) < min_mae:
-                min_mae = res["mae"]
+            if res["mape"] < lowest_mape:
+                lowest_mape = res["mape"]
                 best_model = name
-                
-        return {
-            "comparison": comparison,
-            "best_model": best_model,
-            "min_mae": min_mae
-        }
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"detail": f"Comparison error: {str(e)}"})
+        except Exception as e:
+            print(f"Error running {name}: {e}")
+            continue
+            
+    if not results:
+        raise HTTPException(status_code=500, detail="All models failed.")
+        
+    return {
+        "results": results,
+        "best_model": best_model
+    }
+
+class ExplainRequest(BaseModel):
+    model_name: str
+    periods: int
+    historical_values: List[float]
+    forecast_values: List[float]
+    mae: float
+    rmse: float
+    mape: float
 
 @app.post("/explain")
-async def get_explanation(request: dict):
-    try:
-        hist_data = request.get('data', [])
-        forecast_data = request.get('forecast', [])
+async def explain_forecast(request: ExplainRequest):
+    # Determine basic trend direction
+    first_hist = request.historical_values[0] if request.historical_values else 0
+    last_hist = request.historical_values[-1] if request.historical_values else 0
+    last_fore = request.forecast_values[-1] if request.forecast_values else 0
+    
+    if last_fore > last_hist:
+        trend = "upward"
+    elif last_fore < last_hist:
+        trend = "downward"
+    else:
+        trend = "stable"
         
-        # Handle both formats - list of dicts or list of floats
-        if hist_data and isinstance(hist_data[0], dict):
-            hist_vals = [float(d.get('value', 0)) for d in hist_data]
-        else:
-            hist_vals = [float(v) for v in hist_data]
+    explanation = get_gemini_explanation(
+        model_name=request.model_name,
+        periods=request.periods,
+        historical_values=request.historical_values,
+        forecast_values=request.forecast_values,
+        trend_direction=trend,
+        mae=request.mae,
+        rmse=request.rmse,
+        mape=request.mape
+    )
+    return {"explanation": explanation}
 
-        if forecast_data and isinstance(forecast_data[0], dict):
-            future_vals = [float(d.get('value', d.get('forecast', 0))) for d in forecast_data]
-        else:
-            future_vals = [float(v) for v in forecast_data]
+class DownloadPDFRequest(BaseModel):
+    model_name: str
+    periods: int
+    mae: float
+    rmse: float
+    mape: float
+    explanation: str
 
-        # Calculate trend direction
-        trend_direction = "Increasing" if future_vals[-1] > future_vals[0] else "Decreasing"
-        
-        metrics_dict = request.get('metrics', {})
-
-        explanation = get_gemini_explanation(
-            model_name=request.get('model_name', 'Unknown'),
-            periods=request.get('forecast_period', 30),
-            historical_values=hist_vals,
-            forecast_values=future_vals,
-            trend_direction=trend_direction,
-            mae=metrics_dict.get('mae', 0.0),
-            rmse=metrics_dict.get('rmse', 0.0),
-            mape=metrics_dict.get('mape', 0.0)
-        )
-        return {"explanation": explanation}
-
-    except Exception as e:
-        import traceback
-        print(f"EXPLAIN ERROR: {str(e)}")
-        print(traceback.format_exc())
-        return JSONResponse(
-            status_code=500,
-            content={"detail": f"Explain error: {str(e)}"}
-        )
-
-# Note: Keeping these as POST as they require the result data to generate the files
-# but adding GET versions if they can be used with cached/example data
 @app.post("/download/pdf")
-async def download_pdf_post(request: dict):
-    try:
-        pdf_bytes = generate_pdf_report(request)
-        return Response(
-            content=pdf_bytes, 
-            media_type="application/pdf", 
-            headers={"Content-Disposition": "attachment; filename=forecast_report.pdf"}
-        )
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"detail": f"PDF generation error: {str(e)}"})
+async def download_pdf(request: DownloadPDFRequest):
+    data = request.dict()
+    pdf_buffer = generate_forecast_pdf(data)
+    
+    return StreamingResponse(
+        pdf_buffer, 
+        media_type="application/pdf", 
+        headers={"Content-Disposition": f"attachment; filename=forecast_report.pdf"}
+    )
 
-@app.get("/download/pdf")
-async def download_pdf_get():
-    return JSONResponse(status_code=400, content={"detail": "Please use POST with forecast data to generate PDF"})
+class DownloadCSVRequest(BaseModel):
+    dates: List[str]
+    forecast: List[float]
+    confidence_upper: List[float]
+    confidence_lower: List[float]
 
 @app.post("/download/csv")
-async def download_csv_post(request: dict):
-    try:
-        forecast_vals = request.get('forecast', [])
-        dates = request.get('dates', [])
-        df_fc = pd.DataFrame({"Date": dates, "Forecast": forecast_vals})
-        csv_str = df_fc.to_csv(index=False)
-        return Response(
-            content=csv_str, 
-            media_type="text/csv", 
-            headers={"Content-Disposition": "attachment; filename=forecast_data.csv"}
-        )
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"detail": f"CSV export error: {str(e)}"})
-
-@app.get("/download/csv")
-async def download_csv_get():
-    return JSONResponse(status_code=400, content={"detail": "Please use POST with forecast data to generate CSV"})
-
-@app.get("/sample")
-async def get_sample_data():
-    clear_arima_cache()
-    try:
-        # Navigate to sample_data/sales_data.csv from backend/main.py
-        current_dir = os.path.dirname(__file__)
-        sample_path = os.path.join(os.path.dirname(current_dir), 'sample_data', 'sales_data.csv')
-        
-        if not os.path.exists(sample_path):
-             return JSONResponse(status_code=404, content={"detail": "Sample data file not found"})
-            
-        df = pd.read_csv(sample_path)
-        processed_data, preview = validate_csv(df)
-        
-        return {"message": "Sample data loaded", "preview": preview, "data": processed_data}
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"detail": f"Error loading sample data: {str(e)}"})
+async def download_csv(request: DownloadCSVRequest):
+    df = pd.DataFrame({
+        "Date": request.dates,
+        "Forecast": request.forecast,
+        "Upper Confidence": request.confidence_upper,
+        "Lower Confidence": request.confidence_lower
+    })
+    
+    csv_buffer = io.StringIO()
+    df.to_csv(csv_buffer, index=False)
+    
+    return StreamingResponse(
+        iter([csv_buffer.getvalue()]), 
+        media_type="text/csv", 
+        headers={"Content-Disposition": f"attachment; filename=forecast_data.csv"}
+    )

@@ -1,56 +1,11 @@
-# Python
 __pycache__/
-*.py[cod]
-*$py.class
 *.pyc
 *.pyo
-*.pyd
-.Python
-*.egg
-*.egg-info/
-dist/
-build/
-.eggs/
-
-# Environment
 .env
-.env.local
-.env.production
-venv/
-env/
-ENV/
-
-# Database files — never commit these
-*.db
-*.sqlite
-*.sqlite3
-
-# Frontend
 node_modules/
 frontend/dist/
-frontend/build/
-.npm
-
-# IDE
-.vscode/
-.idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-logs/
-
-# Test cache
+*.db
+*.sqlite
 .pytest_cache/
-.coverage
-htmlcov/
-
-# Vite
-frontend/.vite/
+venv/
+.DS_Store

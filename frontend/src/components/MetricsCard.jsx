@@ -1,107 +1,63 @@
-import React, { useState } from 'react';
-import { Target, AlertCircle } from 'lucide-react';
+import React from 'react';
+import { Activity, Target, TrendingUp } from 'lucide-react';
 
-const MetricsCard = ({ metrics, modelName, isComparing }) => {
-  const [activeTooltip, setActiveTooltip] = useState(null);
-
+export default function MetricsCard({ metrics }) {
   if (!metrics) return null;
 
-  const MetricBox = ({ label, value, desc, colorClass, highlight }) => (
-    <div 
-      className={`relative p-4 rounded-xl border transition-all duration-300 ${highlight ? colorClass : 'bg-slate-50 dark:bg-navy-700/50 border-slate-100 dark:border-navy-600'} hover:shadow-md cursor-help`}
-      onMouseEnter={() => setActiveTooltip(label)}
-      onMouseLeave={() => setActiveTooltip(null)}
-    >
-      <div className="flex justify-between items-center mb-1">
-        <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">{label}</span>
-        {highlight && <AlertCircle className="w-4 h-4 opacity-50" />}
-      </div>
-      <div className="text-2xl font-bold text-slate-800 dark:text-slate-100">{value}</div>
-      
-      {activeTooltip === label && (
-        <div className="absolute top-full left-0 mt-2 w-48 p-2 bg-slate-800 text-white text-xs rounded shadow-lg z-10 animate-fade-in">
-          {desc}
-          <div className="absolute -top-1 left-4 w-2 h-2 bg-slate-800 transform rotate-45"></div>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderSingle = (m) => {
-    // MAPE Colors
-    let mapeColor = "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800";
-    if (m.mape > 20) mapeColor = "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800 text-red-700";
-    else if (m.mape >= 10) mapeColor = "bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800 text-yellow-700";
-
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <MetricBox 
-          label="MAE" 
-          value={m.mae?.toFixed(2) || 'N/A'}
-          desc="Mean Absolute Error: Average absolute difference between forecast and actuals."
-        />
-        <MetricBox 
-          label="RMSE" 
-          value={m.rmse?.toFixed(2) || 'N/A'} 
-          desc="Root Mean Square Error: Penalizes larger errors more heavily."
-        />
-        <MetricBox 
-          label="MAPE" 
-          value={`${m.mape?.toFixed(2) || 'N/A'}%`}
-          desc="Mean Absolute Percentage Error: Average error relative to the actual values."
-          colorClass={mapeColor}
-          highlight={true}
-        />
-      </div>
-    );
+  // MAPE Color logic
+  const getMapeColor = (mape) => {
+    if (mape < 10) return 'text-emerald-600 bg-emerald-50 border-emerald-200';
+    if (mape < 20) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+    return 'text-red-600 bg-red-50 border-red-200';
   };
 
-  const renderCompare = () => {
-    return (
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-slate-200 dark:border-navy-600 text-slate-500 dark:text-slate-400 text-sm">
-              <th className="py-2 pl-2">Model</th>
-              <th className="py-2">MAE</th>
-              <th className="py-2">RMSE</th>
-              <th className="py-2">MAPE</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Object.keys(metrics).map(mKey => {
-              const m = metrics[mKey].metrics;
-              const isBest = Math.min(...Object.values(metrics).map(v => v.metrics?.mape || 999)) === m.mape;
-              
-              return (
-                <tr key={mKey} className={`border-b border-slate-100 dark:border-navy-700/50 ${isBest ? 'bg-orange-50 dark:bg-orange-500/10' : ''}`}>
-                  <td className="py-3 pl-2 font-medium text-slate-800 dark:text-slate-200">
-                    {mKey} {isBest && <span className="ml-2 text-xs bg-orange-500 text-white px-2 py-0.5 rounded-full">Best</span>}
-                  </td>
-                  <td className="py-3 text-slate-600 dark:text-slate-300">{m.mae?.toFixed(2)}</td>
-                  <td className="py-3 text-slate-600 dark:text-slate-300">{m.rmse?.toFixed(2)}</td>
-                  <td className={`py-3 font-semibold ${m.mape < 10 ? 'text-green-600' : m.mape < 20 ? 'text-yellow-600' : 'text-red-600'}`}>
-                    {m.mape?.toFixed(2)}%
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
-    );
-  };
+  const mapeColor = getMapeColor(metrics.mape);
 
   return (
-    <div className="bg-white dark:bg-navy-800 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-navy-700 animate-fade-in">
-      <h2 className="text-xl font-semibold mb-6 text-slate-800 dark:text-slate-100 flex items-center gap-2">
-        <Target className="w-5 h-5 text-orange-500" /> 
-        {isComparing ? 'Model Comparison' : `${modelName} Accuracy`}
-      </h2>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-full flex flex-col justify-center">
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Model Accuracy</h3>
       
-      {isComparing ? renderCompare() : renderSingle(metrics)}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* MAE */}
+        <div className="p-4 rounded-lg border border-gray-100 bg-gray-50 flex flex-col group relative">
+          <div className="flex items-center text-gray-500 mb-2">
+            <Target className="h-4 w-4 mr-1.5" />
+            <span className="text-xs font-medium uppercase tracking-wider">MAE</span>
+          </div>
+          <span className="text-2xl font-semibold text-gray-900">{metrics.mae}</span>
+          
+          {/* Tooltip */}
+          <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs rounded p-2 -top-10 left-1/2 transform -translate-x-1/2 w-48 text-center pointer-events-none z-10">
+            Mean Absolute Error: Average magnitude of errors.
+          </div>
+        </div>
+
+        {/* RMSE */}
+        <div className="p-4 rounded-lg border border-gray-100 bg-gray-50 flex flex-col group relative">
+          <div className="flex items-center text-gray-500 mb-2">
+            <Activity className="h-4 w-4 mr-1.5" />
+            <span className="text-xs font-medium uppercase tracking-wider">RMSE</span>
+          </div>
+          <span className="text-2xl font-semibold text-gray-900">{metrics.rmse}</span>
+          
+          <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs rounded p-2 -top-10 left-1/2 transform -translate-x-1/2 w-48 text-center pointer-events-none z-10">
+            Root Mean Square Error: Penalizes larger errors more heavily.
+          </div>
+        </div>
+
+        {/* MAPE */}
+        <div className={`p-4 rounded-lg border flex flex-col group relative ${mapeColor}`}>
+          <div className="flex items-center mb-2">
+            <TrendingUp className="h-4 w-4 mr-1.5" />
+            <span className="text-xs font-medium uppercase tracking-wider">MAPE</span>
+          </div>
+          <span className="text-2xl font-semibold">{metrics.mape}%</span>
+          
+          <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs rounded p-2 -top-10 left-1/2 transform -translate-x-1/2 w-48 text-center pointer-events-none z-10">
+            Mean Absolute Percentage Error. Green &lt; 10%, Yellow 10-20%, Red &gt; 20%.
+          </div>
+        </div>
+      </div>
     </div>
   );
-};
-
-export default MetricsCard;
+}

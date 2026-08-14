@@ -1,67 +1,118 @@
 import React, { useState } from 'react';
-import { Download, FileText, FileSpreadsheet } from 'lucide-react';
+import { FileDown, FileText, Download } from 'lucide-react';
+import axios from 'axios';
 
-const DownloadReport = ({ onDownloadPdf, onDownloadCsv }) => {
-  const [loadingPdf, setLoadingPdf] = useState(false);
-  const [loadingCsv, setLoadingCsv] = useState(false);
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-  const handleDownloadPdf = async () => {
-    setLoadingPdf(true);
+export default function DownloadReport({ forecastData, metrics, explanation, modelName, periods }) {
+  const [isPdfLoading, setIsPdfLoading] = useState(false);
+  const [isCsvLoading, setIsCsvLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleDownloadPDF = async () => {
+    if (!forecastData || !metrics) return;
+    setIsPdfLoading(true);
+    setError('');
+    
     try {
-      await onDownloadPdf();
+      const response = await axios.post(`${API_BASE}/download/pdf`, {
+        model_name: modelName,
+        periods: periods,
+        mae: metrics.mae,
+        rmse: metrics.rmse,
+        mape: metrics.mape,
+        explanation: explanation || "No explanation generated."
+      }, {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'forecast_report.pdf');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
     } catch (err) {
-      alert("Failed to download PDF.");
+      setError('Failed to generate PDF. Please try again.');
     } finally {
-      setLoadingPdf(false);
+      setIsPdfLoading(false);
     }
   };
 
-  const handleDownloadCsv = async () => {
-    setLoadingCsv(true);
+  const handleDownloadCSV = async () => {
+    if (!forecastData) return;
+    setIsCsvLoading(true);
+    setError('');
+    
     try {
-      await onDownloadCsv();
+      const response = await axios.post(`${API_BASE}/download/csv`, {
+        dates: forecastData.dates,
+        forecast: forecastData.forecast,
+        confidence_upper: forecastData.confidence_upper,
+        confidence_lower: forecastData.confidence_lower
+      }, {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'forecast_data.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
     } catch (err) {
-      alert("Failed to download CSV.");
+      setError('Failed to generate CSV. Please try again.');
     } finally {
-      setLoadingCsv(false);
+      setIsCsvLoading(false);
     }
   };
+
+  if (!forecastData) {
+    return null;
+  }
 
   return (
-    <div className="bg-white dark:bg-navy-800 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-navy-700 mt-6 animate-fade-in flex flex-col justify-center">
-      <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-100 flex items-center gap-2">
-        <Download className="w-5 h-5 text-orange-500" /> Export Results
-      </h2>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center h-full">
+      <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+        <Download className="h-5 w-5 mr-2 text-blue-600" />
+        Export Results
+      </h3>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <button 
-          onClick={handleDownloadPdf}
-          disabled={loadingPdf}
-          className="flex items-center justify-center gap-2 py-3 px-4 bg-navy-800 hover:bg-navy-900 text-white rounded-lg transition-colors disabled:opacity-70"
+      {error && (
+        <div className="mb-4 text-xs text-red-600 bg-red-50 p-2 rounded border border-red-100">
+          {error}
+        </div>
+      )}
+
+      <div className="space-y-3">
+        <button
+          onClick={handleDownloadPDF}
+          disabled={isPdfLoading || isCsvLoading}
+          className="w-full flex items-center justify-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors shadow-sm"
         >
-          {loadingPdf ? (
-            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+          {isPdfLoading ? (
+            <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
           ) : (
-            <FileText className="w-5 h-5" />
+            <FileText className="h-5 w-5 mr-2" />
           )}
-          Download PDF
+          Download PDF Report
         </button>
-        
-        <button 
-          onClick={handleDownloadCsv}
-          disabled={loadingCsv}
-          className="flex items-center justify-center gap-2 py-3 px-4 bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-500/30 font-medium rounded-lg transition-colors disabled:opacity-70"
+
+        <button
+          onClick={handleDownloadCSV}
+          disabled={isPdfLoading || isCsvLoading}
+          className="w-full flex items-center justify-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors shadow-sm"
         >
-          {loadingCsv ? (
-            <div className="animate-spin rounded-full h-5 w-5 border-2 border-orange-500 border-t-transparent"></div>
+          {isCsvLoading ? (
+            <div className="h-5 w-5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin mr-2" />
           ) : (
-            <FileSpreadsheet className="w-5 h-5" />
+            <FileDown className="h-5 w-5 mr-2 text-green-600" />
           )}
-          Export CSV
+          Export Forecast Data (CSV)
         </button>
       </div>
     </div>
   );
-};
-
-export default DownloadReport;
+}

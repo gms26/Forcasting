@@ -1,83 +1,82 @@
 import React, { useMemo } from 'react';
-import { ResponsiveContainer, ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Area } from 'recharts';
-import { Activity } from 'lucide-react';
+import {
+  ComposedChart,
+  Line,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  ReferenceLine
+} from 'recharts';
 
-const ForecastChart = ({ 
-  historicalData, 
-  forecastData, 
-  confidenceUpper, 
-  confidenceLower, 
-  forecastDates,
-  comparisonData,
-  isComparing 
-}) => {
+export default function ForecastChart({ historicalData, forecastData }) {
   
-  // 1. Debug logging
-  console.log("Chart props received:", { 
-    historicalData, forecastData, confidenceUpper, 
-    confidenceLower, forecastDates, comparisonData, isComparing
-  });
-
-  // Define colors for different models
-  const modelColors = {
-    "Moving Average": "#10b981", // Emerald
-    "ARIMA": "#8b5cf6",        // Violet
-    "Holt-Winters": "#f59e0b", // Amber
-    "Prophet": "#ec4899",      // Pink
-    "Forecast": "#f97316"      // Default Orange
-  };
-
-  // 2. Data Structuring
   const chartData = useMemo(() => {
-    if (isComparing && comparisonData) {
-      return comparisonData;
+    if (!historicalData || historicalData.length === 0) return [];
+    
+    // Convert historical data
+    const hist = historicalData.map(d => ({
+      date: d.date,
+      historical: d.value,
+      forecast: null,
+      confidenceLower: null,
+      confidenceUpper: null
+    }));
+    
+    if (!forecastData || !forecastData.dates) return hist;
+    
+    // Convert forecast data
+    const future = forecastData.dates.map((date, i) => ({
+      date: date,
+      historical: null,
+      forecast: forecastData.forecast[i],
+      confidenceLower: forecastData.confidence_lower[i],
+      confidenceUpper: forecastData.confidence_upper[i]
+    }));
+    
+    // Connect the lines by adding the last historical point to the forecast
+    if (hist.length > 0 && future.length > 0) {
+      const lastHist = hist[hist.length - 1];
+      future[0].historical = lastHist.historical; // to bridge the gap visually in some chart libs
     }
     
-    if (!historicalData) return [];
+    return [...hist, ...future];
+  }, [historicalData, forecastData]);
 
-    // Create a base array from historical data
-    const history = historicalData.map(d => ({
-      date: d.date,
-      value: d.value,
-      forecast: null,
-      ci_upper: null,
-      ci_lower: null
-    }));
+  if (!chartData || chartData.length === 0) {
+    return (
+      <div className="h-96 flex items-center justify-center bg-gray-50 rounded-xl border border-gray-200">
+        <p className="text-gray-500">Upload data to see the chart</p>
+      </div>
+    );
+  }
 
-    // If no forecast data, just return history
-    if (!forecastData || forecastData.length === 0) return history;
-
-    // Create forecast array
-    const forecast = forecastDates.map((date, i) => ({
-      date: date,
-      value: null,
-      forecast: forecastData[i],
-      ci_upper: confidenceUpper[i],
-      ci_lower: confidenceLower[i]
-    }));
-
-    return [...history, ...forecast];
-  }, [historicalData, forecastData, confidenceUpper, confidenceLower, forecastDates, comparisonData, isComparing]);
-
-  if (!chartData || chartData.length === 0) return null;
+  const forecastStartDate = forecastData?.dates?.[0];
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-navy-900 border border-navy-700 text-slate-100 p-3 rounded-lg shadow-xl text-sm min-w-[150px]">
-          <div className="flex items-center justify-between mb-2 border-b border-navy-700 pb-1">
-            <span className="font-semibold">{label}</span>
-          </div>
+        <div className="bg-white p-3 border border-gray-200 shadow-lg rounded-lg">
+          <p className="font-medium text-gray-900 mb-2">{label}</p>
           {payload.map((entry, index) => {
-            if (entry.dataKey === 'ci_upper' || entry.dataKey === 'ci_lower') return null;
-            // Don't show redundant entries
-            if (entry.dataKey === 'value' && payload.some(p => p.dataKey !== 'value' && p.value === entry.value)) return null;
-            
+            // Don't show confidence bands in tooltip to keep it clean, or format them nicely
+            if (entry.dataKey === 'confidenceUpper' || entry.dataKey === 'confidenceLower') {
+                return null;
+            }
             return (
-              <p key={index} style={{ color: entry.color }} className="flex justify-between gap-4">
-                <span>{entry.name}:</span>
-                <span className="font-bold">{Number(entry.value).toFixed(2)}</span>
-              </p>
+              <div key={index} className="flex items-center space-x-2 text-sm">
+                <div 
+                  className="w-3 h-3 rounded-full" 
+                  style={{ backgroundColor: entry.color }}
+                />
+                <span className="text-gray-600 capitalize">{entry.name}:</span>
+                <span className="font-semibold text-gray-900">
+                  {entry.value !== null && entry.value !== undefined ? entry.value.toFixed(2) : 'N/A'}
+                </span>
+              </div>
             );
           })}
         </div>
@@ -87,120 +86,73 @@ const ForecastChart = ({
   };
 
   return (
-    <div className="bg-white dark:bg-navy-800 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-navy-700 h-full flex flex-col animate-fade-in">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-          <Activity className="w-5 h-5 text-orange-500" /> Forecast Visualization
-        </h2>
-        
-        <div className="flex flex-wrap gap-3">
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-full">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></div>
-            <span className="text-xs font-medium text-blue-700 dark:text-blue-300">Historical</span>
-          </div>
-          {!isComparing ? (
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 rounded-full">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#f97316]"></div>
-              <span className="text-xs font-medium text-orange-700 dark:text-orange-300">Forecast</span>
-            </div>
-          ) : (
-            Object.entries(modelColors).filter(([name]) => name !== "Forecast").map(([name, color]) => (
-              <div key={name} className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-600 rounded-full">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }}></div>
-                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{name}</span>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-      
-      <div className="flex-1 w-full min-h-[400px]">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h3 className="text-lg font-medium text-gray-900 mb-6">Forecast Visualization</h3>
+      <div className="h-96 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={chartData}
-            margin={{ top: 10, right: 30, left: 20, bottom: 30 }}
+            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" opacity={0.15} vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
             <XAxis 
               dataKey="date" 
-              tick={{ fill: '#64748b', fontSize: 11 }} 
-              tickMargin={10} 
-              minTickGap={40}
-              stroke="#cbd5e1"
+              tick={{ fontSize: 12, fill: '#6B7280' }}
+              tickMargin={10}
+              minTickGap={30}
             />
             <YAxis 
-              tick={{ fill: '#64748b', fontSize: 12 }} 
-              tickMargin={10} 
-              stroke="#cbd5e1"
-              domain={['auto', 'auto']}
+              tick={{ fontSize: 12, fill: '#6B7280' }}
+              tickMargin={10}
+              axisLine={false}
+              tickLine={false}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Legend verticalAlign="top" height={36} wrapperStyle={{ paddingBottom: '20px' }} />
+            <Legend verticalAlign="top" height={36} iconType="circle" />
             
-            {/* Historical Line: Blue Solid */}
-            <Line 
+            {forecastStartDate && (
+              <ReferenceLine x={forecastStartDate} stroke="#9CA3AF" strokeDasharray="3 3" />
+            )}
+
+            <Area 
               type="monotone" 
-              dataKey="value" 
-              name="Historical" 
-              stroke="#3b82f6" 
-              strokeWidth={2} 
-              dot={false}
-              isAnimationActive={false}
-              connectNulls={true}
+              dataKey="confidenceUpper" 
+              stroke="none" 
+              fill="#fed7aa" 
+              fillOpacity={0.4} 
+              legendType="none"
+            />
+            <Area 
+              type="monotone" 
+              dataKey="confidenceLower" 
+              stroke="none" 
+              fill="#ffffff" 
+              fillOpacity={1} 
+              legendType="none"
             />
 
-            {!isComparing ? (
-              <>
-                {/* Confidence Area: Light Orange Fill */}
-                <Area 
-                  type="monotone" 
-                  dataKey="ci_upper" 
-                  baseValue="ci_lower"
-                  stroke="none" 
-                  fill="#fed7aa" 
-                  fillOpacity={0.4} 
-                  name="95% Confidence"
-                  tooltipType="none"
-                  isAnimationActive={false}
-                  connectNulls={true}
-                />
-                
-                {/* Forecast Line: Orange Dashed */}
-                <Line 
-                  type="monotone" 
-                  dataKey="forecast" 
-                  name="Forecast" 
-                  stroke="#f97316" 
-                  strokeWidth={2} 
-                  strokeDasharray="5 5" 
-                  dot={false}
-                  isAnimationActive={false}
-                  connectNulls={true}
-                />
-              </>
-            ) : (
-              // Comparison Lines
-              Object.entries(modelColors).filter(([name]) => name !== "Forecast").map(([name, color]) => (
-                <Line 
-                  key={name}
-                  type="monotone" 
-                  dataKey={name} 
-                  name={name} 
-                  stroke={color} 
-                  strokeWidth={2} 
-                  strokeDasharray="3 3"
-                  dot={false}
-                  isAnimationActive={false}
-                  connectNulls={true}
-                />
-              ))
-            )}
-            
+            <Line 
+              type="monotone" 
+              dataKey="historical" 
+              name="Historical Data"
+              stroke="#3b82f6" 
+              strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 4 }}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="forecast" 
+              name="Forecast"
+              stroke="#f97316" 
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              dot={false}
+              activeDot={{ r: 4 }}
+            />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
     </div>
   );
-};
-
-export default ForecastChart;
+}
