@@ -2,8 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
 @layer utilities {
   .glass {
     @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl;
   }
+  
+  .glass-dark {
+    @apply bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 shadow-2xl;
+  }
+
+  .glow-indigo {
+    box-shadow: 0 0 50px -10px rgba(99, 102, 241, 0.35);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 50px -10px rgba(6, 182, 212, 0.35);
+  }
+  
+  .forecasting-grid-pattern {
+    background-size: 32px 32px;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  }
+
+  .forecasting-grid-pattern-light {
+    background-size: 28px 28px;
+    background-image: 
+      linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+  }
 }
+
+@keyframes pulse-slow {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.08) translateY(-10px);
+    opacity: 0.9;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+

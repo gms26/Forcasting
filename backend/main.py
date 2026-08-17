@@ -27,32 +27,117 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Demo User
-FAKE_USERS_DB = {
-    "admin": {
-        "username": "admin",
-        "hashed_password": get_password_hash("admin123"),
+# User database supporting custom emails
+USERS_DB: Dict[str, Dict[str, Any]] = {
+    "analyst@smartforecast.ai": {
+        "email": "analyst@smartforecast.ai",
+        "name": "Senior Data Analyst",
+        "hashed_password": get_password_hash("forecast2025"),
+    },
+    "admin@smartforecast.ai": {
+        "email": "admin@smartforecast.ai",
+        "name": "Platform Administrator",
+        "hashed_password": get_password_hash("smartforecast"),
     }
 }
 
 class LoginRequest(BaseModel):
-    username: str
+    email: Optional[str] = None
+    username: Optional[str] = None
     password: str
+    name: Optional[str] = None
+
+class RegisterRequest(BaseModel):
+    email: str
+    password: str
+    name: Optional[str] = None
+
+@app.post("/auth/register")
+async def register(request: RegisterRequest):
+    email_key = request.email.strip().lower()
+    if not email_key or "@" not in email_key:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please provide a valid email address."
+        )
+    if len(request.password) < 4:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 4 characters long."
+        )
+    if email_key in USERS_DB:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="An account with this email already exists. Please sign in."
+        )
+    
+    display_name = request.name.strip() if request.name and request.name.strip() else email_key.split('@')[0].capitalize()
+    USERS_DB[email_key] = {
+        "email": email_key,
+        "name": display_name,
+        "hashed_password": get_password_hash(request.password)
+    }
+    
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": email_key, "name": display_name}, expires_delta=access_token_expires
+    )
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "email": email_key,
+            "name": display_name
+        }
+    }
 
 @app.post("/auth/login")
 async def login(request: LoginRequest):
-    user = FAKE_USERS_DB.get(request.username)
-    if not user or not verify_password(request.password, user["hashed_password"]):
+    # Accept either email or username
+    user_identifier = (request.email or request.username or "").strip().lower()
+    if not user_identifier:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email address is required."
         )
+    
+    user = USERS_DB.get(user_identifier)
+    
+    # If user doesn't exist yet, auto-provision seamless account so any user email works immediately
+    if not user:
+        if len(request.password) < 3:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Password must be at least 3 characters long."
+            )
+        display_name = request.name.strip() if request.name and request.name.strip() else user_identifier.split('@')[0].capitalize()
+        user = {
+            "email": user_identifier,
+            "name": display_name,
+            "hashed_password": get_password_hash(request.password)
+        }
+        USERS_DB[user_identifier] = user
+    else:
+        if not verify_password(request.password, user["hashed_password"]):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect password for this email account.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    user_name = user.get("name", user_identifier.split('@')[0].capitalize())
     access_token = create_access_token(
-        data={"sub": user["username"]}, expires_delta=access_token_expires
+        data={"sub": user_identifier, "name": user_name}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "email": user.get("email", user_identifier),
+            "name": user_name
+        }
+    }
 
 @app.get("/sample")
 async def get_sample():
