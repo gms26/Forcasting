@@ -222,11 +222,42 @@ export default function App() {
     }
   };
 
+  const handleQuickStart = async () => {
+    const demoEmail = 'analyst@smartforecast.ai';
+    const demoPassword = 'forecast2025';
+    const demoName = 'Senior Data Analyst';
+
+    let activeToken = token;
+    if (!activeToken) {
+      try {
+        const response = await axios.post(`${API_BASE}/auth/login`, {
+          email: demoEmail,
+          password: demoPassword
+        });
+        activeToken = response.data.access_token;
+        const userData = response.data.user || { email: demoEmail, name: demoName };
+        localStorage.setItem('token', activeToken);
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+        setToken(activeToken);
+      } catch {
+        activeToken = 'jwt_demo_' + Math.random().toString(36).substring(2);
+        const userData = { email: demoEmail, name: demoName };
+        localStorage.setItem('token', activeToken);
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+        setToken(activeToken);
+      }
+    }
+
+    handleSampleData();
+  };
+
   if (!token) {
     if (showLogin) {
       return <Login setToken={setToken} setUser={setUser} onBack={() => setShowLogin(false)} />;
     }
-    return <Landing onLoginClick={() => setShowLogin(true)} />;
+    return <Landing onLoginClick={() => setShowLogin(true)} onQuickStart={handleQuickStart} />;
   }
 
   const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : (user?.email ? user.email.charAt(0).toUpperCase() : 'U');

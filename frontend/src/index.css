@@ -3,70 +3,104 @@
 @tailwind utilities;
 
 @layer base {
-  body {
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+    width: 100%;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #080c14;
+    color: #f1f5f9;
+  }
+
+  /* Custom smooth scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #080c14;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #334155;
   }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
   
-  .glass-dark {
-    @apply bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 shadow-2xl;
+  .glass-card {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(10, 15, 29, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(148, 163, 184, 0.12);
   }
 
-  .glow-indigo {
-    box-shadow: 0 0 50px -10px rgba(99, 102, 241, 0.35);
-  }
-
-  .glow-cyan {
-    box-shadow: 0 0 50px -10px rgba(6, 182, 212, 0.35);
+  .glass-card:hover {
+    border-color: rgba(56, 189, 248, 0.3);
   }
 
   .glow-blue {
-    box-shadow: 0 0 45px -8px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 45px -10px rgba(59, 130, 246, 0.35);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 45px -10px rgba(6, 182, 212, 0.35);
+  }
+
+  .glow-indigo {
+    box-shadow: 0 0 50px -12px rgba(99, 102, 241, 0.35);
+  }
+
+  .glow-emerald {
+    box-shadow: 0 0 45px -10px rgba(16, 185, 129, 0.3);
   }
   
   .forecasting-grid-pattern {
-    background-size: 32px 32px;
+    background-size: 36px 36px;
     background-image: 
-      linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  }
-
-  .forecasting-grid-pattern-light {
-    background-size: 28px 28px;
-    background-image: 
-      linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+      linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
   }
 
   .forecasting-radial-mesh {
-    background: radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.15) 0%, transparent 45%),
-                radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.4) 0%, transparent 70%);
+    background: 
+      radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.18) 0%, transparent 40%),
+      radial-gradient(circle at 90% 30%, rgba(6, 182, 212, 0.14) 0%, transparent 45%),
+      radial-gradient(circle at 50% 80%, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
+      radial-gradient(circle at 70% 90%, rgba(16, 185, 129, 0.08) 0%, transparent 40%);
+  }
+
+  .code-font {
+    font-family: 'JetBrains Mono', monospace;
   }
 }
 
 @keyframes pulse-slow {
   0%, 100% {
     transform: scale(1) translateY(0);
-    opacity: 0.7;
+    opacity: 0.6;
   }
   50% {
-    transform: scale(1.08) translateY(-10px);
-    opacity: 0.95;
+    transform: scale(1.06) translateY(-8px);
+    opacity: 0.9;
   }
 }
 
-@keyframes float {
+@keyframes float-subtle {
   0%, 100% {
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-6px);
+    transform: translateY(-5px);
   }
 }
 
@@ -79,18 +113,26 @@
   }
 }
 
+@keyframes forecast-dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
 .animate-pulse-slow {
   animation: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .animate-float {
-  animation: float 5s ease-in-out infinite;
+  animation: float-subtle 4s ease-in-out infinite;
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 100%);
   background-size: 200% 100%;
-  animation: shimmer 3s infinite;
+  animation: shimmer 2.5s infinite;
 }
 
-
+.animate-dash {
+  animation: forecast-dash 1.5s linear infinite;
+}
