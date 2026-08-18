@@ -224,7 +224,7 @@ export default function App() {
 
   if (!token) {
     if (showLogin) {
-      return <Login setToken={setToken} setUser={setUser} />;
+      return <Login setToken={setToken} setUser={setUser} onBack={() => setShowLogin(false)} />;
     }
     return <Landing onLoginClick={() => setShowLogin(true)} />;
   }
