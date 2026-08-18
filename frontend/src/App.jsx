@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 
 import Login from './Login';
+import Landing from './Landing';
 import FileUpload from './components/FileUpload';
 import ModelSelector from './components/ModelSelector';
 import ForecastChart from './components/ForecastChart';
@@ -32,6 +33,7 @@ export default function App() {
   });
   
   // App State
+  const [showLogin, setShowLogin] = useState(false);
   const [uploadedData, setUploadedData] = useState(null);
   const [fileInfo, setFileInfo] = useState(null);
   const [selectedModel, setSelectedModel] = useState('Moving Average');
@@ -221,7 +223,10 @@ export default function App() {
   };
 
   if (!token) {
-    return <Login setToken={setToken} setUser={setUser} />;
+    if (showLogin) {
+      return <Login setToken={setToken} setUser={setUser} />;
+    }
+    return <Landing onLoginClick={() => setShowLogin(true)} />;
   }
 
   const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : (user?.email ? user.email.charAt(0).toUpperCase() : 'U');
