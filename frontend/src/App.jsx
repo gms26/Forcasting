@@ -86,8 +86,11 @@ export default function App() {
     setUser(null);
     setShowLogin(false);
     setUploadedData(null);
+    setFileInfo(null);
     setForecastResult(null);
     setCompareResults(null);
+    setBestModel(null);
+    setError(null);
   };
 
   const handleUpload = async (file) => {
