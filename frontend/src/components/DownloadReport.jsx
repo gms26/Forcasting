@@ -10,17 +10,17 @@ export default function DownloadReport({ forecastData, metrics, explanation, mod
   const [error, setError] = useState('');
 
   const handleDownloadPDF = async () => {
-    if (!forecastData) return;
+    if (!forecastData || !metrics) return;
     setIsPdfLoading(true);
     setError('');
     
     try {
       const response = await axios.post(`${API_BASE}/download/pdf`, {
-        model_name: modelName || 'Champion Model',
-        periods: periods || 30,
-        mae: metrics?.mae || 0,
-        rmse: metrics?.rmse || 0,
-        mape: metrics?.mape || 0,
+        model_name: modelName,
+        periods: periods,
+        mae: metrics.mae,
+        rmse: metrics.rmse,
+        mape: metrics.mape,
         explanation: explanation || "No explanation generated."
       }, {
         responseType: 'blob'
@@ -34,7 +34,7 @@ export default function DownloadReport({ forecastData, metrics, explanation, mod
       link.click();
       link.parentNode.removeChild(link);
     } catch (err) {
-      setError('Failed to generate PDF report.');
+      setError('Failed to generate PDF. Please try again.');
     } finally {
       setIsPdfLoading(false);
     }
@@ -47,10 +47,10 @@ export default function DownloadReport({ forecastData, metrics, explanation, mod
     
     try {
       const response = await axios.post(`${API_BASE}/download/csv`, {
-        dates: forecastData.dates || [],
-        forecast: forecastData.forecast || [],
-        confidence_upper: forecastData.confidence_upper || [],
-        confidence_lower: forecastData.confidence_lower || []
+        dates: forecastData.dates,
+        forecast: forecastData.forecast,
+        confidence_upper: forecastData.confidence_upper,
+        confidence_lower: forecastData.confidence_lower
       }, {
         responseType: 'blob'
       });
@@ -58,54 +58,59 @@ export default function DownloadReport({ forecastData, metrics, explanation, mod
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'forecast_predictions.csv');
+      link.setAttribute('download', 'forecast_data.csv');
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
     } catch (err) {
-      setError('Failed to generate CSV download.');
+      setError('Failed to generate CSV. Please try again.');
     } finally {
       setIsCsvLoading(false);
     }
   };
 
+  if (!forecastData) {
+    return null;
+  }
+
   return (
-    <div className="rasera-card rounded-2xl p-6 shadow-md border border-[#004775]">
-      <h3 className="text-base font-bold text-white mb-4">Export Forecasting Deliverables</h3>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center h-full">
+      <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+        <Download className="h-5 w-5 mr-2 text-blue-600" />
+        Export Results
+      </h3>
       
       {error && (
-        <div className="mb-4 text-xs text-rose-300 bg-rose-950/60 p-3 rounded-xl border border-rose-800">
+        <div className="mb-4 text-xs text-red-600 bg-red-50 p-2 rounded border border-red-100">
           {error}
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* PDF Download Button */}
+      <div className="space-y-3">
         <button
           onClick={handleDownloadPDF}
-          disabled={isPdfLoading}
-          className="flex items-center justify-center space-x-2 py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#a2fff4] via-[#6aceff] to-[#3b82f6] text-[#00131c] font-extrabold text-sm hover:opacity-95 shadow-md shadow-[#6aceff]/20 disabled:opacity-50 transition-all active:scale-[0.99]"
+          disabled={isPdfLoading || isCsvLoading}
+          className="w-full flex items-center justify-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors shadow-sm"
         >
           {isPdfLoading ? (
-            <div className="h-4 w-4 border-2 border-[#00131c] border-t-transparent rounded-full animate-spin" />
+            <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
           ) : (
-            <FileText className="h-4 w-4 text-[#00131c]" />
+            <FileText className="h-5 w-5 mr-2" />
           )}
-          <span>Download Executive PDF</span>
+          Download PDF Report
         </button>
 
-        {/* CSV Download Button */}
         <button
           onClick={handleDownloadCSV}
-          disabled={isCsvLoading}
-          className="flex items-center justify-center space-x-2 py-3.5 px-4 rounded-xl bg-[#002238] border border-[#004775] text-[#97dcff] hover:text-white hover:bg-[#002f4d] font-bold text-sm disabled:opacity-50 transition-all"
+          disabled={isPdfLoading || isCsvLoading}
+          className="w-full flex items-center justify-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors shadow-sm"
         >
           {isCsvLoading ? (
-            <div className="h-4 w-4 border-2 border-[#97dcff] border-t-transparent rounded-full animate-spin" />
+            <div className="h-5 w-5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin mr-2" />
           ) : (
-            <FileDown className="h-4 w-4 text-[#a2fff4]" />
+            <FileDown className="h-5 w-5 mr-2 text-green-600" />
           )}
-          <span>Export Prediction CSV</span>
+          Export Forecast Data (CSV)
         </button>
       </div>
     </div>
