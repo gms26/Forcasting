@@ -141,29 +141,28 @@ async def login(request: LoginRequest):
 @app.get("/sample-data")
 async def get_sample():
     sample_path = os.path.join(os.path.dirname(__file__), "..", "sample_data", "sales_data.csv")
-    if not os.path.exists(sample_path):
-        # Fallback sample records if file path resolution varies
-        records = [
-            {"date": "2024-01-01", "value": 120.5},
-            {"date": "2024-01-02", "value": 124.8},
-            {"date": "2024-01-03", "value": 119.2},
-            {"date": "2024-01-04", "value": 131.0},
-            {"date": "2024-01-05", "value": 135.4},
-            {"date": "2024-01-06", "value": 128.9},
-            {"date": "2024-01-07", "value": 142.1},
-            {"date": "2024-01-08", "value": 148.6},
-            {"date": "2024-01-09", "value": 145.2},
-            {"date": "2024-01-10", "value": 153.8},
-            {"date": "2024-01-11", "value": 158.0},
-            {"date": "2024-01-12", "value": 162.4},
-            {"date": "2024-01-13", "value": 159.1},
-            {"date": "2024-01-14", "value": 167.5},
-            {"date": "2024-01-15", "value": 172.8}
-        ]
+    if os.path.exists(sample_path):
+        df = pd.read_csv(sample_path)
+        records = df.to_dict(orient="records")
         return {"data": records}
     
-    df = pd.read_csv(sample_path)
-    records = df.to_dict(orient="records")
+    records = [
+        {"date": "2024-01-01", "value": 120.5},
+        {"date": "2024-01-02", "value": 124.8},
+        {"date": "2024-01-03", "value": 119.2},
+        {"date": "2024-01-04", "value": 131.0},
+        {"date": "2024-01-05", "value": 135.4},
+        {"date": "2024-01-06", "value": 128.9},
+        {"date": "2024-01-07", "value": 142.1},
+        {"date": "2024-01-08", "value": 148.6},
+        {"date": "2024-01-09", "value": 145.2},
+        {"date": "2024-01-10", "value": 153.8},
+        {"date": "2024-01-11", "value": 158.0},
+        {"date": "2024-01-12", "value": 162.4},
+        {"date": "2024-01-13", "value": 159.1},
+        {"date": "2024-01-14", "value": 167.5},
+        {"date": "2024-01-15", "value": 172.8}
+    ]
     return {"data": records}
 
 @app.post("/upload")
@@ -184,6 +183,19 @@ class ForecastRequest(BaseModel):
     model: str
     periods: int
 
+def extract_metrics(res_dict: dict) -> dict:
+    if "metrics" in res_dict and isinstance(res_dict["metrics"], dict):
+        return {
+            "mae": round(float(res_dict["metrics"].get("mae", 0)), 2),
+            "rmse": round(float(res_dict["metrics"].get("rmse", 0)), 2),
+            "mape": round(float(res_dict["metrics"].get("mape", 0)), 2)
+        }
+    return {
+        "mae": round(float(res_dict.get("mae", 0)), 2),
+        "rmse": round(float(res_dict.get("rmse", 0)), 2),
+        "mape": round(float(res_dict.get("mape", 0)), 2)
+    }
+
 @app.post("/forecast")
 async def forecast(request: ForecastRequest):
     data = request.data
@@ -201,8 +213,28 @@ async def forecast(request: ForecastRequest):
             result = holt_winters.run_forecast(data, periods)
         else:
             raise HTTPException(status_code=400, detail="Invalid model selected.")
-            
-        return result
+        
+        metrics = extract_metrics(result)
+        explanation = get_gemini_explanation(
+            model_name=model_name,
+            periods=periods,
+            historical_values=[float(d.get("value", 0)) for d in data[-10:]],
+            forecast_values=result.get("forecast", []),
+            trend_direction="upward" if result.get("forecast", [0])[-1] > float(data[-1].get("value", 0)) else "stable",
+            mae=metrics["mae"],
+            rmse=metrics["rmse"],
+            mape=metrics["mape"]
+        )
+
+        return {
+            "forecast": result.get("forecast", []),
+            "dates": result.get("dates", []),
+            "confidence_upper": result.get("confidence_upper", []),
+            "confidence_lower": result.get("confidence_lower", []),
+            "metrics": metrics,
+            "explanation": explanation,
+            "model_name": model_name
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -225,17 +257,15 @@ async def compare_models(request: ForecastRequest):
     for name, module in models.items():
         try:
             res = module.run_forecast(data, periods)
+            metrics = extract_metrics(res)
+            
             results.append({
                 "model": name,
-                "metrics": {
-                    "mae": res["metrics"]["mae"],
-                    "rmse": res["metrics"]["rmse"],
-                    "mape": res["metrics"]["mape"]
-                }
+                "metrics": metrics
             })
             
-            if res["metrics"]["mape"] < lowest_mape:
-                lowest_mape = res["metrics"]["mape"]
+            if metrics["mape"] < lowest_mape:
+                lowest_mape = metrics["mape"]
                 best_model = name
         except Exception as e:
             print(f"Error running {name}: {e}")

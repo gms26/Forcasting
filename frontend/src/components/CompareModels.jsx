@@ -14,7 +14,7 @@ export default function CompareModels({ results, bestModel, isLoading }) {
     );
   }
 
-  if (!results || results.length === 0) {
+  if (!results || !Array.isArray(results) || results.length === 0) {
     return null;
   }
 
@@ -45,7 +45,13 @@ export default function CompareModels({ results, bestModel, isLoading }) {
           </thead>
           <tbody className="divide-y divide-gray-100 bg-white font-mono text-xs sm:text-sm">
             {results.map((res, idx) => {
-              const isBest = res.model === bestModel;
+              const modelName = res.model || res.model_name || 'Model';
+              const maeVal = res.metrics?.mae ?? res.mae ?? 'N/A';
+              const rmseVal = res.metrics?.rmse ?? res.rmse ?? 'N/A';
+              const mapeVal = res.metrics?.mape ?? res.mape ?? 'N/A';
+
+              const isBest = modelName === bestModel || (typeof mapeVal === 'number' && idx === 0);
+
               return (
                 <tr 
                   key={idx} 
@@ -53,12 +59,12 @@ export default function CompareModels({ results, bestModel, isLoading }) {
                 >
                   <td className="px-6 py-3.5 text-gray-900 flex items-center space-x-2">
                     {isBest && <Trophy className="h-4 w-4 text-emerald-600 shrink-0" />}
-                    <span>{res.model}</span>
+                    <span>{modelName}</span>
                   </td>
-                  <td className="px-6 py-3.5 text-gray-700 num-stat">{res.metrics?.mae || 'N/A'}</td>
-                  <td className="px-6 py-3.5 text-gray-700 num-stat">{res.metrics?.rmse || 'N/A'}</td>
+                  <td className="px-6 py-3.5 text-gray-700 num-stat">{maeVal}</td>
+                  <td className="px-6 py-3.5 text-gray-700 num-stat">{rmseVal}</td>
                   <td className={`px-6 py-3.5 num-stat font-bold ${isBest ? 'text-emerald-600' : 'text-gray-900'}`}>
-                    {res.metrics?.mape ? `${res.metrics.mape}%` : 'N/A'}
+                    {mapeVal !== 'N/A' ? `${mapeVal}%` : 'N/A'}
                   </td>
                 </tr>
               );

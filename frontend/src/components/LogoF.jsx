@@ -1,17 +1,11 @@
 import React from 'react';
 
 /**
- * Creative Forecasting 'F' Monogram Symbol
- * - Vertical stem: Historical time-series base
- * - Top predictive wing: Upward forecast trajectory arrow
- * - Middle horizon bar: Changepoint threshold
- * - Predictive pulse node: AI changepoint anchor
+ * High-Visibility Professional 'F' Monogram
+ * Pure white bold 'F' on a soft royal blue & cyan gradient badge.
+ * Perfectly visible on dark and light browser tabs, navbars, and headers.
  */
-export default function LogoF({ className = "h-7 w-7", glow = true }) {
-  const gradientId = React.useId();
-  const accentId = React.useId();
-  const glowId = React.useId();
-
+export default function LogoF({ className = "h-7 w-7" }) {
   return (
     <svg 
       viewBox="0 0 36 36" 
@@ -20,73 +14,24 @@ export default function LogoF({ className = "h-7 w-7", glow = true }) {
       className={`shrink-0 ${className}`}
     >
       <defs>
-        {/* Main Forecasting Gradient: Vibrant Cyan to Electric Blue to Indigo */}
-        <linearGradient id={gradientId} x1="2" y1="4" x2="34" y2="32" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#38bdf8" />
-          <stop offset="40%" stopColor="#06b6d4" />
-          <stop offset="100%" stopColor="#6366f1" />
+        <linearGradient id="logoBadgeGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#2563eb" />
+          <stop offset="60%" stopColor="#3b82f6" />
+          <stop offset="100%" stopColor="#06b6d4" />
         </linearGradient>
-
-        {/* Upward Trajectory Arrow Highlight */}
-        <linearGradient id={accentId} x1="16" y1="4" x2="32" y2="16" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#67e8f9" />
-          <stop offset="100%" stopColor="#38bdf8" />
-        </linearGradient>
-
-        {glow && (
-          <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="#06b6d4" floodOpacity="0.4" />
-          </filter>
-        )}
       </defs>
 
-      <g filter={glow ? `url(#${glowId})` : undefined}>
-        {/* Vertical Axis Spine (Historical Data Column) */}
-        <rect 
-          x="5" 
-          y="5" 
-          width="5.5" 
-          height="26" 
-          rx="2.75" 
-          fill={`url(#${gradientId})`} 
-        />
+      {/* Rounded Soft Royal Blue Badge */}
+      <rect width="36" height="36" rx="9" fill="url(#logoBadgeGrad)" />
 
-        {/* Top Forward-Projecting Forecast Wing (Predictive Trajectory) */}
-        <path 
-          d="M5 5 H 26.5 C 28.2 5 29.1 7 28 8.2 L 22.5 14.5 C 21.8 15.3 20.7 15.8 19.6 15.8 H 5 V 5 Z" 
-          fill={`url(#${gradientId})`} 
-        />
-        
-        {/* Luminous Arrowhead Accent */}
-        <path 
-          d="M17 5 H 26.5 C 28.2 5 29.1 7 28 8.2 L 22.5 14.5 H 17.5 L 21.5 9 H 17 V 5 Z" 
-          fill={`url(#${accentId})`} 
-        />
+      {/* Solid Crisp White 'F' Monogram with Predictive Trajectory Top Vector */}
+      <path 
+        d="M9 8 H 27 C 28.2 8 28.8 9.5 28 10.4 L 24 14.5 H 14.5 V 17.5 H 22 C 22.8 17.5 23.5 18.2 23.5 19 V 20.5 C 23.5 21.3 22.8 22 H 14.5 V 28 C 14.5 28.8 13.8 29.5 13 V 29.5 C 12.2 29.5 11.5 28.8 11.5 28 V 10.5 C 11.5 9.1 10.4 8 9 8 Z" 
+        fill="#ffffff" 
+      />
 
-        {/* Middle Horizon Horizon Bar (Changepoint Bar) */}
-        <rect 
-          x="5" 
-          y="18.5" 
-          width="13" 
-          height="4.5" 
-          rx="2.25" 
-          fill={`url(#${gradientId})`} 
-        />
-
-        {/* Predictive Horizon Changepoint Node (Cyan Dot) */}
-        <circle 
-          cx="22.5" 
-          cy="20.75" 
-          r="2.75" 
-          fill="#22d3ee" 
-        />
-        <circle 
-          cx="22.5" 
-          cy="20.75" 
-          r="1.25" 
-          fill="#ffffff" 
-        />
-      </g>
+      {/* Luminous Forecasting Dot Node */}
+      <circle cx="25.5" cy="11.5" r="2" fill="#67e8f9" />
     </svg>
   );
 }
