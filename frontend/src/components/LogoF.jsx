@@ -1,11 +1,10 @@
 import React from 'react';
 
 /**
- * High-Visibility Professional 'F' Monogram
- * Pure white bold 'F' on a soft royal blue & cyan gradient badge.
- * Perfectly visible on dark and light browser tabs, navbars, and headers.
+ * Stylish High-Contrast 'F' Monogram Symbol
+ * Vibrant Indigo to Cyan gradient badge with a crisp white 'F' and Amber forecast node.
  */
-export default function LogoF({ className = "h-7 w-7" }) {
+export default function LogoF({ className = "h-9 w-9" }) {
   return (
     <svg 
       viewBox="0 0 36 36" 
@@ -14,24 +13,24 @@ export default function LogoF({ className = "h-7 w-7" }) {
       className={`shrink-0 ${className}`}
     >
       <defs>
-        <linearGradient id="logoBadgeGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#2563eb" />
-          <stop offset="60%" stopColor="#3b82f6" />
+        <linearGradient id="logoFDiffGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#4f46e5" />
+          <stop offset="50%" stopColor="#2563eb" />
           <stop offset="100%" stopColor="#06b6d4" />
         </linearGradient>
       </defs>
 
-      {/* Rounded Soft Royal Blue Badge */}
-      <rect width="36" height="36" rx="9" fill="url(#logoBadgeGrad)" />
+      {/* Distinct Indigo-Cyan Rounded Gradient Badge */}
+      <rect width="36" height="36" rx="9" fill="url(#logoFDiffGrad)" />
 
-      {/* Solid Crisp White 'F' Monogram with Predictive Trajectory Top Vector */}
+      {/* Bold Crisp White 'F' Monogram */}
       <path 
         d="M9 8 H 27 C 28.2 8 28.8 9.5 28 10.4 L 24 14.5 H 14.5 V 17.5 H 22 C 22.8 17.5 23.5 18.2 23.5 19 V 20.5 C 23.5 21.3 22.8 22 H 14.5 V 28 C 14.5 28.8 13.8 29.5 13 V 29.5 C 12.2 29.5 11.5 28.8 11.5 28 V 10.5 C 11.5 9.1 10.4 8 9 8 Z" 
         fill="#ffffff" 
       />
 
-      {/* Luminous Forecasting Dot Node */}
-      <circle cx="25.5" cy="11.5" r="2" fill="#67e8f9" />
+      {/* Luminous Gold/Amber Predictive Horizon Node */}
+      <circle cx="25.5" cy="11.5" r="2.2" fill="#fbbf24" />
     </svg>
   );
 }
