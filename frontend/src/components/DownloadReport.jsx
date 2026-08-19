@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileDown, FileText, Download } from 'lucide-react';
+import { Download, FileText, FileSpreadsheet } from 'lucide-react';
 import axios from 'axios';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -16,7 +16,7 @@ export default function DownloadReport({ forecastData, metrics, explanation, mod
     
     try {
       const response = await axios.post(`${API_BASE}/download/pdf`, {
-        model_name: modelName || 'Champion Model',
+        model_name: modelName || 'Best Model',
         periods: periods || 30,
         mae: metrics?.mae || 0,
         rmse: metrics?.rmse || 0,
@@ -70,42 +70,45 @@ export default function DownloadReport({ forecastData, metrics, explanation, mod
   };
 
   return (
-    <div className="rasera-card rounded-2xl p-6 shadow-md border border-[#004775]">
-      <h3 className="text-base font-bold text-white mb-4">Export Forecasting Deliverables</h3>
+    <div className="dash-card p-6">
+      <div className="flex items-center space-x-2 text-gray-900 mb-4">
+        <Download className="h-5 w-5 text-blue-600" />
+        <h3 className="text-base font-bold text-gray-900">Export Results</h3>
+      </div>
       
       {error && (
-        <div className="mb-4 text-xs text-rose-300 bg-rose-950/60 p-3 rounded-xl border border-rose-800">
+        <div className="mb-4 text-xs text-rose-600 bg-rose-50 p-3 rounded-xl border border-rose-200">
           {error}
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="space-y-3">
         {/* PDF Download Button */}
         <button
           onClick={handleDownloadPDF}
           disabled={isPdfLoading}
-          className="flex items-center justify-center space-x-2 py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#a2fff4] via-[#6aceff] to-[#3b82f6] text-[#00131c] font-extrabold text-sm hover:opacity-95 shadow-md shadow-[#6aceff]/20 disabled:opacity-50 transition-all active:scale-[0.99]"
+          className="w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-sm transition-colors disabled:opacity-50"
         >
           {isPdfLoading ? (
-            <div className="h-4 w-4 border-2 border-[#00131c] border-t-transparent rounded-full animate-spin" />
+            <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
-            <FileText className="h-4 w-4 text-[#00131c]" />
+            <FileText className="h-4 w-4" />
           )}
-          <span>Download Executive PDF</span>
+          <span>Download PDF Report</span>
         </button>
 
         {/* CSV Download Button */}
         <button
           onClick={handleDownloadCSV}
           disabled={isCsvLoading}
-          className="flex items-center justify-center space-x-2 py-3.5 px-4 rounded-xl bg-[#002238] border border-[#004775] text-[#97dcff] hover:text-white hover:bg-[#002f4d] font-bold text-sm disabled:opacity-50 transition-all"
+          className="w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 font-semibold text-sm shadow-sm transition-colors disabled:opacity-50"
         >
           {isCsvLoading ? (
-            <div className="h-4 w-4 border-2 border-[#97dcff] border-t-transparent rounded-full animate-spin" />
+            <div className="h-4 w-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
           ) : (
-            <FileDown className="h-4 w-4 text-[#a2fff4]" />
+            <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
           )}
-          <span>Export Prediction CSV</span>
+          <span>Export Forecast Data (CSV)</span>
         </button>
       </div>
     </div>

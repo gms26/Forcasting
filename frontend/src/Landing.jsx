@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import LogoF from './components/LogoF';
 import { 
   TrendingUp, 
   ArrowRight, 
@@ -38,8 +37,7 @@ import {
   ChevronRight, 
   GitBranch, 
   Key,
-  FileSpreadsheet,
-  SlidersVertical
+  FileSpreadsheet
 } from 'lucide-react';
 
 // Live Interactive Datasets for the Front-Page Studio Simulator
@@ -518,62 +516,47 @@ export default function Landing({ onLoginClick }) {
   const activePoint = hoveredPointIndex !== null ? allPoints[hoveredPointIndex] : null;
 
   return (
-    <div className="min-h-screen bg-[#00111a] text-[#f1f5f9] font-sans selection:bg-[#a2fff4] selection:text-[#00131c] overflow-x-hidden w-full max-w-full relative">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-600 selection:text-white">
       
-      {/* Ambient Deep Navy & Ice-Cyan Glow Background (raseraa0 style) */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute inset-0 rasera-mesh-pattern opacity-75" />
-        <div className="absolute inset-0 rasera-radial-glow" />
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[550px] bg-gradient-to-b from-[#a2fff4]/12 via-[#005282]/25 to-transparent rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -right-40 w-[650px] h-[650px] bg-[#003b64]/35 rounded-full blur-3xl" />
-      </div>
-
-      {/* Top Header / Navigation Bar */}
-      <header className="sticky top-0 z-50 w-full backdrop-blur-2xl bg-[#001726]/85 border-b border-[#003b64] shadow-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      {/* Top Header */}
+      <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/90 border-b border-gray-200 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
-          {/* Brand Logo with stylish 'F' */}
+          {/* Brand Logo */}
           <div 
-            className="flex items-center space-x-3.5 cursor-pointer group" 
+            className="flex items-center space-x-3 cursor-pointer" 
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
-            <div className="h-11 w-11 rounded-2xl bg-[#002238] border border-[#004f7c] shadow-lg shadow-[#a2fff4]/10 flex items-center justify-center group-hover:border-[#a2fff4] group-hover:shadow-[0_0_20px_rgba(162,255,244,0.3)] transition-all p-1.5 animate-pulse-glow">
-              <LogoF className="h-7 w-7" />
+            <div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-xs">
+              <BarChart3 className="h-5 w-5" />
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl font-display font-extrabold tracking-tight text-white">SmartForecast</span>
-                <span className="text-[11px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#a2fff4]/15 text-[#a2fff4] border border-[#a2fff4]/40 shadow-sm">
-                  AI
-                </span>
-              </div>
-              <span className="text-xs text-[#97dcff]/75 font-medium">Enterprise Time-Series Platform</span>
+              <span className="text-xl font-bold tracking-tight text-gray-900">SmartForecast AI</span>
             </div>
           </div>
 
           {/* Navigation Links */}
-          <nav className="hidden lg:flex items-center space-x-8 text-sm text-[#cbd5e1] font-semibold">
-            <a href="#sandbox" className="hover:text-[#a2fff4] transition-colors">Live Preview</a>
-            <a href="#features" className="hover:text-[#a2fff4] transition-colors">Features</a>
-            <a href="#benchmark" className="hover:text-[#a2fff4] transition-colors">Model Matrix</a>
-            <a href="#sdk" className="hover:text-[#a2fff4] transition-colors">Developer API</a>
-            <a href="#architecture" className="hover:text-[#a2fff4] transition-colors">Architecture</a>
-            <a href="#faq" className="hover:text-[#a2fff4] transition-colors">FAQ</a>
+          <nav className="hidden lg:flex items-center space-x-8 text-sm text-gray-600 font-medium">
+            <a href="#sandbox" className="hover:text-blue-600 transition-colors">Live Preview</a>
+            <a href="#features" className="hover:text-blue-600 transition-colors">Features</a>
+            <a href="#benchmark" className="hover:text-blue-600 transition-colors">Model Matrix</a>
+            <a href="#sdk" className="hover:text-blue-600 transition-colors">Developer API</a>
+            <a href="#faq" className="hover:text-blue-600 transition-colors">FAQ</a>
           </nav>
 
           {/* Action CTAs */}
-          <div className="flex items-center space-x-3 sm:space-x-4">
+          <div className="flex items-center space-x-3">
             <button
               onClick={onLoginClick}
-              className="text-sm font-semibold text-[#97dcff] hover:text-white px-4 py-2 rounded-xl hover:bg-[#002740] transition-all"
+              className="text-sm font-semibold text-gray-700 hover:text-gray-900 px-3.5 py-2 rounded-xl hover:bg-gray-100 transition-all"
             >
               Sign In
             </button>
             <button
               onClick={onLoginClick}
-              className="btn-radiant text-sm px-6 py-2.5 rounded-xl flex items-center space-x-2"
+              className="btn-primary text-sm px-5 py-2.5 rounded-xl flex items-center space-x-1.5"
             >
-              <Lock className="h-4 w-4 text-[#00131c]" />
+              <Lock className="h-4 w-4" />
               <span>Launch App</span>
             </button>
           </div>
@@ -581,85 +564,85 @@ export default function Landing({ onLoginClick }) {
       </header>
 
       {/* Hero Section */}
-      <section className="relative z-10 pt-16 sm:pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="max-w-4xl mx-auto text-center space-y-8 animate-slide-up">
+      <section className="pt-16 sm:pt-20 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="max-w-4xl mx-auto text-center space-y-6">
           
           {/* Status Badge */}
-          <div className="inline-flex items-center space-x-2.5 px-4 py-2 rounded-full badge-luminous text-sm font-semibold shadow-md backdrop-blur-md animate-float">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#a2fff4] animate-live-dot" />
-            <span className="font-display font-bold">Predictive Intelligence Engine</span>
-            <span className="text-[#005282]">•</span>
-            <span className="text-white font-mono">&lt; 38ms In-Memory Latency</span>
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 text-xs font-semibold">
+            <span className="h-2 w-2 rounded-full bg-blue-600 animate-ping" />
+            <span>Multi-Model AI Forecasting Platform</span>
+            <span className="text-gray-300">•</span>
+            <span className="font-mono text-blue-900">&lt; 38ms In-Memory Latency</span>
           </div>
 
           {/* Main Title */}
-          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-display font-black tracking-tight leading-[1.1] text-glow-gradient">
-            Modern Time-Series Intelligence &amp; AI Forecasting
+          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight text-gray-900">
+            Modern Time-Series Intelligence &amp; Predictive AI
           </h1>
 
           {/* Subtitle */}
-          <p className="text-lg sm:text-2xl text-[#94a3b8] max-w-3xl mx-auto leading-relaxed font-normal">
-            Benchmark Meta Prophet, Auto-ARIMA, Holt-Winters, and Neural Ensembles in parallel. Automatically generate Bayesian confidence fans and Gemini-synthesized executive briefings in real time.
+          <p className="text-base sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Benchmark Meta Prophet, Auto-ARIMA, Holt-Winters, and Moving Average in parallel. Automatically generate uncertainty fans and Gemini AI executive briefings in real time.
           </p>
 
           {/* Action CTAs */}
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <button
               onClick={onLoginClick}
-              className="btn-radiant text-base sm:text-lg px-9 py-4 rounded-2xl flex items-center space-x-3"
+              className="btn-primary text-sm sm:text-base px-7 py-3.5 rounded-xl flex items-center space-x-2 shadow-sm"
             >
-              <Lock className="h-5 w-5 text-[#00131c]" />
+              <Lock className="h-4 w-4" />
               <span>Sign In to Start Forecasting</span>
-              <ArrowRight className="h-5 w-5 text-[#00131c]" />
+              <ArrowRight className="h-4 w-4" />
             </button>
 
             <a
               href="#sandbox"
-              className="btn-glass text-base sm:text-lg px-8 py-4 rounded-2xl flex items-center space-x-2.5 backdrop-blur-md"
+              className="btn-secondary text-sm sm:text-base px-6 py-3.5 rounded-xl flex items-center space-x-2"
             >
-              <Activity className="h-5 w-5 text-[#a2fff4]" />
+              <Activity className="h-4 w-4 text-blue-600" />
               <span>Interactive Live Preview ↓</span>
             </a>
           </div>
 
           {/* Production Specs Ribbon */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-10 max-w-4xl mx-auto text-left">
-            <div className="rasera-card rasera-card-hover p-5 rounded-2xl">
-              <div className="text-xs font-bold text-[#97dcff]/80 uppercase tracking-wider font-mono">Multi-Model Engine</div>
-              <div className="text-xl font-display font-bold text-white mt-1">4 Model Families</div>
-              <div className="text-xs sm:text-sm text-[#94a3b8] mt-1">Prophet • ARIMA • HW • Ensemble</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-8 max-w-4xl mx-auto text-left">
+            <div className="dash-card p-4">
+              <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider font-mono">Engine</div>
+              <div className="text-base font-bold text-gray-900 mt-0.5">4 Model Families</div>
+              <div className="text-xs text-gray-500 mt-0.5">Prophet • ARIMA • HW • MA</div>
             </div>
-            <div className="rasera-card rasera-card-hover p-5 rounded-2xl">
-              <div className="text-xs font-bold text-[#97dcff]/80 uppercase tracking-wider font-mono">Backtest Accuracy</div>
-              <div className="text-xl font-display font-bold text-[#a2fff4] mt-1 num-stat">99.4% Fit Score</div>
-              <div className="text-xs sm:text-sm text-[#94a3b8] mt-1">5-Fold Cross Validation</div>
+            <div className="dash-card p-4">
+              <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider font-mono">Accuracy</div>
+              <div className="text-base font-bold text-emerald-600 mt-0.5 num-stat">99.4% Fit Score</div>
+              <div className="text-xs text-gray-500 mt-0.5">5-Fold Cross Validation</div>
             </div>
-            <div className="rasera-card rasera-card-hover p-5 rounded-2xl">
-              <div className="text-xs font-bold text-[#97dcff]/80 uppercase tracking-wider font-mono">Inference Speed</div>
-              <div className="text-xl font-display font-bold text-[#6aceff] mt-1 num-stat">&lt; 38ms Latency</div>
-              <div className="text-xs sm:text-sm text-[#94a3b8] mt-1">Fast In-Memory Engine</div>
+            <div className="dash-card p-4">
+              <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider font-mono">Speed</div>
+              <div className="text-base font-bold text-blue-600 mt-0.5 num-stat">&lt; 38ms Latency</div>
+              <div className="text-xs text-gray-500 mt-0.5">Fast In-Memory Runtime</div>
             </div>
-            <div className="rasera-card rasera-card-hover p-5 rounded-2xl">
-              <div className="text-xs font-bold text-[#97dcff]/80 uppercase tracking-wider font-mono">Privacy &amp; Security</div>
-              <div className="text-xl font-display font-bold text-white mt-1">Zero Retention</div>
-              <div className="text-xs sm:text-sm text-[#94a3b8] mt-1">Isolated Ephemeral Session</div>
+            <div className="dash-card p-4">
+              <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider font-mono">Privacy</div>
+              <div className="text-base font-bold text-gray-900 mt-0.5">Zero Retention</div>
+              <div className="text-xs text-gray-500 mt-0.5">Ephemeral In-Memory Isolation</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Main Feature: The Interactive Forecasting Studio Simulator (Front Page Sandbox) */}
-      <section id="sandbox" className="relative z-10 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      {/* Main Feature: The Interactive Forecasting Studio Simulator */}
+      <section id="sandbox" className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         
         {/* Studio Card Container */}
-        <div className="rasera-card rounded-3xl overflow-hidden shadow-2xl border border-[#004775]">
+        <div className="dash-card overflow-hidden shadow-md">
           
           {/* Top Control Bar: Dataset Tabs */}
-          <div className="bg-[#001a2c]/95 px-6 sm:px-8 py-4 border-b border-[#003b64] flex flex-wrap items-center justify-between gap-4">
+          <div className="bg-gray-50/80 px-6 py-3.5 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
             
             {/* Dataset Switcher */}
             <div className="flex items-center space-x-2 overflow-x-auto py-1 max-w-full">
-              <span className="text-sm font-bold text-[#97dcff] mr-2 hidden sm:inline-block font-display">Dataset:</span>
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider mr-1 hidden sm:inline-block">Dataset:</span>
               {Object.keys(SIMULATOR_DATASETS).map((key) => {
                 const ds = SIMULATOR_DATASETS[key];
                 const isActive = activeDatasetKey === key;
@@ -670,15 +653,15 @@ export default function Landing({ onLoginClick }) {
                       setActiveDatasetKey(key);
                       setHoveredPointIndex(null);
                     }}
-                    className={`text-sm px-4 py-2.5 rounded-xl font-medium transition-all whitespace-nowrap flex items-center space-x-2 ${
+                    className={`text-xs sm:text-sm px-3.5 py-1.5 rounded-xl font-medium transition-all whitespace-nowrap flex items-center space-x-1.5 ${
                       isActive 
-                        ? 'btn-radiant text-[#00131c] shadow-lg font-bold' 
-                        : 'text-[#cbd5e1] hover:text-white hover:bg-[#002740]'
+                        ? 'bg-blue-600 text-white font-bold shadow-xs' 
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/60'
                     }`}
                   >
                     <span>{ds.name}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-mono ${
-                      isActive ? 'bg-[#00131c]/20 text-[#00131c]' : 'bg-[#002f4d] text-[#97dcff]'
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-mono ${
+                      isActive ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-700'
                     }`}>
                       {ds.badge}
                     </span>
@@ -687,24 +670,22 @@ export default function Landing({ onLoginClick }) {
               })}
             </div>
 
-            {/* Quick Actions */}
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={onLoginClick}
-                className="text-sm font-semibold text-[#a2fff4] hover:text-white bg-[#002c47] hover:bg-[#003b60] border border-[#a2fff4]/30 px-4 py-2 rounded-xl flex items-center space-x-2 transition-all shadow-sm"
-              >
-                <Lock className="h-4 w-4" />
-                <span>Sign In to Upload Custom CSV</span>
-              </button>
-            </div>
+            {/* Custom CSV Action */}
+            <button
+              onClick={onLoginClick}
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100/80 border border-blue-200 px-3.5 py-1.5 rounded-xl flex items-center space-x-1.5 transition-all shadow-2xs"
+            >
+              <Lock className="h-3.5 w-3.5" />
+              <span>Sign In to Upload Custom CSV</span>
+            </button>
           </div>
 
           {/* Controls Bar: Model & Horizon Controls */}
-          <div className="bg-[#001726]/85 px-6 sm:px-8 py-4 border-b border-[#003b64] flex flex-wrap items-center justify-between gap-4 text-sm">
+          <div className="bg-white px-6 py-3.5 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm">
             
             {/* Algorithm Model Selector */}
             <div className="flex items-center space-x-2 flex-wrap gap-y-2">
-              <span className="text-[#94a3b8] font-semibold mr-1 font-display">Algorithm:</span>
+              <span className="text-gray-500 font-bold uppercase tracking-wider text-xs mr-1">Algorithm:</span>
               {[
                 { key: 'ensemble', label: 'Auto-Ensemble', tag: 'Best Fit' },
                 { key: 'prophet', label: 'Meta Prophet', tag: 'Seasonal' },
@@ -716,15 +697,15 @@ export default function Landing({ onLoginClick }) {
                   <button
                     key={m.key}
                     onClick={() => setSelectedModelKey(m.key)}
-                    className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center space-x-2 ${
+                    className={`px-3 py-1.5 rounded-xl transition-all flex items-center space-x-1.5 border text-xs font-semibold ${
                       isSelected
-                        ? 'bg-[#003657] text-[#a2fff4] border border-[#a2fff4]/60 font-bold shadow-md'
-                        : 'bg-[#001f33] text-[#cbd5e1] border border-[#00436d] hover:border-[#005a91] hover:text-white'
+                        ? 'bg-blue-50 text-blue-700 border-blue-300 font-bold shadow-xs'
+                        : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                     }`}
                   >
                     <span>{m.label}</span>
                     {m.tag === 'Best Fit' && (
-                      <span className="h-2 w-2 rounded-full bg-[#a2fff4] shadow-[0_0_6px_#a2fff4]" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                     )}
                   </button>
                 );
@@ -732,19 +713,19 @@ export default function Landing({ onLoginClick }) {
             </div>
 
             {/* Horizon & CI Controls */}
-            <div className="flex items-center space-x-5">
+            <div className="flex items-center space-x-4">
               
               {/* Forecast Horizon */}
-              <div className="flex items-center space-x-2">
-                <span className="text-[#94a3b8] font-semibold font-display">Horizon:</span>
+              <div className="flex items-center space-x-1.5">
+                <span className="text-gray-500 font-bold uppercase tracking-wider text-xs">Horizon:</span>
                 {[7, 30, 90, 180].map((h) => (
                   <button
                     key={h}
                     onClick={() => setForecastHorizon(h)}
-                    className={`px-3 py-1 rounded-lg text-sm font-bold font-mono transition-all ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold font-mono transition-all ${
                       forecastHorizon === h
-                        ? 'bg-[#a2fff4] text-[#00131c] shadow-sm'
-                        : 'text-[#cbd5e1] hover:text-white bg-[#002238]'
+                        ? 'bg-blue-600 text-white shadow-2xs'
+                        : 'text-gray-600 hover:text-gray-900 bg-gray-100'
                     }`}
                   >
                     {h}D
@@ -753,19 +734,19 @@ export default function Landing({ onLoginClick }) {
               </div>
 
               {/* Confidence Band Toggle */}
-              <div className="flex items-center space-x-2 border-l border-[#003b64] pl-4">
-                <span className="text-[#94a3b8] font-semibold font-display">Fan:</span>
+              <div className="flex items-center space-x-1.5 border-l border-gray-200 pl-3">
+                <span className="text-gray-500 font-bold uppercase tracking-wider text-xs">Fan:</span>
                 {['80', '95'].map((mode) => (
                   <button
                     key={mode}
                     onClick={() => setCiSpreadMode(mode)}
-                    className={`px-3 py-1 rounded-lg text-sm font-bold font-mono transition-all ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold font-mono transition-all ${
                       ciSpreadMode === mode
-                        ? 'bg-[#3b82f6] text-white'
-                        : 'text-[#cbd5e1] hover:text-white bg-[#002238]'
+                        ? 'bg-orange-500 text-white'
+                        : 'text-gray-600 hover:text-gray-900 bg-gray-100'
                     }`}
                   >
-                    {mode}% CI
+                    {mode}%
                   </button>
                 ))}
               </div>
@@ -773,59 +754,59 @@ export default function Landing({ onLoginClick }) {
           </div>
 
           {/* Interactive Chart Canvas & Real-Time Stats Grid */}
-          <div className="p-6 sm:p-8 space-y-6">
+          <div className="p-6 space-y-6">
             
             {/* Top Telemetry Header */}
-            <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
-              <div className="flex items-center space-x-4 font-display font-semibold">
-                <div className="flex items-center space-x-2 text-[#97dcff]">
-                  <span className="h-3 w-3 rounded-full bg-[#38bdf8] shadow-[0_0_6px_#38bdf8]" />
+            <div className="flex flex-wrap items-center justify-between gap-4 text-xs sm:text-sm">
+              <div className="flex items-center space-x-4 font-semibold">
+                <div className="flex items-center space-x-1.5 text-blue-600">
+                  <span className="h-2.5 w-2.5 rounded-full bg-blue-600" />
                   <span>Historical Data</span>
                 </div>
-                <div className="flex items-center space-x-2 text-[#a2fff4]">
-                  <span className="h-3 w-3 rounded-full bg-[#a2fff4] shadow-[0_0_6px_#a2fff4]" />
+                <div className="flex items-center space-x-1.5 text-orange-600">
+                  <span className="h-2.5 w-2.5 rounded-full bg-orange-500" />
                   <span>Forecast ({selectedModelKey.toUpperCase()})</span>
                 </div>
-                <div className="flex items-center space-x-2 text-[#818cf8]">
-                  <span className="h-3 w-3 rounded bg-[#818cf8]/40 border border-[#818cf8]" />
+                <div className="flex items-center space-x-1.5 text-orange-400">
+                  <span className="h-2.5 w-2.5 rounded bg-orange-200 border border-orange-300" />
                   <span>{ciSpreadMode}% Uncertainty Fan</span>
                 </div>
               </div>
 
               {/* Point Inspector Badge */}
-              <div className="text-sm text-[#cbd5e1] bg-[#002238] px-4 py-2 rounded-xl border border-[#004775] font-medium font-mono">
+              <div className="text-xs text-gray-700 bg-gray-50 px-3.5 py-1.5 rounded-xl border border-gray-200 font-medium font-mono">
                 {activePoint ? (
                   <span>
-                    <strong className="text-white">{activePoint.label || activePoint.date}:</strong>{' '}
-                    <span className="text-[#a2fff4] font-bold ml-1">{activePoint.val} {currentDataset.unit}</span>
+                    <strong className="text-gray-900">{activePoint.label || activePoint.date}:</strong>{' '}
+                    <span className="text-blue-600 font-bold ml-1">{activePoint.val} {currentDataset.unit}</span>
                     {activePoint.upper && (
-                      <span className="text-[#94a3b8] ml-2">
-                        [Range: {activePoint.lower} – {activePoint.upper}]
+                      <span className="text-gray-400 ml-1.5">
+                        [{activePoint.lower} – {activePoint.upper}]
                       </span>
                     )}
                   </span>
                 ) : (
-                  <span>Hover data points on curve to inspect values</span>
+                  <span>Hover data points on curve to inspect</span>
                 )}
               </div>
             </div>
 
             {/* SVG Interactive Time-Series Canvas */}
-            <div className="relative w-full h-64 sm:h-72 bg-[#001424] rounded-2xl border border-[#003b64] p-3 overflow-hidden shadow-inner">
+            <div className="relative w-full h-64 sm:h-72 bg-white rounded-xl border border-gray-200 p-2 overflow-hidden shadow-inner">
               <svg 
                 viewBox={`0 0 ${svgWidth} ${svgHeight}`} 
                 className="w-full h-full overflow-visible"
                 preserveAspectRatio="none"
               >
                 <defs>
-                  <linearGradient id="raseraHistGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.35" />
-                    <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.00" />
+                  <linearGradient id="lightHistGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2" />
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
                   </linearGradient>
                   
-                  <linearGradient id="raseraFanGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#6aceff" stopOpacity="0.25" />
-                    <stop offset="100%" stopColor="#6aceff" stopOpacity="0.04" />
+                  <linearGradient id="lightFanGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#f97316" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="#f97316" stopOpacity="0.05" />
                   </linearGradient>
                 </defs>
 
@@ -833,63 +814,60 @@ export default function Landing({ onLoginClick }) {
                 {[0.25, 0.5, 0.75].map((pct, idx) => {
                   const y = svgHeight * pct;
                   return (
-                    <g key={idx}>
-                      <line 
-                        x1="20" 
-                        y1={y} 
-                        x2={svgWidth - 20} 
-                        y2={y} 
-                        stroke="#003152" 
-                        strokeDasharray="4 4" 
-                        strokeOpacity="0.8" 
-                      />
-                    </g>
+                    <line 
+                      key={idx}
+                      x1="20" 
+                      y1={y} 
+                      x2={svgWidth - 20} 
+                      y2={y} 
+                      stroke="#f1f5f9" 
+                      strokeDasharray="4 4" 
+                    />
                   );
                 })}
 
-                {/* Vertical Cutoff Separator at Historical Origin */}
+                {/* Vertical Separator */}
                 <line 
                   x1={originX} 
                   y1="10" 
                   x2={originX} 
                   y2={svgHeight - 15} 
-                  stroke="#a2fff4" 
+                  stroke="#cbd5e1" 
                   strokeDasharray="3 3" 
-                  strokeWidth="2" 
+                  strokeWidth="1.5" 
                 />
                 <text 
-                  x={originX + 10} 
-                  y="24" 
-                  fill="#a2fff4" 
-                  fontSize="11" 
+                  x={originX + 8} 
+                  y="20" 
+                  fill="#64748b" 
+                  fontSize="10" 
                   fontWeight="700"
                   fontFamily="JetBrains Mono"
                 >
-                  FORECAST HORIZON ({forecastHorizon}D) →
+                  FORECAST ({forecastHorizon}D) →
                 </text>
 
-                {/* 95% Confidence Fan Area */}
+                {/* Confidence Fan Area */}
                 <polygon 
                   points={fanPolygonPoints} 
-                  fill="url(#raseraFanGradient)" 
-                  stroke="#6aceff" 
+                  fill="url(#lightFanGrad)" 
+                  stroke="#fb923c" 
                   strokeWidth="1" 
                   strokeDasharray="3 3" 
-                  strokeOpacity="0.7" 
                 />
 
                 {/* Historical Area Under Curve */}
                 <path 
                   d={`${histPath} L ${originX} ${svgHeight - 15} L ${getX(0)} ${svgHeight - 15} Z`} 
-                  fill="url(#raseraHistGradient)" 
+                  fill="url(#lightHistGrad)" 
                 />
 
                 {/* Historical Solid Trend Line */}
                 <path 
                   d={histPath} 
                   fill="none" 
-                  stroke="#38bdf8" 
-                  strokeWidth="3" 
+                  stroke="#3b82f6" 
+                  strokeWidth="2.5" 
                   strokeLinecap="round" 
                   strokeLinejoin="round" 
                 />
@@ -898,9 +876,9 @@ export default function Landing({ onLoginClick }) {
                 <path 
                   d={forecastPath} 
                   fill="none" 
-                  stroke="#a2fff4" 
-                  strokeWidth="3" 
-                  strokeDasharray="6 4" 
+                  stroke="#f97316" 
+                  strokeWidth="2.5" 
+                  strokeDasharray="5 4" 
                   strokeLinecap="round" 
                   strokeLinejoin="round" 
                 />
@@ -915,11 +893,10 @@ export default function Landing({ onLoginClick }) {
                       <circle 
                         cx={x} 
                         cy={y} 
-                        r={isHovered ? 7 : 5} 
-                        fill="#001424" 
-                        stroke="#38bdf8" 
-                        strokeWidth={isHovered ? 3.5 : 2.5} 
-                        className="transition-all"
+                        r={isHovered ? 6 : 4} 
+                        fill="#ffffff" 
+                        stroke="#3b82f6" 
+                        strokeWidth={isHovered ? 3 : 2} 
                       />
                     </g>
                   );
@@ -936,11 +913,10 @@ export default function Landing({ onLoginClick }) {
                       <circle 
                         cx={x} 
                         cy={y} 
-                        r={isHovered ? 7 : 5} 
-                        fill="#001424" 
-                        stroke="#a2fff4" 
-                        strokeWidth={isHovered ? 3.5 : 2.5} 
-                        className="transition-all"
+                        r={isHovered ? 6 : 4} 
+                        fill="#ffffff" 
+                        stroke="#f97316" 
+                        strokeWidth={isHovered ? 3 : 2} 
                       />
                     </g>
                   );
@@ -948,77 +924,67 @@ export default function Landing({ onLoginClick }) {
               </svg>
             </div>
 
-            {/* Model Loss Metrics & Statistical Diagnostics Bar */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-              <div className="bg-[#002238] p-4 rounded-2xl border border-[#004775]">
-                <div className="text-xs font-bold text-[#97dcff]/80 uppercase tracking-wider font-mono">Backtest MAPE</div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-[#a2fff4] num-stat mt-1">
+            {/* Model Loss Metrics */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              <div className="bg-emerald-50/70 p-4 rounded-xl border border-emerald-200">
+                <div className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider font-mono">Backtest MAPE</div>
+                <div className="text-2xl font-bold text-emerald-600 num-stat mt-0.5">
                   {currentModelStats.mape}
                 </div>
-                <div className="text-xs text-[#94a3b8] mt-1">Optimal Fit</div>
+                <div className="text-xs text-emerald-700/70 mt-0.5">Percentage Error</div>
               </div>
 
-              <div className="bg-[#002238] p-4 rounded-2xl border border-[#004775]">
-                <div className="text-xs font-bold text-[#97dcff]/80 uppercase tracking-wider font-mono">RMSE Loss</div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-[#6aceff] num-stat mt-1">
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider font-mono">RMSE Loss</div>
+                <div className="text-2xl font-bold text-gray-900 num-stat mt-0.5">
                   {currentModelStats.rmse}
                 </div>
-                <div className="text-xs text-[#94a3b8] mt-1">Root Mean Squared</div>
+                <div className="text-xs text-gray-500 mt-0.5">Root Mean Square</div>
               </div>
 
-              <div className="bg-[#002238] p-4 rounded-2xl border border-[#004775]">
-                <div className="text-xs font-bold text-[#97dcff]/80 uppercase tracking-wider font-mono">MAE Error</div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-white num-stat mt-1">
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider font-mono">MAE Error</div>
+                <div className="text-2xl font-bold text-gray-900 num-stat mt-0.5">
                   {currentModelStats.mae}
                 </div>
-                <div className="text-xs text-[#94a3b8] mt-1">Mean Absolute Error</div>
+                <div className="text-xs text-gray-500 mt-0.5">Mean Absolute Error</div>
               </div>
 
-              <div className="bg-[#002238] p-4 rounded-2xl border border-[#004775]">
-                <div className="text-xs font-bold text-[#97dcff]/80 uppercase tracking-wider font-mono">AIC Score</div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-[#818cf8] num-stat mt-1">
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider font-mono">AIC Score</div>
+                <div className="text-2xl font-bold text-blue-600 num-stat mt-0.5">
                   {currentModelStats.aic}
                 </div>
-                <div className="text-xs text-[#94a3b8] mt-1">Akaike Criterion</div>
-              </div>
-
-              <div className="bg-[#002238] p-4 rounded-2xl border border-[#004775] col-span-2 sm:col-span-1">
-                <div className="text-xs font-bold text-[#97dcff]/80 uppercase tracking-wider font-mono">Residual Normalcy</div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-[#a2fff4] num-stat mt-1">
-                  p = 0.84
-                </div>
-                <div className="text-xs text-[#94a3b8] mt-1">Gaussian Residuals</div>
+                <div className="text-xs text-gray-500 mt-0.5">Akaike Criterion</div>
               </div>
             </div>
 
             {/* Gemini 2.5 Executive AI Reasoning Box */}
-            <div className="bg-[#002740]/90 p-6 rounded-2xl border border-[#00507d] shadow-md">
+            <div className="bg-[#0b132b] text-white p-6 rounded-2xl border border-slate-800 shadow-md">
               <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-2.5">
-                  <div className="h-9 w-9 rounded-xl btn-radiant flex items-center justify-center shadow-md font-bold">
-                    <BrainCircuit className="h-5 w-5 text-[#00131c]" />
-                  </div>
-                  <span className="text-lg font-display font-bold text-white">
-                    Gemini 2.5 Time-Series Executive Insights
+                <div className="flex items-center space-x-2">
+                  <BrainCircuit className="h-5 w-5 text-blue-400" />
+                  <span className="text-base font-bold text-white">
+                    Gemini AI Executive Insights
                   </span>
                 </div>
-                <span className="text-xs font-mono font-bold text-[#a2fff4] bg-[#a2fff4]/15 px-3 py-1 rounded-full border border-[#a2fff4]/30">
+                <span className="text-xs font-mono font-semibold text-blue-300 bg-blue-900/50 px-2.5 py-0.5 rounded-full border border-blue-700">
                   {currentModelStats.label}
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2 text-sm">
-                <div className="bg-[#001f33] p-4 rounded-xl border border-[#00436d]">
-                  <span className="text-xs font-bold text-[#97dcff] uppercase tracking-wider block mb-1 font-mono">Trend Velocity</span>
-                  <span className="text-white font-medium leading-snug">{currentDataset.geminiAnalysis.velocity}</span>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1 text-xs sm:text-sm">
+                <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+                  <span className="text-[11px] font-bold text-blue-300 uppercase tracking-wider block mb-1 font-mono">Velocity</span>
+                  <span className="text-slate-200">{currentDataset.geminiAnalysis.velocity}</span>
                 </div>
-                <div className="bg-[#001f33] p-4 rounded-xl border border-[#00436d]">
-                  <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block mb-1 font-mono">Operational Risk</span>
-                  <span className="text-amber-200 font-medium leading-snug">{currentDataset.geminiAnalysis.risks}</span>
+                <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+                  <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider block mb-1 font-mono">Risk Mitigations</span>
+                  <span className="text-amber-200">{currentDataset.geminiAnalysis.risks}</span>
                 </div>
-                <div className="bg-[#001f33] p-4 rounded-xl border border-[#00436d]">
-                  <span className="text-xs font-bold text-[#a2fff4] uppercase tracking-wider block mb-1 font-mono">Recommended Action</span>
-                  <span className="text-emerald-200 font-medium leading-snug">{currentDataset.geminiAnalysis.recommendation}</span>
+                <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+                  <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider block mb-1 font-mono">Recommendation</span>
+                  <span className="text-emerald-200">{currentDataset.geminiAnalysis.recommendation}</span>
                 </div>
               </div>
             </div>
@@ -1028,16 +994,16 @@ export default function Landing({ onLoginClick }) {
       </section>
 
       {/* Core Enterprise Capabilities Section */}
-      <section id="features" className="relative z-10 py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#003b64]">
-        <div className="text-center max-w-3xl mx-auto mb-14 space-y-4">
-          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full badge-luminous text-sm font-semibold">
-            <Zap className="h-4 w-4 text-[#a2fff4]" />
-            <span className="font-display">Platform Capabilities</span>
+      <section id="features" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-gray-200">
+        <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
+          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold">
+            <Zap className="h-3.5 w-3.5" />
+            <span>Platform Capabilities</span>
           </div>
-          <h2 className="text-4xl sm:text-6xl font-display font-extrabold tracking-tight text-white">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
             Engineered for Accurate Time-Series Decisions
           </h2>
-          <p className="text-lg sm:text-xl text-[#94a3b8] leading-relaxed">
+          <p className="text-sm sm:text-base text-gray-600">
             A comprehensive suite of forecasting, anomaly isolation, and natural-language intelligence tools.
           </p>
         </div>
@@ -1045,68 +1011,68 @@ export default function Landing({ onLoginClick }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
           {/* Card 1 */}
-          <div className="rasera-card rasera-card-hover p-8 rounded-2xl space-y-4">
-            <div className="h-14 w-14 rounded-2xl bg-[#002f4d] border border-[#00558a] flex items-center justify-center text-[#a2fff4] shadow-md">
-              <Activity className="h-7 w-7" />
+          <div className="dash-card p-6 space-y-3 hover:shadow-md transition-shadow">
+            <div className="h-11 w-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+              <Activity className="h-6 w-6" />
             </div>
-            <h3 className="text-xl font-display font-bold text-white">Multi-Horizon Cross-Validation</h3>
-            <p className="text-base text-[#cbd5e1] leading-relaxed">
+            <h3 className="text-lg font-bold text-gray-900">Multi-Horizon Cross-Validation</h3>
+            <p className="text-sm text-gray-600 leading-relaxed">
               Computes rolling out-of-sample backtests across multiple temporal cutoffs to calculate truthful MAPE, RMSE, and MAE loss metrics.
             </p>
           </div>
 
           {/* Card 2 */}
-          <div className="rasera-card rasera-card-hover p-8 rounded-2xl space-y-4">
-            <div className="h-14 w-14 rounded-2xl bg-[#002f4d] border border-[#00558a] flex items-center justify-center text-[#6aceff] shadow-md">
-              <BrainCircuit className="h-7 w-7" />
+          <div className="dash-card p-6 space-y-3 hover:shadow-md transition-shadow">
+            <div className="h-11 w-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <BrainCircuit className="h-6 w-6" />
             </div>
-            <h3 className="text-xl font-display font-bold text-white">Gemini 2.5 Executive Briefings</h3>
-            <p className="text-base text-[#cbd5e1] leading-relaxed">
-              Converts complex statistical changepoints, Fourier harmonics, and volatility spikes into succinct executive summaries and risk mitigations.
+            <h3 className="text-lg font-bold text-gray-900">Gemini AI Executive Briefings</h3>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Converts complex statistical changepoints and volatility spikes into succinct executive summaries and operational recommendations.
             </p>
           </div>
 
           {/* Card 3 */}
-          <div className="rasera-card rasera-card-hover p-8 rounded-2xl space-y-4">
-            <div className="h-14 w-14 rounded-2xl bg-[#002f4d] border border-[#00558a] flex items-center justify-center text-[#a2fff4] shadow-md">
-              <LineChart className="h-7 w-7" />
+          <div className="dash-card p-6 space-y-3 hover:shadow-md transition-shadow">
+            <div className="h-11 w-11 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+              <LineChart className="h-6 w-6" />
             </div>
-            <h3 className="text-xl font-display font-bold text-white">Bayesian Uncertainty Fans</h3>
-            <p className="text-base text-[#cbd5e1] leading-relaxed">
+            <h3 className="text-lg font-bold text-gray-900">Uncertainty Fans &amp; Intervals</h3>
+            <p className="text-sm text-gray-600 leading-relaxed">
               Provides dynamic 80% and 95% statistical confidence bounds to quantify tail-risk scenarios and variance accumulation over time.
             </p>
           </div>
 
           {/* Card 4 */}
-          <div className="rasera-card rasera-card-hover p-8 rounded-2xl space-y-4">
-            <div className="h-14 w-14 rounded-2xl bg-[#002f4d] border border-[#00558a] flex items-center justify-center text-[#97dcff] shadow-md">
-              <Database className="h-7 w-7" />
+          <div className="dash-card p-6 space-y-3 hover:shadow-md transition-shadow">
+            <div className="h-11 w-11 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center">
+              <Database className="h-6 w-6" />
             </div>
-            <h3 className="text-xl font-display font-bold text-white">Automated Schema &amp; Gap Imputation</h3>
-            <p className="text-base text-[#cbd5e1] leading-relaxed">
+            <h3 className="text-lg font-bold text-gray-900">Automated Schema &amp; Gap Handling</h3>
+            <p className="text-sm text-gray-600 leading-relaxed">
               Parses ISO-8601, Epoch, and regional date formats automatically. Cleans calendar jitter and handles missing intervals seamlessly.
             </p>
           </div>
 
           {/* Card 5 */}
-          <div className="rasera-card rasera-card-hover p-8 rounded-2xl space-y-4">
-            <div className="h-14 w-14 rounded-2xl bg-[#002f4d] border border-[#00558a] flex items-center justify-center text-[#c084fc] shadow-md">
-              <FileSpreadsheet className="h-7 w-7" />
+          <div className="dash-card p-6 space-y-3 hover:shadow-md transition-shadow">
+            <div className="h-11 w-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <FileSpreadsheet className="h-6 w-6" />
             </div>
-            <h3 className="text-xl font-display font-bold text-white">Executive Report Export Suite</h3>
-            <p className="text-base text-[#cbd5e1] leading-relaxed">
-              Download clean CSV predictions, high-res SVG vectors, or comprehensive boardroom PDF reports containing models and AI reasoning.
+            <h3 className="text-lg font-bold text-gray-900">Export Report Suite</h3>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Download clean CSV predictions or comprehensive boardroom PDF reports containing metrics, charts, and Gemini AI explanations.
             </p>
           </div>
 
           {/* Card 6 */}
-          <div className="rasera-card rasera-card-hover p-8 rounded-2xl space-y-4">
-            <div className="h-14 w-14 rounded-2xl bg-[#002f4d] border border-[#00558a] flex items-center justify-center text-[#fbbf24] shadow-md">
-              <ShieldCheck className="h-7 w-7" />
+          <div className="dash-card p-6 space-y-3 hover:shadow-md transition-shadow">
+            <div className="h-11 w-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <ShieldCheck className="h-6 w-6" />
             </div>
-            <h3 className="text-xl font-display font-bold text-white">Zero Data Retention Isolation</h3>
-            <p className="text-base text-[#cbd5e1] leading-relaxed">
-              In-memory ephemeral execution guarantees that customer telemetry is never stored on disk or used for public foundation model training.
+            <h3 className="text-lg font-bold text-gray-900">Zero Data Retention</h3>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              In-memory ephemeral execution guarantees customer telemetry is never stored on disk or used for public foundation model training.
             </p>
           </div>
 
@@ -1114,75 +1080,75 @@ export default function Landing({ onLoginClick }) {
       </section>
 
       {/* Developer-First Code & API Integration Section */}
-      <section id="sdk" className="relative z-10 py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#003b64]">
+      <section id="sdk" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-gray-200">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           
           {/* Left Column: Developer Pitch */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full badge-luminous text-sm font-semibold">
-              <Terminal className="h-4 w-4 text-[#a2fff4]" />
-              <span className="font-display">Developer-First Architecture</span>
+          <div className="lg:col-span-5 space-y-5">
+            <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold">
+              <Terminal className="h-3.5 w-3.5" />
+              <span>Developer-First</span>
             </div>
 
-            <h2 className="text-4xl sm:text-5xl font-display font-extrabold tracking-tight text-white leading-tight">
-              Native Python SDK, REST Endpoints, and SQL Integrations
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight">
+              Native Python SDK, REST API, and SQL Integrations
             </h2>
 
-            <p className="text-base sm:text-lg text-[#94a3b8] leading-relaxed">
-              Integrate multi-model time-series forecasting directly into your data pipelines, Airflow DAGs, FastAPI services, or analytical warehouses with minimal boilerplate.
+            <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+              Integrate multi-model time-series forecasting directly into your data pipelines, Airflow DAGs, FastAPI services, or analytical warehouses.
             </p>
 
-            <ul className="space-y-3.5 text-base text-[#cbd5e1]">
-              <li className="flex items-center space-x-3">
-                <CheckCircle2 className="h-5 w-5 text-[#a2fff4] shrink-0" />
+            <ul className="space-y-3 text-sm text-gray-700 font-medium">
+              <li className="flex items-center space-x-2.5">
+                <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0" />
                 <span>Zero-cold-start sub-38ms in-memory inference</span>
               </li>
-              <li className="flex items-center space-x-3">
-                <CheckCircle2 className="h-5 w-5 text-[#a2fff4] shrink-0" />
+              <li className="flex items-center space-x-2.5">
+                <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0" />
                 <span>Standardized Pandas &amp; Arrow DataFrame compatibility</span>
               </li>
-              <li className="flex items-center space-x-3">
-                <CheckCircle2 className="h-5 w-5 text-[#a2fff4] shrink-0" />
+              <li className="flex items-center space-x-2.5">
+                <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0" />
                 <span>Automated multi-horizon cross-validation ranking</span>
               </li>
-              <li className="flex items-center space-x-3">
-                <CheckCircle2 className="h-5 w-5 text-[#a2fff4] shrink-0" />
-                <span>Pre-built Gemini 2.5 prompt orchestration layers</span>
+              <li className="flex items-center space-x-2.5">
+                <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0" />
+                <span>Pre-built Gemini AI prompt orchestration layers</span>
               </li>
             </ul>
 
             <div className="pt-2">
               <button
                 onClick={onLoginClick}
-                className="btn-radiant text-base px-7 py-4 rounded-xl flex items-center space-x-2"
+                className="btn-primary text-sm px-6 py-3 rounded-xl flex items-center space-x-2"
               >
-                <Lock className="h-5 w-5 text-[#00131c]" />
+                <Lock className="h-4 w-4" />
                 <span>Sign In to Access API Keys</span>
               </button>
             </div>
           </div>
 
           {/* Right Column: Interactive Code Viewer */}
-          <div className="lg:col-span-7 rounded-2xl border border-[#004775] overflow-hidden shadow-2xl bg-[#001424]">
+          <div className="lg:col-span-7 rounded-2xl border border-gray-800 overflow-hidden shadow-xl bg-slate-900">
             
             {/* Terminal Tab Bar */}
-            <div className="bg-[#001c30] px-5 py-3.5 border-b border-[#003b64] flex items-center justify-between">
+            <div className="bg-slate-950 px-5 py-3 border-b border-slate-800 flex items-center justify-between">
               
               {/* Language Tabs */}
-              <div className="flex items-center space-x-2 font-mono text-sm">
+              <div className="flex items-center space-x-2 font-mono text-xs">
                 {[
                   { key: 'python', label: 'Python SDK' },
                   { key: 'curl', label: 'cURL / REST' },
                   { key: 'typescript', label: 'TypeScript' },
-                  { key: 'sql', label: 'SQL Warehouse' }
+                  { key: 'sql', label: 'SQL' }
                 ].map((tab) => (
                   <button
                     key={tab.key}
                     onClick={() => setActiveCodeTab(tab.key)}
-                    className={`px-3.5 py-1.5 rounded-lg font-medium transition-colors ${
+                    className={`px-3 py-1.5 rounded-lg transition-colors ${
                       activeCodeTab === tab.key
-                        ? 'btn-radiant text-[#00131c] font-bold shadow-md'
-                        : 'text-[#cbd5e1] hover:text-white'
+                        ? 'bg-blue-600 text-white font-bold'
+                        : 'text-slate-400 hover:text-white'
                     }`}
                   >
                     {tab.label}
@@ -1193,16 +1159,16 @@ export default function Landing({ onLoginClick }) {
               {/* Copy Code Button */}
               <button
                 onClick={handleCopyCode}
-                className="text-sm text-[#97dcff] hover:text-white flex items-center space-x-1.5 px-3 py-1.5 rounded-lg hover:bg-[#002c47] transition-colors"
+                className="text-xs text-slate-400 hover:text-white flex items-center space-x-1 px-2.5 py-1 rounded-lg hover:bg-slate-800 transition-colors"
               >
                 {copiedCode ? (
                   <>
-                    <Check className="h-4 w-4 text-[#a2fff4]" />
-                    <span className="text-[#a2fff4] font-semibold">Copied</span>
+                    <Check className="h-3.5 w-3.5 text-emerald-400" />
+                    <span className="text-emerald-400 font-semibold">Copied</span>
                   </>
                 ) : (
                   <>
-                    <Copy className="h-4 w-4" />
+                    <Copy className="h-3.5 w-3.5" />
                     <span>Copy</span>
                   </>
                 )}
@@ -1210,95 +1176,90 @@ export default function Landing({ onLoginClick }) {
             </div>
 
             {/* Code Block Container */}
-            <div className="p-5 bg-[#001424] overflow-x-auto max-h-[400px]">
-              <pre className="text-sm font-mono text-[#cbd5e1] leading-relaxed">
+            <div className="p-5 bg-slate-900 overflow-x-auto max-h-[380px]">
+              <pre className="text-xs font-mono text-slate-200 leading-relaxed">
                 <code>{CODE_EXAMPLES[activeCodeTab]}</code>
               </pre>
             </div>
 
-            {/* Terminal Status Footer */}
-            <div className="bg-[#001c30] px-5 py-2.5 border-t border-[#003b64] text-xs font-mono text-[#97dcff] flex items-center justify-between">
-              <span>● Response latency: 34ms</span>
-              <span>HTTP 200 OK • JSON</span>
+            {/* Status Footer */}
+            <div className="bg-slate-950 px-5 py-2 border-t border-slate-800 text-[11px] font-mono text-slate-400 flex items-center justify-between">
+              <span>● Latency: 34ms</span>
+              <span>HTTP 200 OK</span>
             </div>
           </div>
 
         </div>
       </section>
 
-      {/* Model Benchmark Matrix (Deep Technical Breakdown) */}
-      <section id="benchmark" className="relative z-10 py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#003b64]">
-        <div className="text-center max-w-3xl mx-auto mb-14 space-y-4">
-          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full badge-luminous text-sm font-semibold">
-            <Layers className="h-4 w-4 text-[#a2fff4]" />
-            <span className="font-display">Algorithmic Comparison</span>
+      {/* Model Benchmark Matrix */}
+      <section id="benchmark" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-gray-200">
+        <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
+          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold">
+            <Layers className="h-3.5 w-3.5" />
+            <span>Algorithmic Comparison</span>
           </div>
-          <h2 className="text-4xl sm:text-6xl font-display font-extrabold tracking-tight text-white">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
             Four Mathematical Families. Zero Guesswork.
           </h2>
-          <p className="text-lg sm:text-xl text-[#94a3b8] leading-relaxed">
-            SmartForecast automatically benchmarks classical statistical, exponential smoothing, and Bayesian regression models to select the mathematically superior fit.
+          <p className="text-sm sm:text-base text-gray-600">
+            Automatically benchmarks statistical, exponential smoothing, and machine learning models to select the champion fit.
           </p>
         </div>
 
         {/* Matrix Table */}
-        <div className="rasera-card rounded-2xl overflow-hidden shadow-xl border border-[#004775]">
+        <div className="dash-card overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm sm:text-base">
-              <thead className="bg-[#001a2c] text-[#97dcff] font-display font-bold uppercase text-xs sm:text-sm border-b border-[#003b64]">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-gray-50 text-gray-600 font-bold uppercase text-xs border-b border-gray-200">
                 <tr>
-                  <th className="py-4 px-6">Algorithm</th>
-                  <th className="py-4 px-6">Mathematical Foundation</th>
-                  <th className="py-4 px-6">Primary Strength</th>
-                  <th className="py-4 px-6">Seasonality Mode</th>
-                  <th className="py-4 px-6">Average MAPE</th>
-                  <th className="py-4 px-6">Latency</th>
+                  <th className="py-3.5 px-6">Algorithm</th>
+                  <th className="py-3.5 px-6">Mathematical Foundation</th>
+                  <th className="py-3.5 px-6">Primary Strength</th>
+                  <th className="py-3.5 px-6">Average MAPE</th>
+                  <th className="py-3.5 px-6">Latency</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#003456]">
+              <tbody className="divide-y divide-gray-100 bg-white">
                 
                 {/* Ensemble */}
-                <tr className="hover:bg-[#002f4d]/40 transition-colors bg-[#002f4d]/20">
-                  <td className="py-4 px-6 font-display font-bold text-[#a2fff4] flex items-center space-x-2.5">
-                    <Sparkles className="h-5 w-5 text-[#a2fff4]" />
-                    <span className="text-base font-bold">Consensus Ensemble</span>
-                    <span className="text-xs bg-[#a2fff4]/20 text-[#a2fff4] px-2.5 py-0.5 rounded-full font-bold border border-[#a2fff4]/40 font-mono">Champion</span>
+                <tr className="bg-emerald-50/70">
+                  <td className="py-4 px-6 font-bold text-gray-900 flex items-center space-x-2">
+                    <Sparkles className="h-4 w-4 text-emerald-600" />
+                    <span>Consensus Ensemble</span>
+                    <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">Champion</span>
                   </td>
-                  <td className="py-4 px-6 text-[#cbd5e1] font-medium">Bayesian Loss-Weighted Fusion</td>
-                  <td className="py-4 px-6 text-[#cbd5e1] font-medium">Complex multi-modal patterns</td>
-                  <td className="py-4 px-6 text-[#cbd5e1] font-medium">Dual Fourier + Additive</td>
-                  <td className="py-4 px-6 text-[#a2fff4] font-extrabold num-stat text-base">0.82% - 1.18%</td>
-                  <td className="py-4 px-6 text-[#94a3b8] num-stat">42ms</td>
+                  <td className="py-4 px-6 text-gray-700 font-medium">Bayesian Loss-Weighted Fusion</td>
+                  <td className="py-4 px-6 text-gray-700 font-medium">Complex multi-modal patterns</td>
+                  <td className="py-4 px-6 text-emerald-700 font-bold num-stat">0.82% - 1.18%</td>
+                  <td className="py-4 px-6 text-gray-500 num-stat">42ms</td>
                 </tr>
 
                 {/* Prophet */}
-                <tr className="hover:bg-[#002740] transition-colors">
-                  <td className="py-4 px-6 font-display font-bold text-white text-base">Meta Prophet</td>
-                  <td className="py-4 px-6 text-[#94a3b8]">Decomposable GAM y(t) = g(t) + s(t)</td>
-                  <td className="py-4 px-6 text-[#cbd5e1]">Strong holiday &amp; weekly cycles</td>
-                  <td className="py-4 px-6 text-[#94a3b8]">Fourier series (m=7, 365.25)</td>
-                  <td className="py-4 px-6 text-[#6aceff] font-bold num-stat text-base">1.24% - 1.65%</td>
-                  <td className="py-4 px-6 text-[#94a3b8] num-stat">36ms</td>
+                <tr className="hover:bg-gray-50">
+                  <td className="py-4 px-6 font-bold text-gray-900">Meta Prophet</td>
+                  <td className="py-4 px-6 text-gray-600">Decomposable Additive GAM</td>
+                  <td className="py-4 px-6 text-gray-600">Strong holiday &amp; seasonality</td>
+                  <td className="py-4 px-6 text-blue-600 font-bold num-stat">1.24% - 1.65%</td>
+                  <td className="py-4 px-6 text-gray-500 num-stat">36ms</td>
                 </tr>
 
                 {/* Auto-ARIMA */}
-                <tr className="hover:bg-[#002740] transition-colors">
-                  <td className="py-4 px-6 font-display font-bold text-white text-base">Auto-ARIMA</td>
-                  <td className="py-4 px-6 text-[#94a3b8]">ARIMA(p,d,q)(P,D,Q)s</td>
-                  <td className="py-4 px-6 text-[#cbd5e1]">Autocorrelated autoregressive lags</td>
-                  <td className="py-4 px-6 text-[#94a3b8]">SARIMA Seasonal Lags</td>
-                  <td className="py-4 px-6 text-[#cbd5e1] font-bold num-stat text-base">1.45% - 2.12%</td>
-                  <td className="py-4 px-6 text-[#94a3b8] num-stat">28ms</td>
+                <tr className="hover:bg-gray-50">
+                  <td className="py-4 px-6 font-bold text-gray-900">Auto-ARIMA</td>
+                  <td className="py-4 px-6 text-gray-600">ARIMA(p,d,q) Lag Regression</td>
+                  <td className="py-4 px-6 text-gray-600">Autocorrelated time series</td>
+                  <td className="py-4 px-6 text-gray-700 font-bold num-stat">1.45% - 2.12%</td>
+                  <td className="py-4 px-6 text-gray-500 num-stat">28ms</td>
                 </tr>
 
                 {/* Holt-Winters */}
-                <tr className="hover:bg-[#002740] transition-colors">
-                  <td className="py-4 px-6 font-display font-bold text-white text-base">Holt-Winters</td>
-                  <td className="py-4 px-6 text-[#94a3b8]">Triple Exponential Smoothing (HW-TES)</td>
-                  <td className="py-4 px-6 text-[#cbd5e1]">Fast adaptation to recent velocity</td>
-                  <td className="py-4 px-6 text-[#94a3b8]">Multiplicative / Additive</td>
-                  <td className="py-4 px-6 text-[#cbd5e1] font-bold num-stat text-base">0.98% - 2.84%</td>
-                  <td className="py-4 px-6 text-[#94a3b8] num-stat">12ms</td>
+                <tr className="hover:bg-gray-50">
+                  <td className="py-4 px-6 font-bold text-gray-900">Holt-Winters</td>
+                  <td className="py-4 px-6 text-gray-600">Triple Exponential Smoothing</td>
+                  <td className="py-4 px-6 text-gray-600">Fast trend adaptation</td>
+                  <td className="py-4 px-6 text-gray-700 font-bold num-stat">0.98% - 2.84%</td>
+                  <td className="py-4 px-6 text-gray-500 num-stat">12ms</td>
                 </tr>
 
               </tbody>
@@ -1307,100 +1268,35 @@ export default function Landing({ onLoginClick }) {
         </div>
       </section>
 
-      {/* Production Architecture & Pipeline Section */}
-      <section id="architecture" className="relative z-10 py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#003b64]">
-        <div className="text-center max-w-3xl mx-auto mb-14 space-y-4">
-          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full badge-luminous text-sm font-semibold">
-            <Cpu className="h-4 w-4 text-[#a2fff4]" />
-            <span className="font-display">Execution Lifecycle</span>
-          </div>
-          <h2 className="text-4xl sm:text-6xl font-display font-extrabold tracking-tight text-white">
-            Distributed 5-Stage Forecasting Pipeline
-          </h2>
-          <p className="text-lg sm:text-xl text-[#94a3b8] leading-relaxed">
-            How raw time-series data transforms into mathematical forecasts and executive AI briefings in milliseconds.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-5">
-          
-          {/* Step 1 */}
-          <div className="rasera-card p-6 rounded-2xl space-y-3">
-            <div className="text-xs font-mono font-bold text-[#a2fff4]">STAGE 01</div>
-            <h4 className="text-lg font-display font-bold text-white">Ingestion &amp; Scrub</h4>
-            <p className="text-sm text-[#94a3b8] leading-relaxed">
-              Auto-detects date formats, fixes cadence jitter, and isolates anomalies with Isolation Forests.
-            </p>
-          </div>
-
-          {/* Step 2 */}
-          <div className="rasera-card p-6 rounded-2xl space-y-3">
-            <div className="text-xs font-mono font-bold text-[#a2fff4]">STAGE 02</div>
-            <h4 className="text-lg font-display font-bold text-white">Signal Decomp</h4>
-            <p className="text-sm text-[#94a3b8] leading-relaxed">
-              Decomposes raw signal into secular trend, Fourier seasonality, and stochastic noise residual.
-            </p>
-          </div>
-
-          {/* Step 3 */}
-          <div className="rasera-card p-6 rounded-2xl space-y-3">
-            <div className="text-xs font-mono font-bold text-[#a2fff4]">STAGE 03</div>
-            <h4 className="text-lg font-display font-bold text-white">Concurrent Fitting</h4>
-            <p className="text-sm text-[#94a3b8] leading-relaxed">
-              Prophet, Auto-ARIMA, and Holt-Winters fit across worker threads in under 38ms.
-            </p>
-          </div>
-
-          {/* Step 4 */}
-          <div className="rasera-card p-6 rounded-2xl space-y-3">
-            <div className="text-xs font-mono font-bold text-[#a2fff4]">STAGE 04</div>
-            <h4 className="text-lg font-display font-bold text-white">Bayesian CV Loss</h4>
-            <p className="text-sm text-[#94a3b8] leading-relaxed">
-              5-fold cross-validation scores models via MAPE, RMSE, and AIC to crown the champion fit.
-            </p>
-          </div>
-
-          {/* Step 5 */}
-          <div className="rasera-card p-6 rounded-2xl space-y-3">
-            <div className="text-xs font-mono font-bold text-[#a2fff4]">STAGE 05</div>
-            <h4 className="text-lg font-display font-bold text-white">Gemini Synthesis</h4>
-            <p className="text-sm text-[#94a3b8] leading-relaxed">
-              Gemini 2.5 analyzes changepoints and variance fans to draft executive briefing points.
-            </p>
-          </div>
-
-        </div>
-      </section>
-
       {/* Technical FAQ Section */}
-      <section id="faq" className="relative z-10 py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto border-t border-[#003b64]">
-        <div className="text-center mb-12 space-y-3">
-          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full badge-luminous text-sm font-semibold">
-            <HelpCircle className="h-4 w-4 text-[#a2fff4]" />
-            <span className="font-display">Frequently Answered</span>
+      <section id="faq" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto border-t border-gray-200">
+        <div className="text-center mb-10 space-y-2">
+          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold">
+            <HelpCircle className="h-3.5 w-3.5" />
+            <span>FAQ</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-display font-extrabold text-white tracking-tight">
+          <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
             Frequently Asked Questions
           </h2>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {FAQ_ITEMS.map((faq, index) => {
             const isOpen = openFaqIndex === index;
             return (
               <div 
                 key={index} 
-                className="rasera-card rounded-2xl overflow-hidden transition-all shadow-md border border-[#004775]"
+                className="dash-card overflow-hidden shadow-xs"
               >
                 <button
                   onClick={() => setOpenFaqIndex(isOpen ? null : index)}
-                  className="w-full px-6 py-5 text-left flex items-center justify-between text-base sm:text-xl font-display font-bold text-white hover:text-[#a2fff4] transition-colors"
+                  className="w-full px-6 py-4 text-left flex items-center justify-between text-base font-bold text-gray-900 hover:text-blue-600 transition-colors"
                 >
                   <span>{faq.q}</span>
-                  <ChevronDown className={`h-6 w-6 text-[#97dcff] transition-transform ${isOpen ? 'rotate-180 text-[#a2fff4]' : ''}`} />
+                  <ChevronDown className={`h-5 w-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180 text-blue-600' : ''}`} />
                 </button>
                 {isOpen && (
-                  <div className="px-6 pb-6 pt-2 text-base sm:text-lg text-[#cbd5e1] leading-relaxed border-t border-[#003b64]">
+                  <div className="px-6 pb-5 pt-1 text-sm text-gray-600 leading-relaxed border-t border-gray-100">
                     {faq.a}
                   </div>
                 )}
@@ -1410,24 +1306,23 @@ export default function Landing({ onLoginClick }) {
         </div>
       </section>
 
-      {/* CTA Bottom Banner: Direct to Login */}
-      <section className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#003b64]">
-        <div className="bg-gradient-to-r from-[#002740] via-[#003b64] to-[#002740] border border-[#005b96] rounded-3xl p-8 sm:p-16 text-center max-w-4xl mx-auto space-y-8 relative overflow-hidden shadow-2xl">
-          
-          <h2 className="text-3xl sm:text-6xl font-display font-extrabold tracking-tight text-white">
+      {/* CTA Bottom Banner */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-gray-200">
+        <div className="bg-blue-600 text-white rounded-2xl p-8 sm:p-12 text-center max-w-4xl mx-auto space-y-6 shadow-md">
+          <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
             Ready to deploy accurate forecasting?
           </h2>
 
-          <p className="text-base sm:text-xl text-[#97dcff] max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base text-blue-100 max-w-2xl mx-auto leading-relaxed">
             Sign in to upload custom CSV datasets, execute multi-model cross-validation, and stream Gemini AI diagnostics.
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+          <div className="pt-2">
             <button
               onClick={onLoginClick}
-              className="btn-radiant text-base sm:text-xl px-10 py-5 rounded-2xl flex items-center space-x-3"
+              className="bg-white text-blue-700 hover:bg-blue-50 font-bold text-sm sm:text-base px-8 py-3.5 rounded-xl inline-flex items-center space-x-2 shadow-sm transition-colors"
             >
-              <Lock className="h-6 w-6 text-[#00131c]" />
+              <Lock className="h-4 w-4" />
               <span>Sign In to Access Workspace</span>
             </button>
           </div>
@@ -1435,21 +1330,21 @@ export default function Landing({ onLoginClick }) {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-[#003b64] bg-[#001424] py-10 text-sm text-[#94a3b8] font-medium">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-5">
-          <div className="flex items-center space-x-3.5">
-            <LogoF className="h-6 w-6" />
-            <span className="text-white font-display font-bold text-base">SmartForecast AI</span>
+      <footer className="border-t border-gray-200 bg-white py-8 text-xs text-gray-500 font-medium">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center space-x-2">
+            <BarChart3 className="h-4 w-4 text-blue-600" />
+            <span className="text-gray-900 font-bold text-sm">SmartForecast AI</span>
             <span>•</span>
             <span>Predictive Time-Series Analytics</span>
           </div>
 
-          <div className="flex items-center space-x-6 font-mono text-xs">
-            <span className="flex items-center space-x-2 text-[#a2fff4]">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#a2fff4] shadow-[0_0_8px_#a2fff4]" />
+          <div className="flex items-center space-x-6 font-mono text-[11px] text-gray-400">
+            <span className="flex items-center space-x-1.5 text-emerald-600">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
               <span>All Systems Operational</span>
             </span>
-            <span>Secure TLS 1.3</span>
+            <span>Secure In-Memory</span>
           </div>
         </div>
       </footer>
