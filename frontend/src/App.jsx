@@ -283,7 +283,7 @@ export default function App() {
             
             {/* Brand Logo & Name with high-visibility white 'F' monogram */}
             <div className="flex items-center space-x-3">
-              <LogoF className="h-8 w-8" />
+              <LogoF className="h-9 w-9" />
               <span className="text-xl font-bold text-slate-900 tracking-tight">SmartForecast AI</span>
             </div>
 

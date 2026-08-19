@@ -104,9 +104,7 @@ export default function Login({ setToken, setUser, onBack }) {
           className="flex items-center space-x-3 cursor-pointer" 
           onClick={onBack}
         >
-          <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center p-1.5 border border-blue-100">
-            <LogoF className="h-6 w-6" />
-          </div>
+          <LogoF className="h-9 w-9" />
           <div className="flex flex-col">
             <span className="text-xl font-bold tracking-tight text-gray-900">SmartForecast AI</span>
             <span className="text-xs text-gray-500 font-medium">Predictive Workspace</span>
@@ -131,9 +129,7 @@ export default function Login({ setToken, setUser, onBack }) {
           
           {/* Top Logo & Welcome */}
           <div className="text-center space-y-2 mb-6">
-            <div className="inline-flex h-12 w-12 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 items-center justify-center p-2 mb-1">
-              <LogoF className="h-7 w-7" />
-            </div>
+            <LogoF className="h-12 w-12 mx-auto mb-1" />
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">
               {isRegister ? 'Create Account' : 'Welcome Back'}
             </h1>

@@ -298,9 +298,7 @@ export default function Landing({ onLoginClick }) {
             className="flex items-center space-x-3 cursor-pointer" 
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
-            <div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 p-1">
-              <LogoF className="h-5 w-5" />
-            </div>
+            <LogoF className="h-9 w-9" />
             <span className="text-xl font-bold tracking-tight text-gray-900">SmartForecast AI</span>
           </div>
 
