@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   TrendingUp, 
@@ -8,14 +8,21 @@ import {
   Eye, 
   EyeOff, 
   ArrowRight, 
-  ArrowLeft,
-  Sparkles, 
+  ArrowLeft, 
   Activity, 
   ShieldCheck, 
   CheckCircle2,
   AlertCircle,
   X,
-  Play
+  Play,
+  Terminal,
+  Server,
+  Zap,
+  Check,
+  KeyRound,
+  Shield,
+  Layers,
+  Cpu
 } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -26,7 +33,7 @@ export default function Login({ setToken, setUser, onBack }) {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
+  const [capsLockActive, setCapsLockActive] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [authSuccessNotice, setAuthSuccessNotice] = useState('');
@@ -36,10 +43,43 @@ export default function Login({ setToken, setUser, onBack }) {
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotSubmitted, setForgotSubmitted] = useState(false);
 
+  // Live Terminal Log Stream Simulation for the developer aside
+  const [terminalLogs, setTerminalLogs] = useState([
+    { ts: '12:04:01', level: 'INFO', msg: 'Cluster node [us-east-1a] worker pool healthy' },
+    { ts: '12:04:08', level: 'INFO', msg: 'Prophet + Auto-ARIMA engine initialized' },
+    { ts: '12:04:14', level: 'OK', msg: 'Bayesian CV cross-validation ready (4 workers)' },
+    { ts: '12:04:19', level: 'OK', msg: 'Gemini 2.5 reasoning stream connected' }
+  ]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const msgs = [
+        { level: 'INFO', msg: 'Rolling 5-fold cross validation benchmark completed (32ms)' },
+        { level: 'OK', msg: 'Ensemble model consensus achieved • AIC: 312.4' },
+        { level: 'INFO', msg: 'Zero-retention ephemeral session sandbox active' },
+        { level: 'INFO', msg: 'TLS 1.3 handshake verified • AES-256 in-memory state' }
+      ];
+      const randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
+      const now = new Date();
+      const ts = now.toTimeString().split(' ')[0];
+      setTerminalLogs(prev => [...prev.slice(-3), { ts, ...randomMsg }]);
+    }, 4500);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleKeyDown = (e) => {
+    if (e.getModifierState && e.getModifierState('CapsLock')) {
+      setCapsLockActive(true);
+    } else {
+      setCapsLockActive(false);
+    }
+  };
+
   // Password strength calculation for registration
   const calculatePasswordStrength = (pwd) => {
     let score = 0;
-    if (!pwd) return { score: 0, text: 'Empty', color: 'bg-slate-700' };
+    if (!pwd) return { score: 0, text: 'Empty', color: 'bg-zinc-700' };
     if (pwd.length >= 6) score += 1;
     if (pwd.length >= 10) score += 1;
     if (/[A-Z]/.test(pwd)) score += 1;
@@ -48,7 +88,7 @@ export default function Login({ setToken, setUser, onBack }) {
     if (score <= 1) return { score: 1, text: 'Weak', color: 'bg-rose-500' };
     if (score === 2) return { score: 2, text: 'Fair', color: 'bg-amber-500' };
     if (score === 3) return { score: 3, text: 'Strong', color: 'bg-emerald-500' };
-    return { score: 4, text: 'Enterprise Grade', color: 'bg-cyan-400' };
+    return { score: 4, text: 'Production Grade', color: 'bg-cyan-400' };
   };
 
   const pwdStrength = calculatePasswordStrength(password);
@@ -60,7 +100,7 @@ export default function Login({ setToken, setUser, onBack }) {
 
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
-      setError('Please enter a valid work or personal email address.');
+      setError('Please enter a valid work or organization email.');
       return;
     }
 
@@ -85,17 +125,17 @@ export default function Login({ setToken, setUser, onBack }) {
         name: name || cleanEmail.split('@')[0] 
       };
 
-      setAuthSuccessNotice('Identity verified. Entering forecasting workspace...');
+      setAuthSuccessNotice('Authentication verified. Initializing workspace session...');
 
       setTimeout(() => {
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(userData));
         if (setUser) setUser(userData);
         setToken(token);
-      }, 350);
+      }, 300);
 
     } catch (err) {
-      const errorMsg = err.response?.data?.detail || 'Authentication failed. Please verify your credentials.';
+      const errorMsg = err.response?.data?.detail || 'Authentication failed. Please verify credentials.';
       setError(errorMsg);
       setIsLoading(false);
     }
@@ -125,7 +165,7 @@ export default function Login({ setToken, setUser, onBack }) {
         localStorage.setItem('user', JSON.stringify(userData));
         if (setUser) setUser(userData);
         setToken(token);
-      }, 300);
+      }, 250);
 
     } catch {
       // Fallback offline demo token
@@ -139,28 +179,24 @@ export default function Login({ setToken, setUser, onBack }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#080c14] text-slate-100 flex flex-col justify-between relative overflow-x-hidden w-full max-w-full font-sans selection:bg-cyan-500 selection:text-slate-950">
+    <div className="min-h-screen bg-[#090a0f] text-slate-100 flex flex-col justify-between relative overflow-x-hidden w-full max-w-full font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
       
-      {/* Background Glow Ambience */}
+      {/* Subtle Developer Background Grid */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute inset-0 forecasting-radial-mesh" />
-        <div className="absolute inset-0 forecasting-grid-pattern opacity-40" />
-        <div className="absolute -top-32 -left-32 w-[550px] h-[550px] bg-blue-600/15 rounded-full blur-[150px] animate-pulse-slow" />
-        <div className="absolute -bottom-32 -right-32 w-[550px] h-[550px] bg-cyan-500/15 rounded-full blur-[150px] animate-pulse-slow" />
+        <div className="absolute inset-0 dev-grid-pattern opacity-50" />
+        <div className="absolute inset-0 dev-radial-glow opacity-80" />
       </div>
 
-      {/* Top Navbar */}
-      <header className="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between border-b border-slate-800/70">
-        <div className="flex items-center space-x-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-400 p-[1px] shadow-md shadow-cyan-500/20">
-            <div className="h-full w-full bg-[#080c14] rounded-[11px] flex items-center justify-center">
-              <TrendingUp className="h-4 w-4 text-cyan-400" />
-            </div>
+      {/* Top Header Bar */}
+      <header className="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between border-b border-zinc-800/80">
+        <div className="flex items-center space-x-3 cursor-pointer" onClick={onBack}>
+          <div className="h-8 w-8 rounded-lg bg-zinc-900 border border-zinc-700/80 flex items-center justify-center shadow-inner">
+            <TrendingUp className="h-4 w-4 text-cyan-400" />
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-base font-extrabold tracking-tight text-white">SmartForecast</span>
-            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-              Enterprise AI
+            <span className="text-sm font-semibold tracking-tight text-white font-mono">SmartForecast</span>
+            <span className="text-[10px] font-mono text-zinc-400 px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800">
+              Auth Console
             </span>
           </div>
         </div>
@@ -169,342 +205,300 @@ export default function Login({ setToken, setUser, onBack }) {
           <button
             type="button"
             onClick={onBack}
-            className="text-xs font-semibold text-slate-400 hover:text-white flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-all"
+            className="text-xs font-mono text-zinc-400 hover:text-white flex items-center space-x-1.5 px-3 py-1.5 rounded-md bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-all"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            <span>Back to Overview</span>
+            <span>Overview</span>
           </button>
         )}
       </header>
 
-      {/* Main Container: Focused & Clean Split Layout */}
+      {/* Main Split Layout Card */}
       <main className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 py-8 my-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 bg-slate-900/90 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl glow-indigo">
+        <div className="surface-panel rounded-2xl border border-zinc-800 shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12">
           
-          {/* Left Column: Forecasting Visual Showcase Graphic */}
-          <div className="lg:col-span-5 bg-gradient-to-br from-[#080c14] via-slate-900 to-indigo-950/40 p-7 sm:p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800 relative">
+          {/* Left Column: Focused Authentication Form */}
+          <div className="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between space-y-6">
             
-            {/* Header branding */}
             <div>
-              <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[11px] font-semibold mb-3">
-                <Activity className="h-3.5 w-3.5 text-cyan-400 animate-pulse" />
-                <span>Multi-Model AI Engine</span>
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                Predictive Forecasting Workspace
-              </h3>
-              <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
-                Sign in to benchmark Meta Prophet, Auto-ARIMA, and Holt-Winters with automated Gemini executive reasoning.
-              </p>
-            </div>
-
-            {/* High-Precision Forecasting Graph Visual */}
-            <div className="my-6 p-4 rounded-2xl bg-[#080c14] border border-slate-800 shadow-inner relative overflow-hidden">
-              <div className="flex items-center justify-between mb-3 text-[11px]">
-                <span className="text-slate-400 font-medium">Model Output Stream</span>
-                <span className="text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                  ● 99.4% Multi-Model Fit
-                </span>
-              </div>
-
-              {/* Dynamic Predictive Fan Curve SVG */}
-              <div className="h-32 w-full relative">
-                <svg viewBox="0 0 320 110" className="w-full h-full overflow-visible">
-                  <defs>
-                    <linearGradient id="loginForecastGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.35" />
-                      <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
-                    </linearGradient>
-                    <linearGradient id="loginFanGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#818cf8" stopOpacity="0.28" />
-                      <stop offset="100%" stopColor="#818cf8" stopOpacity="0.05" />
-                    </linearGradient>
-                  </defs>
-
-                  {/* Grid Lines */}
-                  <line x1="0" y1="28" x2="320" y2="28" stroke="#1e293b" strokeDasharray="3 3" strokeOpacity="0.8" />
-                  <line x1="0" y1="65" x2="320" y2="65" stroke="#1e293b" strokeDasharray="3 3" strokeOpacity="0.8" />
-                  <line x1="0" y1="95" x2="320" y2="95" stroke="#1e293b" strokeDasharray="3 3" strokeOpacity="0.8" />
-
-                  {/* Vertical origin line */}
-                  <line x1="170" y1="5" x2="170" y2="105" stroke="#06b6d4" strokeDasharray="2 2" strokeWidth="1.5" />
-                  <text x="174" y="16" fill="#06b6d4" fontSize="8" fontWeight="700">PREDICTION</text>
-
-                  {/* 95% Confidence Fan */}
-                  <polygon 
-                    points="170,55 210,38 250,28 290,16 320,10 320,85 290,75 250,70 210,65 170,55" 
-                    fill="url(#loginFanGrad)" 
-                  />
-
-                  {/* Historical Area */}
-                  <path 
-                    d="M 0 90 Q 40 82, 80 86 T 130 65 T 170 55 L 170 105 L 0 105 Z" 
-                    fill="url(#loginForecastGrad)" 
-                  />
-
-                  {/* Historical Solid Line */}
-                  <path 
-                    d="M 0 90 Q 40 82, 80 86 T 130 65 T 170 55" 
-                    fill="none" 
-                    stroke="#38bdf8" 
-                    strokeWidth="2.5" 
-                    strokeLinecap="round" 
-                  />
-
-                  {/* Forecast Dashed Line */}
-                  <path 
-                    d="M 170 55 Q 210 50, 250 42 T 320 22" 
-                    fill="none" 
-                    stroke="#818cf8" 
-                    strokeWidth="2.5" 
-                    strokeDasharray="4 3" 
-                    strokeLinecap="round" 
-                  />
-
-                  {/* Pulse Crossover Node */}
-                  <circle cx="170" cy="55" r="4.5" fill="#06b6d4" className="animate-pulse" />
-                  <circle cx="170" cy="55" r="8" fill="none" stroke="#06b6d4" strokeWidth="1" className="animate-ping opacity-75" />
-                  <circle cx="320" cy="22" r="3.5" fill="#818cf8" />
-                </svg>
-              </div>
-
-              {/* Minimal metrics footer */}
-              <div className="grid grid-cols-3 gap-2 mt-3 pt-2.5 border-t border-slate-800 text-center text-[10px]">
+              {/* Top Mode Header */}
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <span className="text-slate-500 uppercase block font-medium">History</span>
-                  <span className="text-cyan-400 font-bold">Actuals</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 uppercase block font-medium">Interval</span>
-                  <span className="text-indigo-400 font-bold">95% CI</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 uppercase block font-medium">Reasoning</span>
-                  <span className="text-emerald-400 font-bold">Gemini 2.5</span>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                    {isRegister ? 'Create Workspace Account' : 'Sign in to SmartForecast'}
+                  </h2>
+                  <p className="text-xs text-zinc-400 mt-1">
+                    {isRegister 
+                      ? 'Deploy isolated time-series pipelines and custom ML models.' 
+                      : 'Access predictive benchmarking, Meta Prophet, and Gemini reasoning.'}
+                  </p>
                 </div>
               </div>
-            </div>
 
-            {/* Security badge footer */}
-            <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-800/80">
-              <span className="flex items-center">
-                <ShieldCheck className="h-3.5 w-3.5 text-emerald-400 mr-1" />
-                256-Bit Encrypted
-              </span>
-              <span>Zero Public Retention</span>
-            </div>
-
-          </div>
-
-          {/* Right Column: Clean, Modern Authentication Portal */}
-          <div className="lg:col-span-7 p-6 sm:p-9 flex flex-col justify-center bg-slate-900">
-            
-            <div className="max-w-md w-full mx-auto">
-              
-              {/* Header & Mode Switcher */}
+              {/* 1-Click Instant Demo Button (Frictionless Sandbox) */}
               <div className="mb-5">
-                <h2 className="text-2xl font-bold text-white tracking-tight">
-                  {isRegister ? 'Create Workspace Account' : 'Welcome Back'}
-                </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {isRegister ? 'Enter your details to access the forecasting suite' : 'Sign in to access your models & predictions'}
-                </p>
-              </div>
-
-              {/* ⚡ Instant 1-Click Demo Analyst Access Button */}
-              <div className="mb-4">
                 <button
                   type="button"
                   onClick={handleInstantDemoLogin}
                   disabled={isLoading}
-                  className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:via-teal-500 hover:to-cyan-500 shadow-lg shadow-teal-600/20 border border-emerald-400/30 transition-all flex items-center justify-between group disabled:opacity-50"
+                  className="w-full py-2.5 px-4 rounded-lg bg-zinc-900 hover:bg-zinc-850 border border-cyan-500/40 hover:border-cyan-400/80 text-cyan-300 hover:text-cyan-200 text-xs font-mono font-semibold flex items-center justify-between transition-all group shadow-sm active:scale-[0.99]"
                 >
                   <div className="flex items-center space-x-2">
-                    <Sparkles className="h-4 w-4 text-emerald-200 animate-spin-slow" />
-                    <span>Instant Demo Access (Analyst Sandbox)</span>
+                    <Zap className="h-4 w-4 text-cyan-400 fill-cyan-400/20 group-hover:scale-110 transition-transform" />
+                    <span>Explore Live Sandbox as Senior Analyst</span>
                   </div>
-                  <span className="text-[10px] uppercase font-bold bg-white/20 px-2 py-0.5 rounded text-white group-hover:translate-x-0.5 transition-transform">
-                    1-Click ➔
-                  </span>
+                  <div className="flex items-center space-x-1 text-[10px] text-zinc-400 group-hover:text-zinc-300">
+                    <span>1-Click Demo</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </div>
                 </button>
               </div>
 
               {/* Divider */}
-              <div className="relative flex py-1.5 items-center mb-4">
-                <div className="flex-grow border-t border-slate-800" />
-                <span className="flex-shrink mx-3 text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
-                  or with email credentials
+              <div className="relative flex py-2 items-center mb-4">
+                <div className="flex-grow border-t border-zinc-800"></div>
+                <span className="flex-shrink mx-3 text-[10px] font-mono uppercase text-zinc-500">
+                  Or continue with credentials
                 </span>
-                <div className="flex-grow border-t border-slate-800" />
+                <div className="flex-grow border-t border-zinc-800"></div>
               </div>
 
-              {/* Segmented Sign In / Register Tabs */}
-              <div className="flex p-1 bg-[#080c14] border border-slate-800 rounded-xl mb-4">
-                <button
-                  type="button"
-                  onClick={() => { setIsRegister(false); setError(''); setAuthSuccessNotice(''); }}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                    !isRegister 
-                      ? 'bg-blue-600 text-white shadow-md' 
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  Sign In
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setIsRegister(true); setError(''); setAuthSuccessNotice(''); }}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                    isRegister 
-                      ? 'bg-blue-600 text-white shadow-md' 
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  Create Account
-                </button>
-              </div>
-
-              {/* Alert Feedback Messages */}
+              {/* Error Notice */}
               {error && (
-                <div className="mb-3.5 p-2.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs flex items-start space-x-2 animate-fadeIn">
-                  <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5 text-rose-400" />
-                  <span className="leading-snug">{error}</span>
+                <div className="mb-4 p-3 rounded-lg bg-rose-950/40 border border-rose-800/80 text-rose-300 text-xs flex items-start space-x-2">
+                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose-400" />
+                  <span>{error}</span>
                 </div>
               )}
 
+              {/* Success Notice */}
               {authSuccessNotice && (
-                <div className="mb-3.5 p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs flex items-start space-x-2 animate-fadeIn">
-                  <CheckCircle2 className="h-4 w-4 flex-shrink-0 mt-0.5 text-emerald-400" />
-                  <span className="leading-snug">{authSuccessNotice}</span>
+                <div className="mb-4 p-3 rounded-lg bg-emerald-950/40 border border-emerald-800/80 text-emerald-300 text-xs flex items-start space-x-2 font-mono">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-emerald-400" />
+                  <span>{authSuccessNotice}</span>
                 </div>
               )}
 
-              {/* Main Auth Form */}
-              <form onSubmit={handleSubmit} className="space-y-3.5">
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="space-y-4">
                 
                 {isRegister && (
                   <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">Full Name</label>
+                    <label className="block text-xs font-mono text-zinc-400 mb-1.5">
+                      Full Name / Analyst Handle
+                    </label>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                        <User className="h-4 w-4" />
-                      </div>
                       <input
                         type="text"
-                        required
-                        placeholder="Sarah Chen"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="pl-9 block w-full rounded-xl border border-slate-800 bg-[#080c14] text-white placeholder-slate-500 text-xs p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                        placeholder="e.g. Alex Rivera"
+                        required
+                        className="w-full bg-[#080a10] border border-zinc-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-white rounded-lg px-3.5 py-2 text-xs transition-colors placeholder:text-zinc-600 outline-none font-sans"
                       />
+                      <User className="h-4 w-4 text-zinc-500 absolute right-3 top-2.5" />
                     </div>
                   </div>
                 )}
 
-                {/* Email Input */}
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Work Email</label>
+                  <label className="block text-xs font-mono text-zinc-400 mb-1.5">
+                    Work Email Address
+                  </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                      <Mail className="h-4 w-4" />
-                    </div>
                     <input
                       type="email"
-                      required
-                      placeholder="analyst@company.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-9 block w-full rounded-xl border border-slate-800 bg-[#080c14] text-white placeholder-slate-500 text-xs p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                      placeholder="analyst@enterprise.com"
+                      required
+                      className="w-full bg-[#080a10] border border-zinc-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-white rounded-lg px-3.5 py-2 text-xs transition-colors placeholder:text-zinc-600 outline-none font-sans"
                     />
+                    <Mail className="h-4 w-4 text-zinc-500 absolute right-3 top-2.5" />
                   </div>
                 </div>
 
-                {/* Password Input */}
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-medium text-slate-300">Password</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-mono text-zinc-400">
+                      Password
+                    </label>
                     {!isRegister && (
-                      <button 
+                      <button
                         type="button"
                         onClick={() => setShowForgotModal(true)}
-                        className="text-[11px] text-cyan-400 hover:underline"
+                        className="text-[11px] font-mono text-zinc-500 hover:text-cyan-400 transition-colors"
                       >
-                        Forgot?
+                        Forgot password?
                       </button>
                     )}
                   </div>
-
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                      <Lock className="h-4 w-4" />
-                    </div>
                     <input
                       type={showPassword ? 'text' : 'password'}
-                      required
-                      placeholder="••••••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-9 pr-9 block w-full rounded-xl border border-slate-800 bg-[#080c14] text-white placeholder-slate-500 text-xs p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                      onKeyDown={handleKeyDown}
+                      onKeyUp={handleKeyDown}
+                      placeholder="••••••••••••"
+                      required
+                      className="w-full bg-[#080a10] border border-zinc-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-white rounded-lg px-3.5 py-2 text-xs transition-colors placeholder:text-zinc-600 outline-none font-sans"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300"
+                      className="text-zinc-500 hover:text-zinc-300 absolute right-3 top-2.5"
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
 
+                  {capsLockActive && (
+                    <div className="text-[11px] text-amber-400 mt-1 font-mono flex items-center space-x-1">
+                      <span>⚠️ Caps Lock is active</span>
+                    </div>
+                  )}
+
+                  {/* Password Strength Meter when Registering */}
                   {isRegister && password && (
                     <div className="mt-2 space-y-1">
-                      <div className="flex items-center justify-between text-[10px]">
-                        <span className="text-slate-400">Strength:</span>
-                        <span className="font-semibold text-slate-200">{pwdStrength.text}</span>
+                      <div className="flex items-center justify-between text-[10px] font-mono">
+                        <span className="text-zinc-500">Security Score:</span>
+                        <span className="text-zinc-300 font-semibold">{pwdStrength.text}</span>
                       </div>
-                      <div className="grid grid-cols-4 gap-1 h-1 w-full bg-[#080c14] rounded-full overflow-hidden">
-                        <div className={`h-full rounded-full ${pwdStrength.score >= 1 ? pwdStrength.color : 'bg-slate-800'}`} />
-                        <div className={`h-full rounded-full ${pwdStrength.score >= 2 ? pwdStrength.color : 'bg-slate-800'}`} />
-                        <div className={`h-full rounded-full ${pwdStrength.score >= 3 ? pwdStrength.color : 'bg-slate-800'}`} />
-                        <div className={`h-full rounded-full ${pwdStrength.score >= 4 ? pwdStrength.color : 'bg-slate-800'}`} />
+                      <div className="grid grid-cols-4 gap-1 h-1">
+                        {[1, 2, 3, 4].map((step) => (
+                          <div
+                            key={step}
+                            className={`rounded-full transition-colors ${
+                              pwdStrength.score >= step ? pwdStrength.color : 'bg-zinc-800'
+                            }`}
+                          />
+                        ))}
                       </div>
                     </div>
                   )}
                 </div>
 
-                {!isRegister && (
-                  <div className="flex items-center justify-between text-xs pt-0.5">
-                    <label className="flex items-center space-x-2 text-slate-400 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={rememberMe}
-                        onChange={(e) => setRememberMe(e.target.checked)}
-                        className="rounded border-slate-700 bg-[#080c14] text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-[11px]">Remember on this device</span>
-                    </label>
-                  </div>
-                )}
-
-                {/* Submit Button */}
+                {/* Submit Action */}
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full mt-2 flex items-center justify-center py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-lg shadow-blue-600/30 disabled:opacity-50 transition-all"
+                  className="w-full py-2.5 px-4 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-zinc-950 font-semibold text-xs flex items-center justify-center space-x-2 transition-all shadow-md shadow-cyan-500/10 active:scale-[0.99] disabled:opacity-50"
                 >
                   {isLoading ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Authenticating...</span>
+                    <div className="flex items-center space-x-2 font-mono">
+                      <div className="h-3.5 w-3.5 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin" />
+                      <span>Verifying Credentials...</span>
                     </div>
                   ) : (
-                    <div className="flex items-center space-x-1.5">
-                      <span>{isRegister ? 'Create Account & Launch' : 'Sign in to Workspace'}</span>
+                    <>
+                      <span>{isRegister ? 'Create Account & Initialize Workspace' : 'Sign In to Workspace'}</span>
                       <ArrowRight className="h-3.5 w-3.5" />
-                    </div>
+                    </>
                   )}
                 </button>
-              </form>
 
+              </form>
+            </div>
+
+            {/* Toggle Mode Footer */}
+            <div className="pt-4 border-t border-zinc-800/80 flex items-center justify-between text-xs">
+              <span className="text-zinc-500">
+                {isRegister ? 'Already have an account?' : "Don't have an enterprise account?"}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRegister(!isRegister);
+                  setError('');
+                  setAuthSuccessNotice('');
+                }}
+                className="font-mono text-cyan-400 hover:text-cyan-300 font-semibold"
+              >
+                {isRegister ? 'Sign In Instead' : 'Create Workspace Account'}
+              </button>
+            </div>
+
+          </div>
+
+          {/* Right Column: Live Telemetry & Server Telemetry Inspector */}
+          <div className="lg:col-span-5 bg-[#0b0e17] p-6 sm:p-8 border-t lg:border-t-0 lg:border-l border-zinc-800 flex flex-col justify-between space-y-6">
+            
+            {/* Header Specs */}
+            <div>
+              <div className="flex items-center space-x-2 text-xs font-mono text-zinc-400 mb-2">
+                <Server className="h-3.5 w-3.5 text-cyan-400" />
+                <span>CLUSTER TELEMETRY &amp; STATUS</span>
+              </div>
+              <div className="text-base font-bold text-white tracking-tight">
+                Isolated Runtime Security
+              </div>
+              <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                SmartForecast computes all mathematical benchmarks in ephemeral, zero-retention worker pods.
+              </p>
+            </div>
+
+            {/* Live Terminal Stream Card */}
+            <div className="surface-panel rounded-xl border border-zinc-800 p-3.5 bg-[#08090e] space-y-2">
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80 text-[10px] font-mono text-zinc-500">
+                <span className="flex items-center space-x-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-live-dot" />
+                  <span>worker-stream.us-east-1</span>
+                </span>
+                <span>p99: 38ms</span>
+              </div>
+
+              <div className="space-y-1.5 font-mono text-[11px] pt-1">
+                {terminalLogs.map((log, idx) => (
+                  <div key={idx} className="flex items-start space-x-2 leading-tight">
+                    <span className="text-zinc-600 shrink-0">{log.ts}</span>
+                    <span className={`shrink-0 font-semibold ${
+                      log.level === 'OK' ? 'text-emerald-400' : 'text-cyan-400'
+                    }`}>
+                      [{log.level}]
+                    </span>
+                    <span className="text-zinc-300 truncate">{log.msg}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Compliance & Architecture Specs */}
+            <div className="space-y-2.5 text-xs font-mono">
+              <div className="flex items-center justify-between p-2 rounded bg-zinc-900/60 border border-zinc-800/80">
+                <div className="flex items-center space-x-2 text-zinc-300">
+                  <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                  <span>Zero Data Retention</span>
+                </div>
+                <span className="text-zinc-500 text-[10px]">Verified</span>
+              </div>
+
+              <div className="flex items-center justify-between p-2 rounded bg-zinc-900/60 border border-zinc-800/80">
+                <div className="flex items-center space-x-2 text-zinc-300">
+                  <Cpu className="h-4 w-4 text-cyan-400" />
+                  <span>Multi-Model Parallelism</span>
+                </div>
+                <span className="text-zinc-500 text-[10px]">4 Models</span>
+              </div>
+
+              <div className="flex items-center justify-between p-2 rounded bg-zinc-900/60 border border-zinc-800/80">
+                <div className="flex items-center space-x-2 text-zinc-300">
+                  <Lock className="h-4 w-4 text-indigo-400" />
+                  <span>TLS 1.3 &amp; AES-256</span>
+                </div>
+                <span className="text-zinc-500 text-[10px]">Active</span>
+              </div>
+            </div>
+
+            {/* Testimonial Quote */}
+            <div className="pt-3 border-t border-zinc-800/80">
+              <p className="text-xs text-zinc-400 italic leading-relaxed">
+                "SmartForecast cut our time-series benchmarking cycle from 4 hours in notebooks down to 40 milliseconds with direct Gemini executive briefs."
+              </p>
+              <div className="mt-2 text-[11px] font-mono text-zinc-500">
+                — Head of Machine Learning, Global Logistics Platform
+              </div>
             </div>
 
           </div>
@@ -512,61 +506,86 @@ export default function Login({ setToken, setUser, onBack }) {
         </div>
       </main>
 
-      {/* Minimal Footer */}
-      <footer className="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-800/70">
-        <span>© {new Date().getFullYear()} SmartForecast AI</span>
-        <span className="text-slate-400">Enterprise High-Availability Engine</span>
-      </footer>
-
-      {/* Forgot Password Recovery Modal */}
+      {/* Forgot Password Modal */}
       {showForgotModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="surface-panel rounded-2xl border border-zinc-800 p-6 max-w-md w-full shadow-2xl relative space-y-4">
+            
             <button
-              type="button"
-              onClick={() => { setShowForgotModal(false); setForgotSubmitted(false); }}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              onClick={() => {
+                setShowForgotModal(false);
+                setForgotSubmitted(false);
+              }}
+              className="absolute top-4 right-4 text-zinc-500 hover:text-white"
             >
               <X className="h-4 w-4" />
             </button>
 
-            <h3 className="text-lg font-bold text-white mb-1">Reset Password</h3>
-            <p className="text-xs text-slate-400 mb-4">
-              Enter your work email address to receive password recovery instructions.
-            </p>
+            <div className="flex items-center space-x-2">
+              <KeyRound className="h-5 w-5 text-cyan-400" />
+              <h3 className="text-base font-bold text-white">Reset Account Access</h3>
+            </div>
 
             {forgotSubmitted ? (
-              <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs space-y-2">
-                <p>Recovery link dispatched to <strong className="text-white">{forgotEmail}</strong>.</p>
+              <div className="p-4 rounded-lg bg-emerald-950/40 border border-emerald-800/80 text-emerald-300 text-xs space-y-2 font-mono">
+                <div className="font-semibold flex items-center space-x-1.5">
+                  <Check className="h-4 w-4 text-emerald-400" />
+                  <span>Reset Instruction Dispatched</span>
+                </div>
+                <p className="text-zinc-300 font-sans">
+                  If an account exists for <strong className="text-white">{forgotEmail}</strong>, a secure one-time login link has been transmitted.
+                </p>
                 <button
                   type="button"
-                  onClick={() => { setShowForgotModal(false); setForgotSubmitted(false); }}
-                  className="w-full mt-2 py-2 bg-emerald-600 text-white font-bold rounded-xl text-xs"
+                  onClick={() => {
+                    setShowForgotModal(false);
+                    setForgotSubmitted(false);
+                  }}
+                  className="mt-3 w-full py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded text-xs transition-colors"
                 >
-                  Return to Sign In
+                  Close
                 </button>
               </div>
             ) : (
-              <form onSubmit={(e) => { e.preventDefault(); setForgotSubmitted(true); }} className="space-y-3">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (forgotEmail) setForgotSubmitted(true);
+                }}
+                className="space-y-3 text-xs"
+              >
+                <p className="text-zinc-400">
+                  Enter your registered work email address to receive a secure recovery token.
+                </p>
                 <input
                   type="email"
-                  required
-                  placeholder="analyst@company.com"
                   value={forgotEmail}
                   onChange={(e) => setForgotEmail(e.target.value)}
-                  className="block w-full rounded-xl border border-slate-800 bg-[#080c14] text-white text-xs p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="analyst@enterprise.com"
+                  required
+                  className="w-full bg-[#080a10] border border-zinc-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-white rounded-lg px-3.5 py-2 text-xs transition-colors placeholder:text-zinc-600 outline-none"
                 />
                 <button
                   type="submit"
-                  className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs shadow-md"
+                  className="w-full py-2.5 px-4 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-zinc-950 font-semibold transition-colors"
                 >
                   Send Recovery Link
                 </button>
               </form>
             )}
+
           </div>
         </div>
       )}
+
+      {/* Footer */}
+      <footer className="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between text-xs text-zinc-500 font-mono border-t border-zinc-800/80">
+        <div>SmartForecast AI • v2.4.2</div>
+        <div className="flex items-center space-x-2 text-zinc-400">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+          <span>All Systems Operational</span>
+        </div>
+      </footer>
 
     </div>
   );

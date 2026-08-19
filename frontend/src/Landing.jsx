@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   TrendingUp, 
   ArrowRight, 
@@ -27,172 +27,463 @@ import {
   Check,
   Info,
   Calendar,
-  AlertTriangle
+  AlertTriangle,
+  Code2,
+  Copy,
+  Terminal,
+  Server,
+  RefreshCw,
+  SlidersHorizontal,
+  ChevronRight,
+  GitBranch,
+  Key
 } from 'lucide-react';
 
-// Live Interactive Datasets for the Sandbox Simulator
+// Live Interactive Datasets for the Studio Simulator
 const SIMULATOR_DATASETS = {
   revenue: {
-    name: 'Enterprise ARR Revenue',
+    id: 'revenue',
+    name: 'Enterprise SaaS ARR',
     category: 'Financial Planning',
     unit: '$M ARR',
+    badge: 'Finance',
     historicalBase: [
-      { date: 'Jan', val: 3.2 },
-      { date: 'Feb', val: 3.4 },
-      { date: 'Mar', val: 3.9 },
-      { date: 'Apr', val: 4.1 },
-      { date: 'May', val: 4.5 },
-      { date: 'Jun', val: 4.8 }
+      { date: 'Jan 24', val: 3.20 },
+      { date: 'Feb 24', val: 3.42 },
+      { date: 'Mar 24', val: 3.88 },
+      { date: 'Apr 24', val: 4.15 },
+      { date: 'May 24', val: 4.52 },
+      { date: 'Jun 24', val: 4.86 }
     ],
-    growthRate: 1.055,
-    volatility: 0.12,
-    seasonalityPattern: [1.02, 1.05, 0.98, 1.08, 1.12, 1.04],
+    growthRate: 1.058,
+    seasonalityPattern: [1.02, 1.05, 0.99, 1.07, 1.11, 1.04],
     models: {
-      ensemble: { accuracy: '99.4%', mape: '1.2%', mae: '$0.04M', rmse: '$0.06M', label: 'Consensus Ensemble (Best Fit)' },
-      prophet: { accuracy: '99.1%', mape: '1.6%', mae: '$0.06M', rmse: '$0.08M', label: 'Meta Prophet (Seasonal)' },
-      arima: { accuracy: '98.5%', mape: '2.2%', mae: '$0.09M', rmse: '$0.12M', label: 'Auto-ARIMA (Auto-Regressive)' },
-      holt: { accuracy: '98.8%', mape: '1.9%', mae: '$0.07M', rmse: '$0.10M', label: 'Holt-Winters (Exponential)' }
+      ensemble: { 
+        accuracy: '99.4%', 
+        mape: '1.18%', 
+        mae: '$0.042M', 
+        rmse: '$0.058M', 
+        aic: '312.4',
+        label: 'Consensus Ensemble (Best Fit)',
+        desc: 'Weighted bayesian ensemble combining Prophet changepoints and ARIMA lag autocorrelation.'
+      },
+      prophet: { 
+        accuracy: '99.1%', 
+        mape: '1.54%', 
+        mae: '$0.061M', 
+        rmse: '$0.079M', 
+        aic: '328.1',
+        label: 'Meta Prophet (Seasonal + Trend)',
+        desc: 'Decomposable additive model with automated holiday effects and piecewise trend changepoints.'
+      },
+      arima: { 
+        accuracy: '98.6%', 
+        mape: '2.12%', 
+        mae: '$0.089M', 
+        rmse: '$0.118M', 
+        aic: '344.7',
+        label: 'Auto-ARIMA (p,d,q)(P,D,Q)s',
+        desc: 'Optimal order selection via Akaike Information Criterion minimization.'
+      },
+      holt: { 
+        accuracy: '98.9%', 
+        mape: '1.85%', 
+        mae: '$0.072M', 
+        rmse: '$0.096M', 
+        aic: '335.2',
+        label: 'Holt-Winters (Triple Exponential)',
+        desc: 'Damped trend smoothing with multiplicative quarterly seasonal cycles.'
+      }
     },
-    geminiInsight: 'Prophet ensembling detected a consistent +5.5% month-over-month expansion with positive Q3 renewal seasonality. Projected ARR crosses $6.2M with low tail-risk variance.',
-    recommendedAction: 'Increase cloud tier capacity by 15% in Q3 to maintain SLA guarantees as contract volume expands.'
-  },
-  supply: {
-    name: 'Supply Chain Inventory Units',
-    category: 'Logistics & Operations',
-    unit: 'k Units',
-    historicalBase: [
-      { date: 'W1', val: 120 },
-      { date: 'W2', val: 128 },
-      { date: 'W3', val: 115 },
-      { date: 'W4', val: 132 },
-      { date: 'W5', val: 140 },
-      { date: 'W6', val: 145 }
+    changepoints: [
+      { date: 'Mar 24', note: 'Q1 Enterprise Tier Expansion (+14% ARR uplift)' },
+      { date: 'May 24', note: 'Europe Datacenter Launch (+9% pipeline expansion)' }
     ],
-    growthRate: 1.042,
-    volatility: 0.18,
-    seasonalityPattern: [1.08, 0.95, 1.12, 1.02, 1.15, 0.98],
-    models: {
-      ensemble: { accuracy: '98.9%', mape: '2.1%', mae: '2.8k', rmse: '3.6k', label: 'Consensus Ensemble (Best Fit)' },
-      prophet: { accuracy: '98.4%', mape: '2.7%', mae: '3.4k', rmse: '4.2k', label: 'Meta Prophet (Seasonal)' },
-      arima: { accuracy: '99.2%', mape: '1.8%', mae: '2.3k', rmse: '3.1k', label: 'Auto-ARIMA (Auto-Regressive)' },
-      holt: { accuracy: '98.1%', mape: '3.1%', mae: '4.0k', rmse: '5.1k', label: 'Holt-Winters (Exponential)' }
-    },
-    geminiInsight: 'Auto-ARIMA identified critical autocorrelation at lag-3. Demand will surge in late summer due to seasonal supplier lead cycles.',
-    recommendedAction: 'Lock in warehouse buffer stock 3 weeks ahead of the August peak to avoid stockout penalties.'
+    geminiAnalysis: {
+      velocity: '+5.8% MoM compound ARR expansion',
+      confidence: 'High (0.94 probability distribution within 95% CI)',
+      risks: 'Seasonal dip typical in late Q3 renewal cycles if mid-market pipeline remains unhedged.',
+      recommendation: 'Expand compute capacity by 18% in late Q3 to guarantee SLA commitments as enterprise usage hits peak.'
+    }
   },
   compute: {
-    name: 'Cloud GPU Compute Load',
-    category: 'Infrastructure & DevOps',
+    id: 'compute',
+    name: 'Cloud GPU Compute Cluster',
+    category: 'DevOps & Infrastructure',
     unit: 'PFLOPS',
+    badge: 'Infrastructure',
     historicalBase: [
-      { date: 'T-5', val: 62 },
-      { date: 'T-4', val: 68 },
-      { date: 'T-3', val: 74 },
-      { date: 'T-2', val: 79 },
-      { date: 'T-1', val: 86 },
-      { date: 'Now', val: 94 }
+      { date: '00:00', val: 62.4 },
+      { date: '04:00', val: 68.1 },
+      { date: '08:00', val: 75.8 },
+      { date: '12:00', val: 81.3 },
+      { date: '16:00', val: 89.6 },
+      { date: '20:00', val: 96.2 }
     ],
-    growthRate: 1.078,
-    volatility: 0.10,
-    seasonalityPattern: [1.04, 1.06, 1.02, 1.09, 1.11, 1.08],
+    growthRate: 1.074,
+    seasonalityPattern: [1.05, 1.08, 1.01, 1.09, 1.12, 1.06],
     models: {
-      ensemble: { accuracy: '99.7%', mape: '0.8%', mae: '0.6 PF', rmse: '0.9 PF', label: 'Consensus Ensemble (Best Fit)' },
-      prophet: { accuracy: '99.3%', mape: '1.2%', mae: '0.9 PF', rmse: '1.3 PF', label: 'Meta Prophet (Seasonal)' },
-      arima: { accuracy: '98.9%', mape: '1.7%', mae: '1.4 PF', rmse: '1.9 PF', label: 'Auto-ARIMA (Auto-Regressive)' },
-      holt: { accuracy: '99.5%', mape: '1.0%', mae: '0.8 PF', rmse: '1.1 PF', label: 'Holt-Winters (Exponential)' }
+      ensemble: { 
+        accuracy: '99.7%', 
+        mape: '0.82%', 
+        mae: '0.58 PF', 
+        rmse: '0.84 PF', 
+        aic: '284.2',
+        label: 'Consensus Ensemble (Best Fit)',
+        desc: 'Hybrid kernel smoothing combining high-frequency telemetry and batch training cycles.'
+      },
+      prophet: { 
+        accuracy: '99.3%', 
+        mape: '1.24%', 
+        mae: '0.88 PF', 
+        rmse: '1.25 PF', 
+        aic: '298.5',
+        label: 'Meta Prophet (Seasonal + Trend)',
+        desc: 'Captures diurnal diurnal workload pulses and scheduled batch training cron triggers.'
+      },
+      arima: { 
+        accuracy: '99.0%', 
+        mape: '1.62%', 
+        mae: '1.34 PF', 
+        rmse: '1.82 PF', 
+        aic: '310.8',
+        label: 'Auto-ARIMA (p,d,q)(P,D,Q)s',
+        desc: 'Strong autoregression at lag-4 matching continuous inference pipeline loads.'
+      },
+      holt: { 
+        accuracy: '99.5%', 
+        mape: '0.98%', 
+        mae: '0.74 PF', 
+        rmse: '1.05 PF', 
+        aic: '289.6',
+        label: 'Holt-Winters (Triple Exponential)',
+        desc: 'Fast exponential adaptation to instantaneous workload escalations.'
+      }
     },
-    geminiInsight: 'Holt-Winters triple exponential smoothing captured non-linear acceleration in model inference calls. Compute demand is trending 48% higher.',
-    recommendedAction: 'Initiate cluster spot reservation autoscaling to optimize cloud cost margins before threshold breach.'
+    changepoints: [
+      { date: '08:00', note: 'APAC Trading Desk Morning Inference Peak' },
+      { date: '16:00', note: 'US Market Batch Embedding Pipeline Trigger' }
+    ],
+    geminiAnalysis: {
+      velocity: '+7.4% rolling shift compute escalation',
+      confidence: 'Very High (0.97 Bayesian posterior convergence)',
+      risks: 'Potential thermal throttling at peak 124 PFLOPS threshold without autoscaling warm-up.',
+      recommendation: 'Pre-provision 32x H100 GPU spot instances 45 minutes prior to next diurnal peak window.'
+    }
+  },
+  supply: {
+    id: 'supply',
+    name: 'Supply Chain Inventory Units',
+    category: 'Supply Chain & Logistics',
+    unit: 'k Units',
+    badge: 'Logistics',
+    historicalBase: [
+      { date: 'Wk 1', val: 124.0 },
+      { date: 'Wk 2', val: 131.5 },
+      { date: 'Wk 3', val: 118.2 },
+      { date: 'Wk 4', val: 136.0 },
+      { date: 'Wk 5', val: 144.2 },
+      { date: 'Wk 6', val: 151.8 }
+    ],
+    growthRate: 1.046,
+    seasonalityPattern: [1.09, 0.94, 1.14, 1.01, 1.16, 0.97],
+    models: {
+      ensemble: { 
+        accuracy: '99.1%', 
+        mape: '1.68%', 
+        mae: '2.14k', 
+        rmse: '2.95k', 
+        aic: '348.9',
+        label: 'Consensus Ensemble (Best Fit)',
+        desc: 'Synthesizes lead-time lag correlations and retailer replenishment cycles.'
+      },
+      prophet: { 
+        accuracy: '98.7%', 
+        mape: '2.35%', 
+        mae: '3.10k', 
+        rmse: '3.98k', 
+        aic: '362.4',
+        label: 'Meta Prophet (Seasonal + Trend)',
+        desc: 'Identifies holiday inventory loading windows and supplier factory shutdowns.'
+      },
+      arima: { 
+        accuracy: '99.3%', 
+        mape: '1.45%', 
+        mae: '1.92k', 
+        rmse: '2.64k', 
+        aic: '341.2',
+        label: 'Auto-ARIMA (p,d,q)(P,D,Q)s',
+        desc: 'Captures strong 3-week order fulfillment autoregressive autocorrelation.'
+      },
+      holt: { 
+        accuracy: '98.2%', 
+        mape: '2.84%', 
+        mae: '3.75k', 
+        rmse: '4.82k', 
+        aic: '375.1',
+        label: 'Holt-Winters (Triple Exponential)',
+        desc: 'Calculates additive trend with seasonal swings across supplier lead times.'
+      }
+    },
+    changepoints: [
+      { date: 'Wk 3', note: 'Supplier Port Transit Bottleneck (-10% throughput)' },
+      { date: 'Wk 5', note: 'Air Freight Route Reallocation (+16% velocity)' }
+    ],
+    geminiAnalysis: {
+      velocity: '+4.6% weekly unit replenishment velocity',
+      confidence: 'High (0.91 statistical certainty)',
+      risks: 'Inventory buffer tightens below 14-day safety threshold in Week 9.',
+      recommendation: 'Lock in sea freight container reservations 3 weeks earlier to mitigate route cost premiums.'
+    }
+  },
+  ecommerce: {
+    id: 'ecommerce',
+    name: 'E-Commerce Global Transactions',
+    category: 'High-Frequency Retail',
+    unit: 'tx / sec',
+    badge: 'E-Commerce',
+    historicalBase: [
+      { date: 'T-5h', val: 2450 },
+      { date: 'T-4h', val: 2680 },
+      { date: 'T-3h', val: 2920 },
+      { date: 'T-2h', val: 3240 },
+      { date: 'T-1h', val: 3610 },
+      { date: 'Now', val: 4050 }
+    ],
+    growthRate: 1.082,
+    seasonalityPattern: [1.04, 1.07, 1.02, 1.10, 1.14, 1.09],
+    models: {
+      ensemble: { 
+        accuracy: '99.6%', 
+        mape: '0.94%', 
+        mae: '34 tx/s', 
+        rmse: '48 tx/s', 
+        aic: '402.1',
+        label: 'Consensus Ensemble (Best Fit)',
+        desc: 'High-throughput rolling consensus model for microsecond latency applications.'
+      },
+      prophet: { 
+        accuracy: '99.2%', 
+        mape: '1.42%', 
+        mae: '52 tx/s', 
+        rmse: '71 tx/s', 
+        aic: '418.6',
+        label: 'Meta Prophet (Seasonal + Trend)',
+        desc: 'Decomposes intraday flash sale surges and geo-located traffic waves.'
+      },
+      arima: { 
+        accuracy: '99.1%', 
+        mape: '1.58%', 
+        mae: '58 tx/s', 
+        rmse: '79 tx/s', 
+        aic: '422.3',
+        label: 'Auto-ARIMA (p,d,q)(P,D,Q)s',
+        desc: 'Handles high-order moving average coefficients from payment gateway retry queues.'
+      },
+      holt: { 
+        accuracy: '99.4%', 
+        mape: '1.12%', 
+        mae: '41 tx/s', 
+        rmse: '56 tx/s', 
+        aic: '409.8',
+        label: 'Holt-Winters (Triple Exponential)',
+        desc: 'Ultra-fast exponential update weights suited for streaming stream ingestion.'
+      }
+    },
+    changepoints: [
+      { date: 'T-3h', note: 'Flash Sale Push Notification Broadcast' },
+      { date: 'T-1h', note: 'Checkout Payment Gateway Latency Optimization' }
+    ],
+    geminiAnalysis: {
+      velocity: '+8.2% transaction surge rate',
+      confidence: 'Exceptional (0.98 predictive accuracy on streaming test sets)',
+      risks: 'Database connection pool saturation projected at 5,200 tx/sec mark.',
+      recommendation: 'Activate read-replica pooling and edge caching for payment authorization checks.'
+    }
   }
+};
+
+const CODE_EXAMPLES = {
+  python: `# pip install smartforecast-sdk
+import pandas as pd
+from smartforecast import Engine, ModelConfig
+
+# 1. Initialize client with isolated memory runtime
+engine = Engine(api_key="sf_prod_99a8b72c", cluster="us-east-1")
+
+# 2. Ingest time-series DataFrame
+df = pd.read_csv("telemetry_arr.csv", parse_dates=["timestamp"])
+
+# 3. Fit multi-model benchmark concurrently
+benchmark = engine.benchmark(
+    data=df,
+    target_col="arr_metric",
+    date_col="timestamp",
+    models=["prophet", "auto_arima", "holt_winters", "ensemble"],
+    cv_folds=5,
+    forecast_horizon=30
+)
+
+# 4. Extract champion forecast & Gemini executive briefing
+champion = benchmark.get_best_model(metric="mape")
+forecast_df = champion.predict(horizon=30, confidence_interval=0.95)
+reasoning = benchmark.get_gemini_analysis()
+
+print(f"Champion: {champion.name} | Backtest MAPE: {champion.mape:.2f}%")
+print(f"Gemini Synthesis: {reasoning.executive_summary}")`,
+
+  curl: `# Direct High-Throughput REST API Call
+curl -X POST "https://api.smartforecast.ai/v1/forecast/benchmark" \\
+  -H "Authorization: Bearer sf_prod_99a8b72c" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "dataset_id": "ds_arr_2026",
+    "horizon": 30,
+    "confidence_level": 0.95,
+    "seasonality_mode": "additive",
+    "algorithms": ["ensemble", "prophet", "arima", "holt_winters"],
+    "explain_with_gemini": true
+  }'`,
+
+  typescript: `// TypeScript / Node.js Engine Client
+import { SmartForecastClient } from '@smartforecast/sdk';
+
+const sf = new SmartForecastClient({
+  apiKey: process.env.SMARTFORECAST_API_KEY!,
+  clusterRegion: 'us-east-1'
+});
+
+// Run distributed forecast across 4 model families
+const result = await sf.forecast.runBenchmark({
+  records: historicalPoints,
+  targetKey: 'arr_metric',
+  timestampKey: 'timestamp',
+  horizonSteps: 30,
+  includeExecutiveAI: true
+});
+
+console.log(\`Best Model: \${result.champion.modelName}\`);
+console.log(\`Projected P50: \${result.champion.predictions[29].yhat}\`);
+console.log(\`AI Diagnostics: \${result.geminiBriefing.summary}\`);`,
+
+  sql: `-- Native Snowflake / BigQuery / Databricks SQL Interface
+SELECT 
+    d.timestamp,
+    d.historical_value,
+    f.predicted_p50,
+    f.confidence_lower_95,
+    f.confidence_upper_95,
+    f.model_family,
+    f.gemini_risk_flag
+FROM enterprise_telemetry.sales_daily d
+MODEL PREDICT smartforecast_ensemble (
+    TARGET d.historical_value,
+    HORIZON 30,
+    CLUSTER 'ephemeral-gpu'
+) OVER (ORDER BY d.timestamp) f
+WHERE d.timestamp >= CURRENT_DATE - INTERVAL '180 DAYS';`
 };
 
 const FAQ_ITEMS = [
   {
     q: 'How does SmartForecast AI benchmark multiple models simultaneously?',
-    a: 'When you upload or select a time-series dataset, our backend pipeline concurrently fits Meta Prophet, Auto-ARIMA, Holt-Winters Exponential Smoothing, and Moving Average algorithms. It computes Mean Absolute Percentage Error (MAPE), Root Mean Square Error (RMSE), and Mean Absolute Error (MAE) through cross-validation, automatically designating the champion model for your specific data.'
+    a: 'When time-series data is ingested, our worker cluster spawns parallel execution threads for Meta Prophet (decomposable changepoint regression), Auto-ARIMA (AIC-minimizing autoregression), Holt-Winters (triple exponential smoothing), and Moving Average algorithms. It computes Mean Absolute Percentage Error (MAPE), Root Mean Square Error (RMSE), and Mean Absolute Error (MAE) via rolling cross-validation folds, automatically surfacing the mathematical champion model for your data.'
   },
   {
-    q: 'What is the role of Gemini 2.5 AI in numerical forecasting?',
-    a: 'While mathematical algorithms compute the statistical projection vectors and confidence bounds, Gemini AI analyzes the underlying trend velocity, detected changepoints, volatility, and seasonal spikes to synthesize plain-English executive briefings, highlight operational risks, and recommend concrete management actions.'
+    q: 'What exact role does Gemini AI play in numerical forecasting?',
+    a: 'Classical statistical and ML models compute the numerical vectors, trend gradients, and Bayesian confidence boundaries. Gemini 2.5 analyzes the computed changepoints, volatility clusters, residual distribution, and seasonal anomalies to synthesize plain-English executive briefings, highlight tail risks, and recommend concrete operational decisions.'
   },
   {
     q: 'How are the 95% Bayesian Confidence Intervals calculated?',
-    a: 'Confidence intervals represent the statistical boundaries within which the future value is expected to fall with 95% probability. As the forecast horizon extends further into the future, the uncertainty fan naturally expands, giving risk managers visibility into both worst-case and best-case scenarios.'
+    a: 'Confidence intervals represent the statistical boundaries within which future values will fall with 95% certainty. As the forecast horizon extends deeper into the future, the uncertainty fan naturally expands to account for variance accumulation, giving engineering and finance leaders visibility into both worst-case (P05) and best-case (P95) boundaries.'
   },
   {
-    q: 'Can I upload my own custom CSV or Excel files?',
-    a: 'Yes. SmartForecast AI features an intelligent data parser that auto-detects date columns (e.g. ISO-8601, YYYY-MM-DD, DD/MM/YYYY) and numeric metrics, automatically filling missing gaps and filtering anomalies without requiring complex configuration.'
+    q: 'Can I upload custom CSV, Excel, or streaming time-series data?',
+    a: 'Yes. SmartForecast features an intelligent schema parser that automatically detects ISO-8601, Unix epoch, YYYY-MM-DD, or DD/MM/YYYY dates, handles irregular sampling frequencies, fills missing intervals using Kalman or linear interpolation, and isolates outliers before model fitting.'
   },
   {
-    q: 'Is our proprietary business and customer data kept private and secure?',
-    a: 'Absolutely. All computations take place in isolated, in-memory ephemeral runtime environments. We never retain customer data for public AI training, and all communications are secured with 256-bit AES encryption at rest and TLS 1.3 in transit.'
+    q: 'What is your security and data retention architecture?',
+    a: 'All forecasting runs execute in isolated, in-memory ephemeral worker containers. Data is never persisted on disk, never shared across tenants, and never used to train public foundation models. We support TLS 1.3 in transit and AES-256 encryption at rest.'
+  },
+  {
+    q: 'What is the inference latency and throughput for production workloads?',
+    a: 'Our optimized C++ / Python backend fits standard time-series datasets (<10,000 points) across all 4 algorithmic families in under 45ms. For enterprise scale, batch inference handles millions of time-series series concurrently across distributed worker nodes.'
   }
 ];
 
 export default function Landing({ onLoginClick, onQuickStart }) {
   const [activeDatasetKey, setActiveDatasetKey] = useState('revenue');
   const [selectedModelKey, setSelectedModelKey] = useState('ensemble');
-  const [forecastHorizon, setForecastHorizon] = useState(30); // 7, 30, 90, 180 days
-  const [hoveredNode, setHoveredNode] = useState(null);
-  const [openFaqIndex, setOpenFaqIndex] = useState(null);
+  const [forecastHorizon, setForecastHorizon] = useState(30); // 7, 30, 90, 180
+  const [ciSpreadMode, setCiSpreadMode] = useState('95'); // '80' | '95'
+  const [activeCodeTab, setActiveCodeTab] = useState('python');
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [hoveredPointIndex, setHoveredPointIndex] = useState(null);
+  const [openFaqIndex, setOpenFaqIndex] = useState(0);
 
   const currentDataset = SIMULATOR_DATASETS[activeDatasetKey];
   const currentModelStats = currentDataset.models[selectedModelKey];
 
   // Dynamically compute forecast curve based on horizon and selected model
-  const horizonSteps = forecastHorizon <= 14 ? 3 : forecastHorizon <= 60 ? 5 : 7;
-  const lastHist = currentDataset.historicalBase[currentDataset.historicalBase.length - 1].val;
-  
-  const futurePoints = [];
-  for (let i = 1; i <= horizonSteps; i++) {
-    const periodFraction = (i / horizonSteps) * (forecastHorizon / 30);
-    const growthMult = Math.pow(currentDataset.growthRate, periodFraction);
-    const seasonIndex = (i - 1) % currentDataset.seasonalityPattern.length;
-    const seasonMult = currentDataset.seasonalityPattern[seasonIndex];
+  const futurePoints = useMemo(() => {
+    const horizonSteps = forecastHorizon <= 14 ? 4 : forecastHorizon <= 60 ? 6 : 8;
+    const lastHist = currentDataset.historicalBase[currentDataset.historicalBase.length - 1].val;
+    const points = [];
     
-    // Model specific variance multiplier
-    const modelVariance = selectedModelKey === 'arima' ? 1.05 : selectedModelKey === 'holt' ? 0.98 : 1.0;
-    const predictedVal = Number((lastHist * growthMult * seasonMult * modelVariance).toFixed(2));
-    
-    // Confidence Interval fans out with time
-    const spreadFraction = 0.04 + (i * 0.025);
-    const upper = Number((predictedVal * (1 + spreadFraction)).toFixed(2));
-    const lower = Number((predictedVal * (1 - spreadFraction)).toFixed(2));
-    
-    const label = forecastHorizon <= 14 
-      ? `Day +${i * 3}` 
-      : forecastHorizon <= 60 
-        ? `Month +${i}` 
-        : `Qtr +${Math.ceil(i / 2)}`;
+    for (let i = 1; i <= horizonSteps; i++) {
+      const periodFraction = (i / horizonSteps) * (forecastHorizon / 30);
+      const growthMult = Math.pow(currentDataset.growthRate, periodFraction);
+      const seasonIndex = (i - 1) % currentDataset.seasonalityPattern.length;
+      const seasonMult = currentDataset.seasonalityPattern[seasonIndex];
+      
+      // Model specific variance multiplier
+      const modelVariance = selectedModelKey === 'arima' ? 1.03 : selectedModelKey === 'holt' ? 0.98 : 1.0;
+      const predictedVal = Number((lastHist * growthMult * seasonMult * modelVariance).toFixed(2));
+      
+      // CI Spread
+      const spreadBase = ciSpreadMode === '95' ? 0.055 : 0.035;
+      const spreadFraction = spreadBase + (i * 0.022);
+      const upper = Number((predictedVal * (1 + spreadFraction)).toFixed(2));
+      const lower = Number((predictedVal * (1 - spreadFraction)).toFixed(2));
+      
+      const label = forecastHorizon <= 14 
+        ? `Day +${i * 2}` 
+        : forecastHorizon <= 60 
+          ? `M+${i}` 
+          : `Q+${Math.ceil(i / 2)}`;
 
-    futurePoints.push({
-      label,
-      val: predictedVal,
-      upper,
-      lower,
-      isForecast: true
-    });
-  }
+      points.push({
+        label,
+        val: predictedVal,
+        upper,
+        lower,
+        isForecast: true
+      });
+    }
+    return points;
+  }, [currentDataset, selectedModelKey, forecastHorizon, ciSpreadMode]);
 
   // Combined points for SVG plotting
-  const allPoints = [
-    ...currentDataset.historicalBase.map(h => ({ ...h, isForecast: false })),
-    ...futurePoints
-  ];
+  const allPoints = useMemo(() => {
+    return [
+      ...currentDataset.historicalBase.map(h => ({ ...h, isForecast: false })),
+      ...futurePoints
+    ];
+  }, [currentDataset, futurePoints]);
 
   // SVG dimensions
-  const svgWidth = 520;
-  const svgHeight = 160;
-  const minVal = Math.min(...allPoints.map(p => p.lower || p.val)) * 0.88;
-  const maxVal = Math.max(...allPoints.map(p => p.upper || p.val)) * 1.12;
+  const svgWidth = 620;
+  const svgHeight = 200;
+  const minVal = Math.min(...allPoints.map(p => p.lower || p.val)) * 0.90;
+  const maxVal = Math.max(...allPoints.map(p => p.upper || p.val)) * 1.08;
 
   const getY = (v) => {
     const clamped = Math.max(minVal, Math.min(maxVal, v));
-    return svgHeight - ((clamped - minVal) / (maxVal - minVal)) * (svgHeight - 30) - 15;
+    return svgHeight - ((clamped - minVal) / (maxVal - minVal)) * (svgHeight - 40) - 20;
   };
 
   const getX = (idx) => {
-    return (idx / (allPoints.length - 1)) * (svgWidth - 40) + 20;
+    return (idx / (allPoints.length - 1)) * (svgWidth - 60) + 30;
   };
 
   const originHistIndex = currentDataset.historicalBase.length - 1;
@@ -217,868 +508,875 @@ export default function Landing({ onLoginClick, onQuickStart }) {
   const fanLower = [...futurePoints].reverse().map((pt, idx) => `${getX(allPoints.length - 1 - idx)},${getY(pt.lower)}`).join(' ');
   const fanPolygonPoints = `${originX},${originY} ${fanUpper} ${fanLower} ${originX},${originY}`;
 
-  const toggleFaq = (index) => {
-    setOpenFaqIndex(openFaqIndex === index ? null : index);
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(CODE_EXAMPLES[activeCodeTab]);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
   };
 
-  const handleStartSandboxInWorkspace = () => {
-    if (onQuickStart) {
-      onQuickStart();
-    } else if (onLoginClick) {
-      onLoginClick();
-    }
-  };
+  const activePoint = hoveredPointIndex !== null ? allPoints[hoveredPointIndex] : null;
 
   return (
-    <div className="min-h-screen bg-[#080c14] text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950 overflow-x-hidden w-full max-w-full relative">
+    <div className="min-h-screen bg-[#090a0f] text-slate-100 font-sans selection:bg-cyan-500/30 selection:text-cyan-200 overflow-x-hidden w-full max-w-full relative">
       
-      {/* Background Ambience Layers */}
+      {/* Subtle Developer Canvas Ambience (No cheesy oversaturated neon blobs) */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute inset-0 forecasting-radial-mesh" />
-        <div className="absolute inset-0 forecasting-grid-pattern opacity-40" />
-        <div className="absolute -top-32 -left-32 w-[580px] h-[580px] bg-blue-600/15 rounded-full blur-[160px] animate-pulse-slow" />
-        <div className="absolute top-1/3 -right-32 w-[520px] h-[520px] bg-cyan-500/15 rounded-full blur-[150px] animate-pulse-slow" />
-        <div className="absolute bottom-10 left-1/3 w-[450px] h-[450px] bg-indigo-600/10 rounded-full blur-[140px]" />
+        <div className="absolute inset-0 dev-grid-pattern opacity-60" />
+        <div className="absolute inset-0 dev-radial-glow opacity-80" />
       </div>
 
-      {/* Sticky Glass Navigation Bar */}
-      <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-[#080c14]/85 border-b border-slate-800/80">
+      {/* Top Header / Navigation Bar */}
+      <header className="sticky top-0 z-50 w-full pro-glass border-b border-zinc-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
-          {/* Brand Logo */}
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-400 p-[1px] shadow-lg shadow-cyan-500/20">
-              <div className="h-full w-full bg-[#080c14] rounded-[11px] flex items-center justify-center">
-                <TrendingUp className="h-4 w-4 text-cyan-400" />
-              </div>
+          {/* Brand Logo & Version Tag */}
+          <div 
+            className="flex items-center space-x-3 cursor-pointer group" 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
+            <div className="h-8 w-8 rounded-lg bg-zinc-900 border border-zinc-700/80 flex items-center justify-center shadow-inner group-hover:border-cyan-500/50 transition-colors">
+              <TrendingUp className="h-4 w-4 text-cyan-400" />
             </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-base sm:text-lg font-extrabold tracking-tight text-white">SmartForecast</span>
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-                Enterprise AI
+            <div className="flex items-center space-x-2.5">
+              <span className="text-sm font-semibold tracking-tight text-white font-mono">SmartForecast</span>
+              <span className="text-[10px] font-mono text-zinc-400 px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800">
+                v2.4.2-prod
               </span>
             </div>
           </div>
 
-          {/* Nav Links */}
-          <nav className="hidden lg:flex items-center space-x-7 text-xs font-medium text-slate-300">
-            <a href="#simulator" className="hover:text-cyan-400 transition-colors flex items-center space-x-1">
-              <span>Live Simulator</span>
-              <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
-            </a>
-            <a href="#pillars" className="hover:text-cyan-400 transition-colors">Forecasting Pillars</a>
-            <a href="#algorithms" className="hover:text-cyan-400 transition-colors">Model Arsenal</a>
-            <a href="#workflow" className="hover:text-cyan-400 transition-colors">How It Works</a>
-            <a href="#metrics" className="hover:text-cyan-400 transition-colors">Metrics Guide</a>
-            <a href="#security" className="hover:text-cyan-400 transition-colors">Security</a>
-            <a href="#faq" className="hover:text-cyan-400 transition-colors">FAQ</a>
+          {/* Navigation Links */}
+          <nav className="hidden md:flex items-center space-x-6 text-xs text-zinc-400 font-medium">
+            <a href="#sandbox" className="hover:text-white transition-colors">Studio Simulator</a>
+            <a href="#benchmark" className="hover:text-white transition-colors">Model Benchmark</a>
+            <a href="#sdk" className="hover:text-white transition-colors">Developer SDK</a>
+            <a href="#architecture" className="hover:text-white transition-colors">Pipeline Arch</a>
+            <a href="#faq" className="hover:text-white transition-colors">Technical FAQ</a>
           </nav>
 
           {/* Action CTAs */}
           <div className="flex items-center space-x-3">
             <button
-              type="button"
               onClick={onLoginClick}
-              className="text-xs font-semibold text-slate-300 hover:text-white px-3.5 py-2 rounded-xl hover:bg-slate-900 border border-transparent hover:border-slate-800 transition-all"
+              className="text-xs font-medium text-zinc-300 hover:text-white px-3 py-1.5 rounded-md hover:bg-zinc-800/60 transition-colors"
             >
               Sign In
             </button>
             <button
-              type="button"
-              onClick={handleStartSandboxInWorkspace}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:via-indigo-500 hover:to-blue-500 shadow-lg shadow-blue-600/30 hover:shadow-blue-500/40 transition-all flex items-center space-x-1.5 group"
+              onClick={onQuickStart}
+              className="text-xs font-medium text-zinc-950 bg-white hover:bg-zinc-200 px-3.5 py-1.5 rounded-md transition-all flex items-center space-x-1.5 shadow-sm active:scale-[0.98]"
             >
-              <span>Launch Workspace</span>
-              <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+              <Zap className="h-3.5 w-3.5 text-zinc-950 fill-zinc-950" />
+              <span>Launch Studio</span>
+              <span className="kbd-badge ml-1 hidden sm:inline-block">Instant Demo</span>
             </button>
           </div>
-
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-12 sm:pt-20 sm:pb-16 text-center">
-        
-        {/* Eyebrow Pill */}
-        <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-blue-500/10 via-cyan-500/10 to-indigo-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold mb-6 shadow-sm">
-          <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
-          <span>Multi-Model Predictive AI & Gemini Executive Intelligence</span>
-        </div>
-
-        {/* Hero Title */}
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.12] max-w-5xl mx-auto">
-          Turn Historical Data Into <br className="hidden sm:inline" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400">
-            Predictive Certainty
-          </span>
-        </h1>
-
-        {/* Subtitle */}
-        <p className="mt-5 text-sm sm:text-lg text-slate-400 max-w-3xl mx-auto leading-relaxed">
-          Automatically fit, benchmark, and explain <strong className="text-slate-200 font-semibold">Meta Prophet</strong>, <strong className="text-slate-200 font-semibold">Auto-ARIMA</strong>, and <strong className="text-slate-200 font-semibold">Holt-Winters</strong> models in parallel. Enriched with 95% Bayesian confidence intervals and automated Gemini LLM executive briefs.
-        </p>
-
-        {/* Primary Action Triggers */}
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3.5">
-          <button
-            type="button"
-            onClick={handleStartSandboxInWorkspace}
-            className="w-full sm:w-auto px-7 py-3.5 rounded-2xl text-sm font-bold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:via-indigo-500 hover:to-blue-500 shadow-xl shadow-blue-600/30 hover:shadow-blue-500/40 transition-all flex items-center justify-center space-x-2 group"
-          >
-            <span>Launch Free Workspace</span>
-            <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-          </button>
+      <section className="relative z-10 pt-16 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="max-w-4xl mx-auto text-center space-y-6">
           
-          <a
-            href="#simulator"
-            className="w-full sm:w-auto px-6 py-3.5 rounded-2xl text-sm font-bold text-slate-300 bg-slate-900/90 border border-slate-800 hover:border-slate-700 hover:text-white transition-all flex items-center justify-center space-x-2 shadow-sm"
-          >
-            <Activity className="h-4 w-4 text-cyan-400" />
-            <span>Try Live Simulator Below</span>
-          </a>
-        </div>
+          {/* Status Indicator Badge */}
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-zinc-900/90 border border-zinc-800 text-zinc-300 text-xs font-mono">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-live-dot" />
+            <span>High-Throughput Time-Series Engine</span>
+            <span className="text-zinc-500">|</span>
+            <span className="text-cyan-400">p99 &lt; 38ms Latency</span>
+          </div>
 
-        {/* Trust Badges KPI Ticker */}
-        <div className="mt-12 pt-8 border-t border-slate-800/80 max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3.5 text-center">
-          <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/70">
-            <span className="text-xl sm:text-2xl font-extrabold text-white block">99.4%</span>
-            <span className="text-[11px] text-slate-400 uppercase tracking-wider font-medium">Model Precision Fit</span>
+          {/* Main Title */}
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
+            Production Time-Series Intelligence & ML Forecasting Engine
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-base sm:text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+            Benchmark Meta Prophet, Auto-ARIMA, Holt-Winters, and Neural Ensembles in parallel. Get automated Bayesian confidence fans and Gemini-synthesized executive briefings in real time.
+          </p>
+
+          {/* Action CTAs */}
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <button
+              onClick={onQuickStart}
+              className="text-sm font-semibold text-zinc-950 bg-cyan-400 hover:bg-cyan-300 px-5 py-2.5 rounded-lg transition-all flex items-center space-x-2 shadow-lg shadow-cyan-500/10 active:scale-[0.98]"
+            >
+              <Play className="h-4 w-4 fill-zinc-950" />
+              <span>Explore Live Workspace</span>
+              <span className="text-xs bg-cyan-500/30 text-zinc-950 px-1.5 py-0.5 rounded font-mono font-medium">Demo</span>
+            </button>
+
+            <button
+              onClick={onLoginClick}
+              className="text-sm font-semibold text-zinc-200 hover:text-white bg-zinc-900/90 hover:bg-zinc-800 px-4 py-2.5 rounded-lg border border-zinc-800 transition-all flex items-center space-x-2"
+            >
+              <Lock className="h-3.5 w-3.5 text-zinc-400" />
+              <span>Sign In / Connect Data</span>
+            </button>
+
+            <a
+              href="#sdk"
+              className="text-sm font-semibold text-zinc-400 hover:text-white px-3 py-2.5 rounded-lg hover:bg-zinc-900 transition-colors flex items-center space-x-1 font-mono text-xs"
+            >
+              <Code2 className="h-3.5 w-3.5" />
+              <span>Python SDK &amp; API</span>
+            </a>
           </div>
-          <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/70">
-            <span className="text-xl sm:text-2xl font-extrabold text-cyan-400 block">&lt; 25ms</span>
-            <span className="text-[11px] text-slate-400 uppercase tracking-wider font-medium">Inference Latency</span>
-          </div>
-          <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/70">
-            <span className="text-xl sm:text-2xl font-extrabold text-indigo-400 block">95% CI</span>
-            <span className="text-[11px] text-slate-400 uppercase tracking-wider font-medium">Bayesian Variance</span>
-          </div>
-          <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/70">
-            <span className="text-xl sm:text-2xl font-extrabold text-emerald-400 block">Zero-Retention</span>
-            <span className="text-[11px] text-slate-400 uppercase tracking-wider font-medium">In-Memory Privacy</span>
+
+          {/* Production Specs Ribbon */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-8 max-w-3xl mx-auto text-left">
+            <div className="surface-panel p-3 rounded-lg border border-zinc-800/80">
+              <div className="text-[11px] font-mono text-zinc-500 uppercase">Multi-Model Engine</div>
+              <div className="text-sm font-semibold text-white mt-0.5">4 Algorithmic Families</div>
+              <div className="text-[10px] text-zinc-400 font-mono mt-0.5">Prophet • ARIMA • HW • Ensemble</div>
+            </div>
+            <div className="surface-panel p-3 rounded-lg border border-zinc-800/80">
+              <div className="text-[11px] font-mono text-zinc-500 uppercase">Backtest Precision</div>
+              <div className="text-sm font-semibold text-emerald-400 mt-0.5 num-stat">99.4% Multi-Horizon Fit</div>
+              <div className="text-[10px] text-zinc-400 font-mono mt-0.5">5-Fold Rolling Cross-Validation</div>
+            </div>
+            <div className="surface-panel p-3 rounded-lg border border-zinc-800/80">
+              <div className="text-[11px] font-mono text-zinc-500 uppercase">Inference Speed</div>
+              <div className="text-sm font-semibold text-cyan-400 mt-0.5 num-stat">38ms p99 Latency</div>
+              <div className="text-[10px] text-zinc-400 font-mono mt-0.5">In-Memory Ephemeral Engine</div>
+            </div>
+            <div className="surface-panel p-3 rounded-lg border border-zinc-800/80">
+              <div className="text-[11px] font-mono text-zinc-500 uppercase">Privacy &amp; Security</div>
+              <div className="text-sm font-semibold text-white mt-0.5">Zero Data Retention</div>
+              <div className="text-[10px] text-zinc-400 font-mono mt-0.5">AES-256 • Isolated Runtime</div>
+            </div>
           </div>
         </div>
-
       </section>
 
-      {/* SECTION: Interactive Live Forecasting Simulator */}
-      <section id="simulator" className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14 scroll-mt-20">
+      {/* Main Feature: The Interactive Forecasting Studio Simulator */}
+      <section id="sandbox" className="relative z-10 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-semibold mb-3">
-            <Activity className="h-3.5 w-3.5 animate-pulse" />
-            <span>Interactive Live Sandbox</span>
-          </div>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-            Experience Multi-Model Forecasting in Real-Time
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-xl mx-auto">
-            Toggle business datasets, switch algorithms, and drag the forecast horizon slider to see statistical fan curves and Gemini reasoning adapt instantly.
-          </p>
-        </div>
-
-        {/* Interactive Dashboard Container */}
-        <div className="p-5 sm:p-7 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl backdrop-blur-xl glow-indigo">
+        {/* Studio Card Container */}
+        <div className="surface-panel rounded-2xl border border-zinc-800 shadow-2xl overflow-hidden">
           
-          {/* Header Controls: Dataset Tabs */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5 pb-4 border-b border-slate-800">
+          {/* Top Control Bar: Dataset Tabs */}
+          <div className="bg-[#0b0e17] px-4 sm:px-6 py-3.5 border-b border-zinc-800 flex flex-wrap items-center justify-between gap-3">
             
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
-                <h3 className="text-sm sm:text-base font-bold text-white">
-                  {currentDataset.name}
-                </h3>
-              </div>
-              <span className="text-[11px] text-slate-400 mt-0.5 block">
-                Category: {currentDataset.category} • Target Metric: {currentDataset.unit}
-              </span>
-            </div>
-
-            {/* Dataset Switcher Tabs */}
-            <div className="flex flex-wrap items-center gap-1.5 bg-[#080c14] p-1.5 rounded-2xl border border-slate-800">
-              <button
-                type="button"
-                onClick={() => setActiveDatasetKey('revenue')}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all ${
-                  activeDatasetKey === 'revenue' 
-                    ? 'bg-blue-600 text-white shadow-md' 
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                📊 ARR Revenue
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveDatasetKey('supply')}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all ${
-                  activeDatasetKey === 'supply' 
-                    ? 'bg-blue-600 text-white shadow-md' 
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                📦 Supply Chain
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveDatasetKey('compute')}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all ${
-                  activeDatasetKey === 'compute' 
-                    ? 'bg-blue-600 text-white shadow-md' 
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                ⚡ GPU Compute
-              </button>
-            </div>
-
-          </div>
-
-          {/* Model Selector & Horizon Slider Controls Bar */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-5 p-3.5 rounded-2xl bg-[#080c14]/80 border border-slate-800/80">
-            
-            {/* Model Selector Buttons */}
-            <div className="md:col-span-7 flex flex-col justify-center">
-              <span className="text-[10px] uppercase font-bold text-slate-400 mb-1.5 flex items-center">
-                <Sliders className="h-3 w-3 mr-1 text-cyan-400" />
-                Select Algorithmic Engine:
-              </span>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                {[
-                  { key: 'ensemble', name: 'Ensemble Best' },
-                  { key: 'prophet', name: 'Prophet' },
-                  { key: 'arima', name: 'Auto-ARIMA' },
-                  { key: 'holt', name: 'Holt-Winters' }
-                ].map((m) => (
+            {/* Dataset Pill Switcher */}
+            <div className="flex items-center space-x-1 overflow-x-auto py-1 max-w-full">
+              <span className="text-xs text-zinc-400 font-mono mr-2 hidden sm:inline-block">Dataset:</span>
+              {Object.keys(SIMULATOR_DATASETS).map((key) => {
+                const ds = SIMULATOR_DATASETS[key];
+                const isActive = activeDatasetKey === key;
+                return (
                   <button
-                    key={m.key}
-                    type="button"
-                    onClick={() => setSelectedModelKey(m.key)}
-                    className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all text-center ${
-                      selectedModelKey === m.key
-                        ? 'bg-cyan-500/20 border-cyan-500/60 text-cyan-300 shadow-sm'
-                        : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200'
+                    key={key}
+                    onClick={() => {
+                      setActiveDatasetKey(key);
+                      setHoveredPointIndex(null);
+                    }}
+                    className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all whitespace-nowrap flex items-center space-x-1.5 ${
+                      isActive 
+                        ? 'bg-zinc-800 text-cyan-300 border border-zinc-700 shadow-sm' 
+                        : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
                     }`}
                   >
-                    {m.name}
+                    <span>{ds.name}</span>
+                    <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${
+                      isActive ? 'bg-cyan-500/20 text-cyan-300' : 'bg-zinc-800 text-zinc-500'
+                    }`}>
+                      {ds.badge}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Quick Actions */}
+            <div className="flex items-center space-x-2">
+              <span className="text-[11px] font-mono text-zinc-500 hidden md:inline-block">
+                Runtime: Python 3.11 • C++ Core
+              </span>
+              <button
+                onClick={onQuickStart}
+                className="text-xs font-medium text-cyan-400 hover:text-cyan-300 bg-cyan-950/40 hover:bg-cyan-950/70 border border-cyan-800/60 px-3 py-1 rounded-md flex items-center space-x-1.5 transition-colors"
+              >
+                <span>Launch in App</span>
+                <ArrowUpRight className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+
+          {/* Controls Bar: Model & Horizon Controls */}
+          <div className="bg-[#0e121d] px-4 sm:px-6 py-3 border-b border-zinc-800/80 flex flex-wrap items-center justify-between gap-4 text-xs">
+            
+            {/* Algorithm Model Selector */}
+            <div className="flex items-center space-x-1.5 flex-wrap gap-y-1.5">
+              <span className="text-zinc-400 font-mono mr-1">Algorithm:</span>
+              {[
+                { key: 'ensemble', label: 'Auto-Ensemble', tag: 'Best Fit' },
+                { key: 'prophet', label: 'Meta Prophet', tag: 'Seasonal' },
+                { key: 'arima', label: 'Auto-ARIMA', tag: 'Autoregressive' },
+                { key: 'holt', label: 'Holt-Winters', tag: 'Exponential' }
+              ].map((m) => {
+                const isSelected = selectedModelKey === m.key;
+                return (
+                  <button
+                    key={m.key}
+                    onClick={() => setSelectedModelKey(m.key)}
+                    className={`px-2.5 py-1 rounded font-mono transition-all flex items-center space-x-1.5 ${
+                      isSelected
+                        ? 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/40 font-semibold'
+                        : 'bg-zinc-900/80 text-zinc-400 border border-zinc-800 hover:border-zinc-700 hover:text-zinc-300'
+                    }`}
+                  >
+                    <span>{m.label}</span>
+                    {m.tag === 'Best Fit' && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Horizon & CI Controls */}
+            <div className="flex items-center space-x-4">
+              
+              {/* Forecast Horizon */}
+              <div className="flex items-center space-x-1.5">
+                <span className="text-zinc-400 font-mono">Horizon:</span>
+                {[7, 30, 90, 180].map((h) => (
+                  <button
+                    key={h}
+                    onClick={() => setForecastHorizon(h)}
+                    className={`px-2 py-0.5 rounded font-mono text-[11px] ${
+                      forecastHorizon === h
+                        ? 'bg-zinc-700 text-white font-bold'
+                        : 'text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    {h}D
+                  </button>
+                ))}
+              </div>
+
+              {/* Confidence Band Toggle */}
+              <div className="flex items-center space-x-1.5 border-l border-zinc-800 pl-3">
+                <span className="text-zinc-400 font-mono">Fan:</span>
+                {['80', '95'].map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setCiSpreadMode(mode)}
+                    className={`px-2 py-0.5 rounded font-mono text-[11px] ${
+                      ciSpreadMode === mode
+                        ? 'bg-indigo-950 text-indigo-300 border border-indigo-700/60'
+                        : 'text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    {mode}% CI
                   </button>
                 ))}
               </div>
             </div>
-
-            {/* Forecast Horizon Slider */}
-            <div className="md:col-span-5 flex flex-col justify-center pl-0 md:pl-3 border-t md:border-t-0 md:border-l border-slate-800 pt-2 md:pt-0">
-              <div className="flex items-center justify-between mb-1 text-xs">
-                <span className="text-slate-400 font-medium">Forecast Horizon:</span>
-                <span className="font-bold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
-                  {forecastHorizon} Days Forward
-                </span>
-              </div>
-              <input 
-                type="range"
-                min="7"
-                max="180"
-                step="7"
-                value={forecastHorizon}
-                onChange={(e) => setForecastHorizon(Number(e.target.value))}
-                className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
-              />
-              <div className="flex justify-between text-[10px] text-slate-500 mt-1">
-                <span>7 Days</span>
-                <span>30 Days</span>
-                <span>90 Days</span>
-                <span>180 Days</span>
-              </div>
-            </div>
-
           </div>
 
-          {/* Metric Tiles Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5">
-            <div className="bg-[#080c14] p-3 rounded-2xl border border-slate-800">
-              <span className="text-[10px] uppercase text-slate-400 font-semibold block">Baseline Value</span>
-              <span className="text-base font-extrabold text-white">
-                {currentDataset.historicalBase[currentDataset.historicalBase.length - 1].val} {currentDataset.unit}
-              </span>
-            </div>
-            <div className="bg-[#080c14] p-3 rounded-2xl border border-slate-800">
-              <span className="text-[10px] uppercase text-slate-400 font-semibold block">Horizon Forecast</span>
-              <div className="flex items-center space-x-1.5">
-                <span className="text-base font-extrabold text-cyan-400">
-                  {futurePoints[futurePoints.length - 1].val} {currentDataset.unit}
-                </span>
+          {/* Interactive Chart Canvas & Real-Time Stats Grid */}
+          <div className="p-4 sm:p-6 space-y-6">
+            
+            {/* Top Telemetry Header */}
+            <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-1.5 font-mono text-zinc-300">
+                  <span className="h-2 w-2 rounded-full bg-sky-400" />
+                  <span>Historical Ground Truth</span>
+                </div>
+                <div className="flex items-center space-x-1.5 font-mono text-cyan-300">
+                  <span className="h-2 w-2 rounded-full bg-cyan-400" />
+                  <span>Model Projection ({selectedModelKey.toUpperCase()})</span>
+                </div>
+                <div className="flex items-center space-x-1.5 font-mono text-indigo-300">
+                  <span className="h-2 w-2 rounded bg-indigo-500/30 border border-indigo-400/40" />
+                  <span>{ciSpreadMode}% Bayesian Uncertainty Fan</span>
+                </div>
               </div>
-            </div>
-            <div className="bg-[#080c14] p-3 rounded-2xl border border-slate-800">
-              <span className="text-[10px] uppercase text-slate-400 font-semibold block">Fit Quality (MAPE)</span>
-              <span className="text-base font-extrabold text-indigo-400">
-                {currentModelStats.accuracy} <span className="text-[11px] text-slate-500 font-normal">({currentModelStats.mape})</span>
-              </span>
-            </div>
-            <div className="bg-[#080c14] p-3 rounded-2xl border border-slate-800">
-              <span className="text-[10px] uppercase text-slate-400 font-semibold block">95% Confidence Band</span>
-              <span className="text-base font-extrabold text-emerald-400 text-xs truncate">
-                ± {((futurePoints[futurePoints.length - 1].upper - futurePoints[futurePoints.length - 1].lower) / 2).toFixed(1)} {currentDataset.unit}
-              </span>
-            </div>
-          </div>
 
-          {/* Dynamic SVG Fan Graph Visualizer */}
-          <div className="h-52 sm:h-60 w-full relative bg-[#080c14] rounded-2xl border border-slate-800 p-3 overflow-hidden shadow-inner">
-            <svg 
-              viewBox={`0 0 ${svgWidth} ${svgHeight}`} 
-              className="w-full h-full overflow-visible"
-              onMouseLeave={() => setHoveredNode(null)}
-            >
-              <defs>
-                <linearGradient id="forecastFillGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.35" />
-                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
-                </linearGradient>
-                <linearGradient id="fanConfidenceGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#818cf8" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="#818cf8" stopOpacity="0.06" />
-                </linearGradient>
-              </defs>
-
-              {/* Grid Lines */}
-              <line x1="20" y1="35" x2={svgWidth - 20} y2="35" stroke="#1e293b" strokeDasharray="3 3" strokeOpacity="0.7" />
-              <line x1="20" y1="80" x2={svgWidth - 20} y2="80" stroke="#1e293b" strokeDasharray="3 3" strokeOpacity="0.7" />
-              <line x1="20" y1="125" x2={svgWidth - 20} y2="125" stroke="#1e293b" strokeDasharray="3 3" strokeOpacity="0.7" />
-
-              {/* Origin Split Line */}
-              <line x1={originX} y1="10" x2={originX} y2={svgHeight - 10} stroke="#06b6d4" strokeDasharray="3 2" strokeWidth="1.5" />
-              <text x={originX + 6} y="22" fill="#06b6d4" fontSize="9" fontWeight="700" letterSpacing="0.5">
-                FORECAST HORIZON
-              </text>
-
-              {/* 95% Confidence Fan Area */}
-              <polygon points={fanPolygonPoints} fill="url(#fanConfidenceGrad)" />
-
-              {/* Historical Area */}
-              <path 
-                d={`${histPath} L ${originX} ${svgHeight - 15} L ${getX(0)} ${svgHeight - 15} Z`} 
-                fill="url(#forecastFillGrad)" 
-              />
-
-              {/* Historical Solid Line */}
-              <path 
-                d={histPath} 
-                fill="none" 
-                stroke="#38bdf8" 
-                strokeWidth="2.75" 
-                strokeLinecap="round" 
-              />
-
-              {/* Predicted Dashed Curve */}
-              <path 
-                d={forecastPath} 
-                fill="none" 
-                stroke="#818cf8" 
-                strokeWidth="2.75" 
-                strokeDasharray="5 3.5" 
-                strokeLinecap="round" 
-              />
-
-              {/* Interactive Node Circles */}
-              {allPoints.map((pt, idx) => {
-                const cx = getX(idx);
-                const cy = getY(pt.val);
-                const isOrigin = idx === originHistIndex;
-
-                return (
-                  <g 
-                    key={idx} 
-                    className="cursor-pointer" 
-                    onMouseEnter={() => setHoveredNode({ ...pt, cx, cy })}
-                  >
-                    <circle 
-                      cx={cx} 
-                      cy={cy} 
-                      r={isOrigin ? 5.5 : 4} 
-                      fill={pt.isForecast ? "#818cf8" : (isOrigin ? "#06b6d4" : "#38bdf8")} 
-                      className={isOrigin ? "animate-pulse" : "transition-transform hover:scale-150"}
-                    />
-                    {isOrigin && (
-                      <circle cx={cx} cy={cy} r="9" fill="none" stroke="#06b6d4" strokeWidth="1.2" className="animate-ping opacity-75" />
+              {/* Point Inspector Badge */}
+              <div className="font-mono text-[11px] text-zinc-400 bg-zinc-900 px-2.5 py-1 rounded border border-zinc-800">
+                {activePoint ? (
+                  <span>
+                    <strong className="text-white">{activePoint.label || activePoint.date}:</strong>{' '}
+                    <span className="text-cyan-400 font-semibold">{activePoint.val} {currentDataset.unit}</span>
+                    {activePoint.upper && (
+                      <span className="text-zinc-500 ml-1.5">
+                        [CI: {activePoint.lower} – {activePoint.upper}]
+                      </span>
                     )}
-                  </g>
-                );
-              })}
-            </svg>
-
-            {/* Hover Tooltip Overlay */}
-            {hoveredNode && (
-              <div 
-                className="absolute z-30 bg-slate-950/95 border border-cyan-500/40 text-xs p-2.5 rounded-xl shadow-2xl backdrop-blur-md animate-fadeIn pointer-events-none"
-                style={{
-                  top: Math.max(10, hoveredNode.cy - 60),
-                  left: Math.min(window.innerWidth > 640 ? 340 : 180, Math.max(20, hoveredNode.cx - 70))
-                }}
-              >
-                <div className="flex items-center space-x-1.5 mb-1 font-bold text-white">
-                  <span>{hoveredNode.label || hoveredNode.date}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-semibold ${hoveredNode.isForecast ? 'bg-indigo-500/20 text-indigo-300' : 'bg-cyan-500/20 text-cyan-300'}`}>
-                    {hoveredNode.isForecast ? 'Predicted' : 'Historical Actual'}
                   </span>
-                </div>
-                <div className="text-cyan-400 font-extrabold text-sm">
-                  {hoveredNode.val} {currentDataset.unit}
-                </div>
-                {hoveredNode.upper && (
-                  <div className="text-[10px] text-slate-400 mt-0.5">
-                    95% CI Range: [{hoveredNode.lower} - {hoveredNode.upper}]
-                  </div>
+                ) : (
+                  <span>Hover points on curve to inspect exact telemetry bounds</span>
                 )}
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* Gemini AI Reasoner Card */}
-          <div className="mt-4 p-4 rounded-2xl bg-[#080c14] border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-start space-x-3">
-              <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center flex-shrink-0 text-white shadow-md">
-                <BrainCircuit className="h-4 w-4" />
+            {/* SVG Interactive Time-Series Canvas */}
+            <div className="relative w-full h-56 sm:h-64 bg-[#080a11] rounded-xl border border-zinc-800/80 p-2 overflow-hidden">
+              <svg 
+                viewBox={`0 0 ${svgWidth} ${svgHeight}`} 
+                className="w-full h-full overflow-visible"
+                preserveAspectRatio="none"
+              >
+                <defs>
+                  <linearGradient id="studioHistGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.00" />
+                  </linearGradient>
+                  
+                  <linearGradient id="studioFanGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#6366f1" stopOpacity="0.28" />
+                    <stop offset="100%" stopColor="#6366f1" stopOpacity="0.04" />
+                  </linearGradient>
+                </defs>
+
+                {/* Subtle Horizontal Grid lines */}
+                {[0.25, 0.5, 0.75].map((pct, idx) => {
+                  const y = svgHeight * pct;
+                  return (
+                    <g key={idx}>
+                      <line 
+                        x1="20" 
+                        y1={y} 
+                        x2={svgWidth - 20} 
+                        y2={y} 
+                        stroke="#1e293b" 
+                        strokeDasharray="4 4" 
+                        strokeOpacity="0.5" 
+                      />
+                    </g>
+                  );
+                })}
+
+                {/* Vertical Cutoff Separator at Historical Origin */}
+                <line 
+                  x1={originX} 
+                  y1="10" 
+                  x2={originX} 
+                  y2={svgHeight - 15} 
+                  stroke="#06b6d4" 
+                  strokeDasharray="3 3" 
+                  strokeWidth="1.5" 
+                />
+                <text 
+                  x={originX + 8} 
+                  y="22" 
+                  fill="#06b6d4" 
+                  fontSize="9" 
+                  fontFamily="JetBrains Mono" 
+                  fontWeight="600"
+                >
+                  FORECAST HORIZON ({forecastHorizon}D) →
+                </text>
+
+                {/* 95% Confidence Fan Area */}
+                <polygon 
+                  points={fanPolygonPoints} 
+                  fill="url(#studioFanGradient)" 
+                  stroke="#818cf8" 
+                  strokeWidth="0.75" 
+                  strokeDasharray="2 2" 
+                  strokeOpacity="0.6" 
+                />
+
+                {/* Historical Area Under Curve */}
+                <path 
+                  d={`${histPath} L ${originX} ${svgHeight - 15} L ${getX(0)} ${svgHeight - 15} Z`} 
+                  fill="url(#studioHistGradient)" 
+                />
+
+                {/* Historical Solid Trend Line */}
+                <path 
+                  d={histPath} 
+                  fill="none" 
+                  stroke="#38bdf8" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                />
+
+                {/* Predicted Dashed Forecast Line */}
+                <path 
+                  d={forecastPath} 
+                  fill="none" 
+                  stroke="#22d3ee" 
+                  strokeWidth="2.5" 
+                  strokeDasharray="5 4" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                />
+
+                {/* Historical Points */}
+                {currentDataset.historicalBase.map((pt, idx) => {
+                  const x = getX(idx);
+                  const y = getY(pt.val);
+                  const isHovered = hoveredPointIndex === idx;
+                  return (
+                    <g key={`hist-${idx}`} className="cursor-pointer" onMouseEnter={() => setHoveredPointIndex(idx)}>
+                      <circle 
+                        cx={x} 
+                        cy={y} 
+                        r={isHovered ? 6 : 4} 
+                        fill="#090a0f" 
+                        stroke="#38bdf8" 
+                        strokeWidth={isHovered ? 3 : 2} 
+                        className="transition-all"
+                      />
+                    </g>
+                  );
+                })}
+
+                {/* Future Predicted Points */}
+                {futurePoints.map((pt, idx) => {
+                  const actualIdx = originHistIndex + 1 + idx;
+                  const x = getX(actualIdx);
+                  const y = getY(pt.val);
+                  const isHovered = hoveredPointIndex === actualIdx;
+                  return (
+                    <g key={`fut-${idx}`} className="cursor-pointer" onMouseEnter={() => setHoveredPointIndex(actualIdx)}>
+                      <circle 
+                        cx={x} 
+                        cy={y} 
+                        r={isHovered ? 6 : 4} 
+                        fill="#090a0f" 
+                        stroke="#22d3ee" 
+                        strokeWidth={isHovered ? 3 : 2} 
+                        className="transition-all"
+                      />
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+
+            {/* Model Loss Metrics & Statistical Diagnostics Bar */}
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <div className="bg-[#0b0e17] p-3 rounded-lg border border-zinc-800/80">
+                <div className="text-[10px] font-mono text-zinc-500 uppercase">Backtest MAPE</div>
+                <div className="text-base font-semibold text-emerald-400 num-stat mt-0.5">
+                  {currentModelStats.mape}
+                </div>
+                <div className="text-[10px] text-zinc-400 font-mono mt-0.5">Grade: Optimal</div>
               </div>
-              <div>
+
+              <div className="bg-[#0b0e17] p-3 rounded-lg border border-zinc-800/80">
+                <div className="text-[10px] font-mono text-zinc-500 uppercase">RMSE Loss</div>
+                <div className="text-base font-semibold text-cyan-400 num-stat mt-0.5">
+                  {currentModelStats.rmse}
+                </div>
+                <div className="text-[10px] text-zinc-400 font-mono mt-0.5">Root Mean Sq Err</div>
+              </div>
+
+              <div className="bg-[#0b0e17] p-3 rounded-lg border border-zinc-800/80">
+                <div className="text-[10px] font-mono text-zinc-500 uppercase">MAE Error</div>
+                <div className="text-base font-semibold text-zinc-200 num-stat mt-0.5">
+                  {currentModelStats.mae}
+                </div>
+                <div className="text-[10px] text-zinc-400 font-mono mt-0.5">Mean Abs Error</div>
+              </div>
+
+              <div className="bg-[#0b0e17] p-3 rounded-lg border border-zinc-800/80">
+                <div className="text-[10px] font-mono text-zinc-500 uppercase">AIC Score</div>
+                <div className="text-base font-semibold text-indigo-400 num-stat mt-0.5">
+                  {currentModelStats.aic}
+                </div>
+                <div className="text-[10px] text-zinc-400 font-mono mt-0.5">Akaike Criterion</div>
+              </div>
+
+              <div className="bg-[#0b0e17] p-3 rounded-lg border border-zinc-800/80 col-span-2 sm:col-span-1">
+                <div className="text-[10px] font-mono text-zinc-500 uppercase">Residual Normalcy</div>
+                <div className="text-base font-semibold text-emerald-400 num-stat mt-0.5">
+                  p = 0.84
+                </div>
+                <div className="text-[10px] text-zinc-400 font-mono mt-0.5">Gaussian Residuals</div>
+              </div>
+            </div>
+
+            {/* Gemini 2.5 Executive AI Reasoning Box */}
+            <div className="surface-panel p-4 rounded-xl border border-zinc-800/90 bg-gradient-to-r from-zinc-950 via-[#0d121e] to-zinc-950">
+              <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
-                  <span className="text-xs font-bold text-slate-200">Gemini 2.5 AI Executive Analysis</span>
-                  <span className="text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-1.5 py-0.2 rounded">
-                    Confidence fit: {currentModelStats.accuracy}
+                  <div className="h-5 w-5 rounded bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
+                    <BrainCircuit className="h-3 w-3 text-cyan-400" />
+                  </div>
+                  <span className="text-xs font-mono font-semibold text-cyan-300">
+                    GEMINI 2.5 TIME-SERIES REASONING STREAM
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                  "{currentDataset.geminiInsight}"
-                </p>
-                <p className="text-[11px] text-cyan-300/90 mt-1">
-                  💡 <strong className="font-semibold text-slate-200">Strategic Recommendation:</strong> {currentDataset.recommendedAction}
-                </p>
+                <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+                  Model: {currentModelStats.label}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 text-xs">
+                <div>
+                  <span className="text-zinc-500 font-mono block text-[10px] uppercase">Trend Velocity</span>
+                  <span className="text-zinc-200 font-medium">{currentDataset.geminiAnalysis.velocity}</span>
+                </div>
+                <div>
+                  <span className="text-zinc-500 font-mono block text-[10px] uppercase">Detected Operational Risk</span>
+                  <span className="text-amber-300/90 font-medium">{currentDataset.geminiAnalysis.risks}</span>
+                </div>
+                <div>
+                  <span className="text-zinc-500 font-mono block text-[10px] uppercase">Recommended Action</span>
+                  <span className="text-emerald-300 font-medium">{currentDataset.geminiAnalysis.recommendation}</span>
+                </div>
               </div>
             </div>
 
-            {/* In-Simulator Conversion Trigger */}
-            <button
-              type="button"
-              onClick={handleStartSandboxInWorkspace}
-              className="flex-shrink-0 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center space-x-1.5 w-full sm:w-auto justify-center"
-            >
-              <span>Run in Full Workspace</span>
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </button>
           </div>
-
         </div>
-
       </section>
 
-      {/* SECTION: Time-Series Forecasting Masterclass (Educational Pillars) */}
-      <section id="pillars" className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-800/80 scroll-mt-20">
-        
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold mb-3">
-            <Info className="h-3.5 w-3.5" />
-            <span>Time-Series Fundamentals</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            How Time-Series Forecasting Actually Works
-          </h2>
-          <p className="text-sm text-slate-400 mt-2 max-w-2xl mx-auto">
-            Traditional statistics often fail on modern business metrics. Here is how our multi-model pipeline deconstructs complex temporal dynamics into actionable certainty.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* Developer-First Code & API Integration Section */}
+      <section id="sdk" className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-zinc-800/60">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Pillar 1: Trend */}
-          <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 hover:bg-slate-900/90 transition-all group">
-            <div className="h-10 w-10 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <TrendingUp className="h-5 w-5" />
+          {/* Left Column: Developer Pitch */}
+          <div className="lg:col-span-5 space-y-5">
+            <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs font-mono">
+              <Terminal className="h-3.5 w-3.5 text-cyan-400" />
+              <span>Developer-First Architecture</span>
             </div>
-            <h3 className="text-base font-bold text-white mb-2">1. Trend Direction</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Identifies the underlying long-term linear or logistic trajectory of your metric, separating genuine growth or decline from temporary daily noise.
+
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+              Native Python SDK, REST Endpoints, and SQL Integrations
+            </h2>
+
+            <p className="text-sm text-zinc-400 leading-relaxed">
+              Integrate multi-model time-series forecasting directly into your data pipelines, Airflow DAGs, FastAPI services, or analytical warehouses with minimal boilerplate.
             </p>
-            <div className="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-cyan-400 font-semibold">
-              Prophet & Holt Slope Modeling
+
+            <ul className="space-y-3 text-xs text-zinc-300 font-mono">
+              <li className="flex items-center space-x-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                <span>Zero-cold-start sub-40ms in-memory inference</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                <span>Standardized Pandas &amp; Arrow DataFrame compatibility</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                <span>Automated multi-horizon cross-validation ranking</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                <span>Pre-built Gemini 2.5 prompt orchestration layers</span>
+              </li>
+            </ul>
+
+            <div className="pt-2">
+              <button
+                onClick={onQuickStart}
+                className="text-xs font-semibold text-zinc-950 bg-white hover:bg-zinc-200 px-4 py-2 rounded-md transition-all inline-flex items-center space-x-2"
+              >
+                <span>Read API Reference</span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
             </div>
           </div>
 
-          {/* Pillar 2: Seasonality */}
-          <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 hover:bg-slate-900/90 transition-all group">
-            <div className="h-10 w-10 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Calendar className="h-5 w-5" />
-            </div>
-            <h3 className="text-base font-bold text-white mb-2">2. Seasonality & Cycles</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Discovers recurring cycles across weeks, months, quarters, and holidays. Accounts for weekend dips and end-of-quarter renewal surges.
-            </p>
-            <div className="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-cyan-400 font-semibold">
-              Fourier Series Decomposition
-            </div>
-          </div>
-
-          {/* Pillar 3: Stationarity & Noise */}
-          <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 hover:bg-slate-900/90 transition-all group">
-            <div className="h-10 w-10 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Activity className="h-5 w-5" />
-            </div>
-            <h3 className="text-base font-bold text-white mb-2">3. Stationarity & Lags</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Applies differencing and autocorrelation analysis to stabilize non-stationary series, eliminating deceptive autocorrelation traps.
-            </p>
-            <div className="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-indigo-400 font-semibold">
-              Auto-ARIMA (p, d, q) Optimization
-            </div>
-          </div>
-
-          {/* Pillar 4: Confidence Bands */}
-          <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 hover:bg-slate-900/90 transition-all group">
-            <div className="h-10 w-10 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
-            <h3 className="text-base font-bold text-white mb-2">4. 95% Bayesian Bands</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Calculates expanding uncertainty envelopes for future periods, giving risk executives worst-case and best-case bounds for budgeting.
-            </p>
-            <div className="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-emerald-400 font-semibold">
-              Markov Chain Monte Carlo (MCMC)
-            </div>
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* SECTION: Algorithmic Arsenal */}
-      <section id="algorithms" className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-800/80 scroll-mt-20">
-        
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-semibold mb-3">
-            <Layers className="h-3.5 w-3.5" />
-            <span>Algorithm Benchmark Engine</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            Four Battle-Tested Forecasting Engines
-          </h2>
-          <p className="text-sm text-slate-400 mt-2 max-w-xl mx-auto">
-            No single algorithm wins on every dataset. SmartForecast AI runs an automated model tournament to select the best performer.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          
-          {/* Card 1: Prophet */}
-          <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between">
-            <div>
-              <div className="h-10 w-10 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-4">
-                <TrendingUp className="h-5 w-5" />
+          {/* Right Column: Interactive Code Viewer */}
+          <div className="lg:col-span-7 surface-panel rounded-xl border border-zinc-800 overflow-hidden shadow-2xl">
+            
+            {/* Terminal Tab Bar */}
+            <div className="bg-[#0b0e17] px-4 py-2.5 border-b border-zinc-800 flex items-center justify-between">
+              
+              {/* Language Tabs */}
+              <div className="flex items-center space-x-1">
+                {[
+                  { key: 'python', label: 'Python SDK' },
+                  { key: 'curl', label: 'cURL / REST' },
+                  { key: 'typescript', label: 'TypeScript' },
+                  { key: 'sql', label: 'SQL Warehouse' }
+                ].map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveCodeTab(tab.key)}
+                    className={`text-xs px-2.5 py-1 rounded font-mono transition-colors ${
+                      activeCodeTab === tab.key
+                        ? 'bg-zinc-800 text-cyan-400 border border-zinc-700'
+                        : 'text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
-              <h3 className="text-lg font-bold text-white mb-1.5">Meta Prophet</h3>
-              <p className="text-xs text-slate-400 leading-relaxed mb-4">
-                Decomposable additive model engineered for business metrics featuring strong multi-period seasonal effects and historical changepoint shifts.
-              </p>
-            </div>
-            <div className="pt-3 border-t border-slate-800/80 text-[11px] text-cyan-400 font-semibold">
-              Best for: SaaS ARR, Web Traffic, Marketing Leads
-            </div>
-          </div>
 
-          {/* Card 2: ARIMA */}
-          <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between">
-            <div>
-              <div className="h-10 w-10 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-4">
-                <LineChart className="h-5 w-5" />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-1.5">Auto-ARIMA</h3>
-              <p className="text-xs text-slate-400 leading-relaxed mb-4">
-                Auto-Regressive Integrated Moving Average utilizing Akaike Information Criterion (AIC) to optimize lag parameters and differencing.
-              </p>
+              {/* Copy Code Button */}
+              <button
+                onClick={handleCopyCode}
+                className="text-xs font-mono text-zinc-400 hover:text-white flex items-center space-x-1 px-2 py-1 rounded hover:bg-zinc-800 transition-colors"
+              >
+                {copiedCode ? (
+                  <>
+                    <Check className="h-3.5 w-3.5 text-emerald-400" />
+                    <span className="text-emerald-400">Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3.5 w-3.5" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
             </div>
-            <div className="pt-3 border-t border-slate-800/80 text-[11px] text-indigo-400 font-semibold">
-              Best for: Financial Stocks, Currency & Commodities
-            </div>
-          </div>
 
-          {/* Card 3: Holt-Winters */}
-          <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between">
-            <div>
-              <div className="h-10 w-10 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-4">
-                <Zap className="h-5 w-5" />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-1.5">Holt-Winters</h3>
-              <p className="text-xs text-slate-400 leading-relaxed mb-4">
-                Triple exponential smoothing that dynamically calculates alpha, beta, and gamma coefficients for baseline level, trend, and seasonal components.
-              </p>
+            {/* Code Block Container */}
+            <div className="p-4 bg-[#08090e] overflow-x-auto max-h-[380px]">
+              <pre className="text-xs font-mono text-zinc-300 leading-relaxed">
+                <code>{CODE_EXAMPLES[activeCodeTab]}</code>
+              </pre>
             </div>
-            <div className="pt-3 border-t border-slate-800/80 text-[11px] text-emerald-400 font-semibold">
-              Best for: Supply Chain, Warehouse SKUs, Inventory
-            </div>
-          </div>
 
-          {/* Card 4: Moving Average */}
-          <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between">
-            <div>
-              <div className="h-10 w-10 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-4">
-                <BarChart3 className="h-5 w-5" />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-1.5">Rolling Average</h3>
-              <p className="text-xs text-slate-400 leading-relaxed mb-4">
-                High-speed rolling window baseline for smoothing noisy high-frequency streams and establishing conservative momentum benchmarks.
-              </p>
-            </div>
-            <div className="pt-3 border-t border-slate-800/80 text-[11px] text-purple-400 font-semibold">
-              Best for: Real-time Telemetry & Micro-trends
+            {/* Terminal Status Footer */}
+            <div className="bg-[#0b0e17] px-4 py-2 border-t border-zinc-800 text-[11px] font-mono text-zinc-500 flex items-center justify-between">
+              <span>● Response time: 34ms</span>
+              <span>Payload: 200 OK application/json</span>
             </div>
           </div>
 
         </div>
-
       </section>
 
-      {/* SECTION: 4-Step Interactive Workflow Walkthrough */}
-      <section id="workflow" className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-800/80 scroll-mt-20">
-        
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-semibold mb-3">
-            <Cpu className="h-3.5 w-3.5" />
-            <span>Operational Pipeline</span>
+      {/* Model Benchmark Matrix (Deep Technical Breakdown) */}
+      <section id="benchmark" className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-zinc-800/60">
+        <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
+          <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs font-mono">
+            <Layers className="h-3.5 w-3.5 text-cyan-400" />
+            <span>Algorithmic Comparison</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            From Raw Spreadsheet to Board Briefing in 4 Steps
+          <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-white">
+            Four Mathematical Families. Zero Guesswork.
           </h2>
-          <p className="text-sm text-slate-400 mt-2 max-w-xl mx-auto">
-            Zero machine learning expertise required. Complete end-to-end intelligence in under 10 seconds.
+          <p className="text-sm text-zinc-400">
+            SmartForecast automatically benchmarks classical statistical, exponential smoothing, and Bayesian regression models to select the mathematically superior fit.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          
-          <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 relative group hover:border-slate-700 transition-all">
-            <span className="text-3xl font-black text-slate-800 absolute top-4 right-4 group-hover:text-cyan-500/20 transition-colors">01</span>
-            <div className="h-9 w-9 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-3">
-              <Database className="h-4 w-4" />
-            </div>
-            <h4 className="text-sm font-bold text-white mb-1">1. Ingest Data</h4>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Upload CSV or click 1-Click Sample Dataset. Automatic date parsing, cadence detection, and null handling.
-            </p>
-          </div>
+        {/* Matrix Table */}
+        <div className="surface-panel rounded-xl border border-zinc-800 overflow-hidden shadow-xl">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-[#0b0e17] text-zinc-400 font-mono uppercase text-[10px] border-b border-zinc-800">
+                <tr>
+                  <th className="py-3 px-4">Algorithm</th>
+                  <th className="py-3 px-4">Mathematical Foundation</th>
+                  <th className="py-3 px-4">Primary Strength</th>
+                  <th className="py-3 px-4">Seasonality Mode</th>
+                  <th className="py-3 px-4">Average MAPE</th>
+                  <th className="py-3 px-4">Latency</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/80 font-mono">
+                
+                {/* Ensemble */}
+                <tr className="hover:bg-zinc-900/50 transition-colors bg-cyan-950/10">
+                  <td className="py-3.5 px-4 font-semibold text-cyan-300 flex items-center space-x-2">
+                    <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+                    <span>Consensus Ensemble</span>
+                    <span className="text-[9px] bg-cyan-500/20 text-cyan-300 px-1 rounded">Champion</span>
+                  </td>
+                  <td className="py-3.5 px-4 text-zinc-300">Bayesian Loss-Weighted Fusion</td>
+                  <td className="py-3.5 px-4 text-zinc-300">Complex multi-modal distributions</td>
+                  <td className="py-3.5 px-4 text-zinc-300">Dual Fourier + Additive</td>
+                  <td className="py-3.5 px-4 text-emerald-400 font-bold num-stat">0.82% - 1.18%</td>
+                  <td className="py-3.5 px-4 text-zinc-400 num-stat">42ms</td>
+                </tr>
 
-          <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 relative group hover:border-slate-700 transition-all">
-            <span className="text-3xl font-black text-slate-800 absolute top-4 right-4 group-hover:text-cyan-500/20 transition-colors">02</span>
-            <div className="h-9 w-9 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-3">
-              <Activity className="h-4 w-4" />
-            </div>
-            <h4 className="text-sm font-bold text-white mb-1">2. Auto-Benchmarking</h4>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Parallel execution of ARIMA, Prophet, and Holt-Winters. Backtested MAPE, MAE, and RMSE ranking.
-            </p>
-          </div>
+                {/* Prophet */}
+                <tr className="hover:bg-zinc-900/50 transition-colors">
+                  <td className="py-3.5 px-4 font-semibold text-white">Meta Prophet</td>
+                  <td className="py-3.5 px-4 text-zinc-400">Decomposable GAM y(t) = g(t) + s(t)</td>
+                  <td className="py-3.5 px-4 text-zinc-300">Strong holiday &amp; weekly periodicity</td>
+                  <td className="py-3.5 px-4 text-zinc-400">Fourier series (m=7, 365.25)</td>
+                  <td className="py-3.5 px-4 text-emerald-400 num-stat">1.24% - 1.65%</td>
+                  <td className="py-3.5 px-4 text-zinc-400 num-stat">36ms</td>
+                </tr>
 
-          <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 relative group hover:border-slate-700 transition-all">
-            <span className="text-3xl font-black text-slate-800 absolute top-4 right-4 group-hover:text-cyan-500/20 transition-colors">03</span>
-            <div className="h-9 w-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-3">
-              <BrainCircuit className="h-4 w-4" />
-            </div>
-            <h4 className="text-sm font-bold text-white mb-1">3. Gemini AI Reasoning</h4>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Synthesizes plain-English executive summaries, risk alerts, and concrete operational recommendations.
-            </p>
-          </div>
+                {/* Auto-ARIMA */}
+                <tr className="hover:bg-zinc-900/50 transition-colors">
+                  <td className="py-3.5 px-4 font-semibold text-white">Auto-ARIMA</td>
+                  <td className="py-3.5 px-4 text-zinc-400">ARIMA(p,d,q)(P,D,Q)s Selection</td>
+                  <td className="py-3.5 px-4 text-zinc-300">Autocorrelated autoregressive lags</td>
+                  <td className="py-3.5 px-4 text-zinc-400">SARIMA Seasonal Lags</td>
+                  <td className="py-3.5 px-4 text-zinc-300 num-stat">1.45% - 2.12%</td>
+                  <td className="py-3.5 px-4 text-zinc-400 num-stat">28ms</td>
+                </tr>
 
-          <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 relative group hover:border-slate-700 transition-all">
-            <span className="text-3xl font-black text-slate-800 absolute top-4 right-4 group-hover:text-cyan-500/20 transition-colors">04</span>
-            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-3">
-              <FileText className="h-4 w-4" />
-            </div>
-            <h4 className="text-sm font-bold text-white mb-1">4. Executive Export</h4>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Download presentation-ready PDF reports and forecast schedule CSVs with 95% confidence bounds.
-            </p>
-          </div>
+                {/* Holt-Winters */}
+                <tr className="hover:bg-zinc-900/50 transition-colors">
+                  <td className="py-3.5 px-4 font-semibold text-white">Holt-Winters</td>
+                  <td className="py-3.5 px-4 text-zinc-400">Triple Exponential Smoothing (HW-TES)</td>
+                  <td className="py-3.5 px-4 text-zinc-300">Fast adaptation to recent velocity</td>
+                  <td className="py-3.5 px-4 text-zinc-400">Multiplicative / Additive</td>
+                  <td className="py-3.5 px-4 text-zinc-300 num-stat">0.98% - 2.84%</td>
+                  <td className="py-3.5 px-4 text-zinc-400 num-stat">12ms</td>
+                </tr>
 
+              </tbody>
+            </table>
+          </div>
         </div>
-
       </section>
 
-      {/* SECTION: Forecasting Metrics Explainer */}
-      <section id="metrics" className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-800/80 scroll-mt-20">
-        
-        <div className="text-center mb-10">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Forecasting Metrics Made Simple
+      {/* Production Architecture & Pipeline Section */}
+      <section id="architecture" className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-zinc-800/60">
+        <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
+          <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs font-mono">
+            <Cpu className="h-3.5 w-3.5 text-cyan-400" />
+            <span>Execution Lifecycle</span>
+          </div>
+          <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-white">
+            Distributed 5-Stage Time-Series Pipeline
           </h2>
-          <p className="text-xs sm:text-sm text-slate-400 mt-2">
-            Understand the statistical evaluation criteria used to rate model accuracy.
+          <p className="text-sm text-zinc-400">
+            How raw telemetry transforms into mathematical forecasts and executive AI briefings in milliseconds.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800">
-            <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider block mb-1">MAPE</span>
-            <h4 className="text-sm font-bold text-white mb-1">Mean Absolute Percentage Error</h4>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Measures the average percentage deviation between predicted and actual values. A MAPE of 1.4% means forecasts were 98.6% accurate.
+          {/* Step 1 */}
+          <div className="surface-panel p-4 rounded-xl border border-zinc-800/80 space-y-2 relative">
+            <div className="text-[10px] font-mono text-cyan-400 font-semibold">STAGE 01</div>
+            <h4 className="text-sm font-semibold text-white">Ingestion &amp; Scrub</h4>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Auto-detects date formats, fixes cadence jitter, and isolates anomalies with Isolation Forests.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800">
-            <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider block mb-1">MAE</span>
-            <h4 className="text-sm font-bold text-white mb-1">Mean Absolute Error</h4>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Calculates the raw average magnitude of errors in the original units (e.g. $ thousands or physical inventory units) without penalizing outliers.
+          {/* Step 2 */}
+          <div className="surface-panel p-4 rounded-xl border border-zinc-800/80 space-y-2 relative">
+            <div className="text-[10px] font-mono text-cyan-400 font-semibold">STAGE 02</div>
+            <h4 className="text-sm font-semibold text-white">Signal Decomp</h4>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Decomposes raw signal into secular trend, Fourier seasonality, and stochastic noise residual.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800">
-            <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block mb-1">RMSE</span>
-            <h4 className="text-sm font-bold text-white mb-1">Root Mean Square Error</h4>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Heavily penalizes large variance misses by squaring residuals, ensuring models that avoid disastrous extreme misses are favored.
+          {/* Step 3 */}
+          <div className="surface-panel p-4 rounded-xl border border-zinc-800/80 space-y-2 relative">
+            <div className="text-[10px] font-mono text-cyan-400 font-semibold">STAGE 03</div>
+            <h4 className="text-sm font-semibold text-white">Concurrent Fitting</h4>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Prophet, Auto-ARIMA, and Holt-Winters fit across worker threads in under 40ms.
+            </p>
+          </div>
+
+          {/* Step 4 */}
+          <div className="surface-panel p-4 rounded-xl border border-zinc-800/80 space-y-2 relative">
+            <div className="text-[10px] font-mono text-cyan-400 font-semibold">STAGE 04</div>
+            <h4 className="text-sm font-semibold text-white">Bayesian CV Loss</h4>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              5-fold cross-validation scores models via MAPE, RMSE, and AIC to crown the champion fit.
+            </p>
+          </div>
+
+          {/* Step 5 */}
+          <div className="surface-panel p-4 rounded-xl border border-zinc-800/80 space-y-2 relative">
+            <div className="text-[10px] font-mono text-cyan-400 font-semibold">STAGE 05</div>
+            <h4 className="text-sm font-semibold text-white">Gemini Synthesis</h4>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Gemini 2.5 analyzes changepoints and variance fans to draft executive briefing points.
             </p>
           </div>
 
         </div>
-
       </section>
 
-      {/* SECTION: Enterprise Security */}
-      <section id="security" className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-800/80 scroll-mt-20">
-        
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold mb-3">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            <span>Enterprise Safeguards</span>
+      {/* Technical FAQ Section */}
+      <section id="faq" className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto border-t border-zinc-800/60">
+        <div className="text-center mb-10 space-y-2">
+          <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs font-mono">
+            <HelpCircle className="h-3.5 w-3.5 text-cyan-400" />
+            <span>Frequently Answered</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            Security & Strict Data Sovereignty
-          </h2>
-          <p className="text-sm text-slate-400 mt-2 max-w-xl mx-auto">
-            Architected for enterprise security leaders with zero data leakage guarantees.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800">
-            <div className="h-10 w-10 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-4">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
-            <h3 className="text-base font-bold text-white mb-2">SOC 2 Type II Compliant</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Rigorous verification of operational availability, confidentiality, and data handling protocols.
-            </p>
-          </div>
-
-          <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800">
-            <div className="h-10 w-10 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-4">
-              <Lock className="h-5 w-5" />
-            </div>
-            <h3 className="text-base font-bold text-white mb-2">256-Bit AES & TLS 1.3</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Full encryption across spreadsheet uploads, model parameter tensors, and generated PDF reports.
-            </p>
-          </div>
-
-          <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800">
-            <div className="h-10 w-10 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-4">
-              <Globe className="h-5 w-5" />
-            </div>
-            <h3 className="text-base font-bold text-white mb-2">Zero Public AI Retention</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Customer data is strictly isolated in memory and never used to train public foundation models.
-            </p>
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* SECTION: FAQ Accordion */}
-      <section id="faq" className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-800/80 scroll-mt-20">
-        
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold mb-3">
-            <HelpCircle className="h-3.5 w-3.5" />
-            <span>Clarifications</span>
-          </div>
-          <h2 className="text-3xl font-extrabold text-white tracking-tight">
-            Frequently Asked Questions
+          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+            Technical FAQ
           </h2>
         </div>
 
         <div className="space-y-3">
-          {FAQ_ITEMS.map((item, index) => {
+          {FAQ_ITEMS.map((faq, index) => {
             const isOpen = openFaqIndex === index;
             return (
               <div 
                 key={index} 
-                className="rounded-2xl border border-slate-800 bg-slate-900/60 overflow-hidden transition-all"
+                className="surface-panel rounded-lg border border-zinc-800/80 overflow-hidden transition-colors"
               >
                 <button
-                  type="button"
-                  onClick={() => toggleFaq(index)}
-                  className="w-full p-4 text-left flex items-center justify-between text-sm font-bold text-slate-200 hover:text-white"
+                  onClick={() => setOpenFaqIndex(isOpen ? null : index)}
+                  className="w-full px-5 py-3.5 text-left flex items-center justify-between text-xs sm:text-sm font-semibold text-zinc-200 hover:text-white"
                 >
-                  <span>{item.q}</span>
-                  {isOpen ? <ChevronUp className="h-4 w-4 text-cyan-400 flex-shrink-0" /> : <ChevronDown className="h-4 w-4 text-slate-500 flex-shrink-0" />}
+                  <span>{faq.q}</span>
+                  <ChevronDown className={`h-4 w-4 text-zinc-400 transition-transform ${isOpen ? 'rotate-180 text-cyan-400' : ''}`} />
                 </button>
                 {isOpen && (
-                  <div className="px-4 pb-4 text-xs text-slate-400 leading-relaxed border-t border-slate-800/60 pt-3 animate-fadeIn">
-                    {item.a}
+                  <div className="px-5 pb-4 pt-1 text-xs text-zinc-400 leading-relaxed border-t border-zinc-800/50">
+                    {faq.a}
                   </div>
                 )}
               </div>
             );
           })}
         </div>
-
       </section>
 
-      {/* High-Converting Bottom CTA Banner */}
-      <section className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-br from-blue-950/90 via-slate-900 to-indigo-950/90 border border-blue-500/30 shadow-2xl text-center glow-indigo">
-          <TrendingUp className="h-12 w-12 text-cyan-400 mx-auto mb-4" />
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            Ready to Forecast with Senior AI Precision?
+      {/* CTA Bottom Banner */}
+      <section className="relative z-10 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-zinc-800/60">
+        <div className="surface-panel rounded-2xl border border-zinc-800 p-8 sm:p-12 text-center max-w-4xl mx-auto space-y-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-8 opacity-10">
+            <TrendingUp className="h-48 w-48 text-cyan-400" />
+          </div>
+
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+            Ready to deploy enterprise-grade forecasting?
           </h2>
-          <p className="text-xs sm:text-sm text-slate-400 mt-3 max-w-xl mx-auto">
-            Experience multi-model Prophet & ARIMA ensembling with automated Gemini LLM executive briefs today.
+
+          <p className="text-sm text-zinc-400 max-w-xl mx-auto leading-relaxed">
+            Test custom datasets in our live studio sandbox, or connect your production pipeline via our Python SDK in under 5 minutes.
           </p>
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <button
-              type="button"
-              onClick={handleStartSandboxInWorkspace}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl text-sm font-bold text-slate-950 bg-white hover:bg-slate-100 shadow-xl transition-all flex items-center justify-center space-x-2"
+              onClick={onQuickStart}
+              className="text-sm font-semibold text-zinc-950 bg-cyan-400 hover:bg-cyan-300 px-6 py-2.5 rounded-lg transition-all shadow-lg shadow-cyan-500/10 active:scale-[0.98]"
             >
-              <span>Launch Free Workspace</span>
-              <ArrowRight className="h-4 w-4 text-slate-950" />
+              Launch Live Sandbox (Instant Demo)
             </button>
             <button
-              type="button"
               onClick={onLoginClick}
-              className="w-full sm:w-auto px-7 py-3.5 rounded-2xl text-sm font-bold text-slate-300 bg-slate-900 border border-slate-700 hover:border-slate-600 hover:text-white transition-all flex items-center justify-center space-x-2"
+              className="text-sm font-semibold text-zinc-200 hover:text-white bg-zinc-900 hover:bg-zinc-800 px-5 py-2.5 rounded-lg border border-zinc-800 transition-all"
             >
-              <span>Sign In with Credentials</span>
+              Sign In to Workspace
             </button>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-20 border-t border-slate-800/80 bg-[#080c14] py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <div className="flex items-center space-x-2">
-            <TrendingUp className="h-4 w-4 text-cyan-400" />
-            <span className="font-semibold text-slate-300">SmartForecast AI</span>
-            <span>© {new Date().getFullYear()} All rights reserved.</span>
+      {/* Senior Developer Footer */}
+      <footer className="relative z-10 border-t border-zinc-800/80 bg-[#07080d] py-8 text-xs text-zinc-500 font-mono">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center space-x-3">
+            <span className="text-zinc-300 font-semibold">SmartForecast AI</span>
+            <span>•</span>
+            <span>High-Throughput Time-Series Analytics</span>
           </div>
-          <div className="flex flex-wrap gap-5 text-[11px]">
-            <a href="#simulator" className="hover:text-cyan-400 transition-colors">Simulator</a>
-            <a href="#pillars" className="hover:text-cyan-400 transition-colors">Pillars</a>
-            <a href="#algorithms" className="hover:text-cyan-400 transition-colors">Algorithms</a>
-            <a href="#workflow" className="hover:text-cyan-400 transition-colors">Workflow</a>
-            <a href="#security" className="hover:text-cyan-400 transition-colors">Security</a>
+
+          <div className="flex items-center space-x-6">
+            <span className="flex items-center space-x-1.5 text-zinc-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              <span>All Systems Operational</span>
+            </span>
+            <span>Python 3.11</span>
+            <span>TLS 1.3</span>
           </div>
         </div>
       </footer>
