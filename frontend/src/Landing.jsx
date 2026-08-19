@@ -5,41 +5,43 @@ import {
   Activity, 
   BrainCircuit, 
   BarChart3, 
-  ShieldCheck,
-  Zap,
-  LineChart,
-  Globe,
-  CheckCircle2,
-  Sparkles,
-  Layers,
-  FileText,
-  Clock,
-  Cpu,
-  ChevronDown,
-  ChevronUp,
-  Download,
-  Lock,
-  Database,
-  ArrowUpRight,
-  HelpCircle,
-  Play,
-  Sliders,
-  Check,
-  Info,
-  Calendar,
-  AlertTriangle,
-  Code2,
-  Copy,
-  Terminal,
-  Server,
-  RefreshCw,
-  SlidersHorizontal,
-  ChevronRight,
-  GitBranch,
-  Key
+  ShieldCheck, 
+  Zap, 
+  LineChart, 
+  Globe, 
+  CheckCircle2, 
+  Sparkles, 
+  Layers, 
+  FileText, 
+  Clock, 
+  Cpu, 
+  ChevronDown, 
+  ChevronUp, 
+  Download, 
+  Lock, 
+  Database, 
+  ArrowUpRight, 
+  HelpCircle, 
+  Play, 
+  Sliders, 
+  Check, 
+  Info, 
+  Calendar, 
+  AlertTriangle, 
+  Code2, 
+  Copy, 
+  Terminal, 
+  Server, 
+  RefreshCw, 
+  SlidersHorizontal, 
+  ChevronRight, 
+  GitBranch, 
+  Key,
+  FileSpreadsheet,
+  SlidersVertical
 } from 'lucide-react';
 
-// Live Interactive Datasets for the Studio Simulator
+// Live Interactive Datasets for the Front-Page Studio Simulator
 const SIMULATOR_DATASETS = {
   revenue: {
     id: 'revenue',
@@ -139,7 +141,7 @@ const SIMULATOR_DATASETS = {
         rmse: '1.25 PF', 
         aic: '298.5',
         label: 'Meta Prophet (Seasonal + Trend)',
-        desc: 'Captures diurnal diurnal workload pulses and scheduled batch training cron triggers.'
+        desc: 'Captures diurnal workload pulses and scheduled batch training cron triggers.'
       },
       arima: { 
         accuracy: '99.0%', 
@@ -411,7 +413,7 @@ const FAQ_ITEMS = [
   }
 ];
 
-export default function Landing({ onLoginClick, onQuickStart }) {
+export default function Landing({ onLoginClick }) {
   const [activeDatasetKey, setActiveDatasetKey] = useState('revenue');
   const [selectedModelKey, setSelectedModelKey] = useState('ensemble');
   const [forecastHorizon, setForecastHorizon] = useState(30); // 7, 30, 90, 180
@@ -548,13 +550,14 @@ export default function Landing({ onLoginClick, onQuickStart }) {
           {/* Navigation Links */}
           <nav className="hidden md:flex items-center space-x-6 text-xs text-zinc-400 font-medium">
             <a href="#sandbox" className="hover:text-white transition-colors">Studio Simulator</a>
+            <a href="#features" className="hover:text-white transition-colors">Core Capabilities</a>
             <a href="#benchmark" className="hover:text-white transition-colors">Model Benchmark</a>
             <a href="#sdk" className="hover:text-white transition-colors">Developer SDK</a>
             <a href="#architecture" className="hover:text-white transition-colors">Pipeline Arch</a>
             <a href="#faq" className="hover:text-white transition-colors">Technical FAQ</a>
           </nav>
 
-          {/* Action CTAs */}
+          {/* Action CTAs: Direct to Login */}
           <div className="flex items-center space-x-3">
             <button
               onClick={onLoginClick}
@@ -563,12 +566,11 @@ export default function Landing({ onLoginClick, onQuickStart }) {
               Sign In
             </button>
             <button
-              onClick={onQuickStart}
-              className="text-xs font-medium text-zinc-950 bg-white hover:bg-zinc-200 px-3.5 py-1.5 rounded-md transition-all flex items-center space-x-1.5 shadow-sm active:scale-[0.98]"
+              onClick={onLoginClick}
+              className="text-xs font-medium text-zinc-950 bg-cyan-400 hover:bg-cyan-300 px-3.5 py-1.5 rounded-md transition-all flex items-center space-x-1.5 shadow-sm active:scale-[0.98] font-semibold"
             >
-              <Zap className="h-3.5 w-3.5 text-zinc-950 fill-zinc-950" />
-              <span>Launch Studio</span>
-              <span className="kbd-badge ml-1 hidden sm:inline-block">Instant Demo</span>
+              <Lock className="h-3.5 w-3.5" />
+              <span>Enter Workspace</span>
             </button>
           </div>
         </div>
@@ -588,7 +590,7 @@ export default function Landing({ onLoginClick, onQuickStart }) {
 
           {/* Main Title */}
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
-            Production Time-Series Intelligence & ML Forecasting Engine
+            Production Time-Series Intelligence &amp; ML Forecasting Engine
           </h1>
 
           {/* Subtitle */}
@@ -596,24 +598,23 @@ export default function Landing({ onLoginClick, onQuickStart }) {
             Benchmark Meta Prophet, Auto-ARIMA, Holt-Winters, and Neural Ensembles in parallel. Get automated Bayesian confidence fans and Gemini-synthesized executive briefings in real time.
           </p>
 
-          {/* Action CTAs */}
+          {/* Action CTAs: Direct to Login */}
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <button
-              onClick={onQuickStart}
+              onClick={onLoginClick}
               className="text-sm font-semibold text-zinc-950 bg-cyan-400 hover:bg-cyan-300 px-5 py-2.5 rounded-lg transition-all flex items-center space-x-2 shadow-lg shadow-cyan-500/10 active:scale-[0.98]"
             >
-              <Play className="h-4 w-4 fill-zinc-950" />
-              <span>Explore Live Workspace</span>
-              <span className="text-xs bg-cyan-500/30 text-zinc-950 px-1.5 py-0.5 rounded font-mono font-medium">Demo</span>
+              <Lock className="h-4 w-4" />
+              <span>Sign In to Launch Workspace</span>
             </button>
 
-            <button
-              onClick={onLoginClick}
+            <a
+              href="#sandbox"
               className="text-sm font-semibold text-zinc-200 hover:text-white bg-zinc-900/90 hover:bg-zinc-800 px-4 py-2.5 rounded-lg border border-zinc-800 transition-all flex items-center space-x-2"
             >
-              <Lock className="h-3.5 w-3.5 text-zinc-400" />
-              <span>Sign In / Connect Data</span>
-            </button>
+              <Activity className="h-3.5 w-3.5 text-cyan-400" />
+              <span>Interactive Live Preview ↓</span>
+            </a>
 
             <a
               href="#sdk"
@@ -650,7 +651,7 @@ export default function Landing({ onLoginClick, onQuickStart }) {
         </div>
       </section>
 
-      {/* Main Feature: The Interactive Forecasting Studio Simulator */}
+      {/* Main Feature: The Interactive Forecasting Studio Simulator (Front Page Sandbox) */}
       <section id="sandbox" className="relative z-10 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         
         {/* Studio Card Container */}
@@ -689,17 +690,17 @@ export default function Landing({ onLoginClick, onQuickStart }) {
               })}
             </div>
 
-            {/* Quick Actions */}
+            {/* Quick Actions: Direct to Login */}
             <div className="flex items-center space-x-2">
               <span className="text-[11px] font-mono text-zinc-500 hidden md:inline-block">
                 Runtime: Python 3.11 • C++ Core
               </span>
               <button
-                onClick={onQuickStart}
-                className="text-xs font-medium text-cyan-400 hover:text-cyan-300 bg-cyan-950/40 hover:bg-cyan-950/70 border border-cyan-800/60 px-3 py-1 rounded-md flex items-center space-x-1.5 transition-colors"
+                onClick={onLoginClick}
+                className="text-xs font-medium text-cyan-400 hover:text-cyan-300 bg-cyan-950/40 hover:bg-cyan-950/70 border border-cyan-800/60 px-3 py-1 rounded-md flex items-center space-x-1.5 transition-colors font-mono"
               >
-                <span>Launch in App</span>
-                <ArrowUpRight className="h-3 w-3" />
+                <Lock className="h-3 w-3" />
+                <span>Sign In to Upload Data</span>
               </button>
             </div>
           </div>
@@ -1032,6 +1033,92 @@ export default function Landing({ onLoginClick, onQuickStart }) {
         </div>
       </section>
 
+      {/* Core Enterprise Capabilities Section */}
+      <section id="features" className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-zinc-800/60">
+        <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
+          <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs font-mono">
+            <Zap className="h-3.5 w-3.5 text-cyan-400" />
+            <span>Platform Capabilities</span>
+          </div>
+          <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-white">
+            Engineered for High-Stakes Time-Series Decisions
+          </h2>
+          <p className="text-sm text-zinc-400">
+            A comprehensive suite of forecasting, anomaly isolation, and natural-language intelligence tools.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          {/* Card 1 */}
+          <div className="surface-panel p-6 rounded-xl border border-zinc-800/80 space-y-3 hover:border-zinc-700 transition-colors">
+            <div className="h-9 w-9 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+              <Activity className="h-5 w-5" />
+            </div>
+            <h3 className="text-base font-semibold text-white">Multi-Horizon Cross-Validation</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Computes rolling out-of-sample backtests across multiple temporal cutoffs to calculate truthful MAPE, RMSE, and MAE loss metrics.
+            </p>
+          </div>
+
+          {/* Card 2 */}
+          <div className="surface-panel p-6 rounded-xl border border-zinc-800/80 space-y-3 hover:border-zinc-700 transition-colors">
+            <div className="h-9 w-9 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+              <BrainCircuit className="h-5 w-5" />
+            </div>
+            <h3 className="text-base font-semibold text-white">Gemini 2.5 Executive Briefings</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Converts complex statistical changepoints, Fourier harmonics, and volatility spikes into succinct executive summaries and risk mitigations.
+            </p>
+          </div>
+
+          {/* Card 3 */}
+          <div className="surface-panel p-6 rounded-xl border border-zinc-800/80 space-y-3 hover:border-zinc-700 transition-colors">
+            <div className="h-9 w-9 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
+              <LineChart className="h-5 w-5" />
+            </div>
+            <h3 className="text-base font-semibold text-white">Bayesian Uncertainty Fans</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Provides dynamic $80\%$ and $95\%$ statistical confidence bounds to quantify tail-risk scenarios and variance accumulation over time.
+            </p>
+          </div>
+
+          {/* Card 4 */}
+          <div className="surface-panel p-6 rounded-xl border border-zinc-800/80 space-y-3 hover:border-zinc-700 transition-colors">
+            <div className="h-9 w-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <Database className="h-5 w-5" />
+            </div>
+            <h3 className="text-base font-semibold text-white">Automated Schema &amp; Gap Imputation</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Parses ISO-8601, Epoch, and regional date formats automatically. Cleans calendar jitter and handles missing intervals seamlessly.
+            </p>
+          </div>
+
+          {/* Card 5 */}
+          <div className="surface-panel p-6 rounded-xl border border-zinc-800/80 space-y-3 hover:border-zinc-700 transition-colors">
+            <div className="h-9 w-9 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+              <FileSpreadsheet className="h-5 w-5" />
+            </div>
+            <h3 className="text-base font-semibold text-white">Executive Report Export Suite</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Download clean CSV predictions, high-res SVG vectors, or comprehensive boardroom PDF reports containing models and AI reasoning.
+            </p>
+          </div>
+
+          {/* Card 6 */}
+          <div className="surface-panel p-6 rounded-xl border border-zinc-800/80 space-y-3 hover:border-zinc-700 transition-colors">
+            <div className="h-9 w-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
+            <h3 className="text-base font-semibold text-white">Zero Data Retention Isolation</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              In-memory ephemeral execution guarantees that customer telemetry is never stored on disk or used for public foundation model training.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
       {/* Developer-First Code & API Integration Section */}
       <section id="sdk" className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-zinc-800/60">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -1072,11 +1159,11 @@ export default function Landing({ onLoginClick, onQuickStart }) {
 
             <div className="pt-2">
               <button
-                onClick={onQuickStart}
+                onClick={onLoginClick}
                 className="text-xs font-semibold text-zinc-950 bg-white hover:bg-zinc-200 px-4 py-2 rounded-md transition-all inline-flex items-center space-x-2"
               >
-                <span>Read API Reference</span>
-                <ChevronRight className="h-3.5 w-3.5" />
+                <Lock className="h-3.5 w-3.5" />
+                <span>Sign In to Access API Keys</span>
               </button>
             </div>
           </div>
@@ -1329,7 +1416,7 @@ export default function Landing({ onLoginClick, onQuickStart }) {
         </div>
       </section>
 
-      {/* CTA Bottom Banner */}
+      {/* CTA Bottom Banner: Direct to Login */}
       <section className="relative z-10 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-zinc-800/60">
         <div className="surface-panel rounded-2xl border border-zinc-800 p-8 sm:p-12 text-center max-w-4xl mx-auto space-y-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-8 opacity-10">
@@ -1341,21 +1428,16 @@ export default function Landing({ onLoginClick, onQuickStart }) {
           </h2>
 
           <p className="text-sm text-zinc-400 max-w-xl mx-auto leading-relaxed">
-            Test custom datasets in our live studio sandbox, or connect your production pipeline via our Python SDK in under 5 minutes.
+            Sign in to upload custom CSVs, execute multi-model cross-validation, and stream Gemini AI diagnostics.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <button
-              onClick={onQuickStart}
-              className="text-sm font-semibold text-zinc-950 bg-cyan-400 hover:bg-cyan-300 px-6 py-2.5 rounded-lg transition-all shadow-lg shadow-cyan-500/10 active:scale-[0.98]"
-            >
-              Launch Live Sandbox (Instant Demo)
-            </button>
-            <button
               onClick={onLoginClick}
-              className="text-sm font-semibold text-zinc-200 hover:text-white bg-zinc-900 hover:bg-zinc-800 px-5 py-2.5 rounded-lg border border-zinc-800 transition-all"
+              className="text-sm font-semibold text-zinc-950 bg-cyan-400 hover:bg-cyan-300 px-6 py-2.5 rounded-lg transition-all shadow-lg shadow-cyan-500/10 active:scale-[0.98] flex items-center space-x-2"
             >
-              Sign In to Workspace
+              <Lock className="h-4 w-4" />
+              <span>Sign In to Access Workspace</span>
             </button>
           </div>
         </div>
