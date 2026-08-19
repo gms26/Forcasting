@@ -110,9 +110,9 @@ export default function Login({ setToken, setUser, onBack }) {
       
       {/* Ambient Deep Navy & Ice-Cyan Glow Background (raseraa0 style) */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute inset-0 rasera-mesh-pattern opacity-70" />
+        <div className="absolute inset-0 rasera-mesh-pattern opacity-75" />
         <div className="absolute inset-0 rasera-radial-glow" />
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[450px] bg-gradient-to-b from-[#a2fff4]/10 via-[#005282]/20 to-transparent rounded-full blur-3xl" />
+        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[750px] h-[500px] bg-gradient-to-b from-[#a2fff4]/12 via-[#005282]/22 to-transparent rounded-full blur-3xl" />
       </div>
 
       {/* Top Header Bar */}
@@ -121,17 +121,17 @@ export default function Login({ setToken, setUser, onBack }) {
           className="flex items-center space-x-3.5 cursor-pointer group" 
           onClick={onBack}
         >
-          <div className="h-10 w-10 rounded-xl bg-[#002238] border border-[#004f7c] shadow-md flex items-center justify-center group-hover:border-[#a2fff4] transition-all p-1.5">
-            <LogoF className="h-6 w-6" />
+          <div className="h-11 w-11 rounded-2xl bg-[#002238] border border-[#004f7c] shadow-lg flex items-center justify-center group-hover:border-[#a2fff4] transition-all p-1.5 animate-pulse-glow">
+            <LogoF className="h-7 w-7" />
           </div>
           <div className="flex flex-col">
             <div className="flex items-center space-x-2">
-              <span className="text-lg font-bold tracking-tight text-white">SmartForecast</span>
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#a2fff4]/15 text-[#a2fff4] border border-[#a2fff4]/30">
+              <span className="text-xl font-display font-bold tracking-tight text-white">SmartForecast</span>
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#a2fff4]/15 text-[#a2fff4] border border-[#a2fff4]/40">
                 AI
               </span>
             </div>
-            <span className="text-xs text-[#97dcff]/70 font-medium">Predictive Workspace</span>
+            <span className="text-xs text-[#97dcff]/75 font-medium">Predictive Workspace</span>
           </div>
         </div>
 
@@ -148,18 +148,18 @@ export default function Login({ setToken, setUser, onBack }) {
       </header>
 
       {/* Main Centered Login Card */}
-      <main className="relative z-10 w-full max-w-md mx-auto px-4 sm:px-6 py-8 my-auto">
-        <div className="rasera-card rounded-3xl p-7 sm:p-9 shadow-2xl">
+      <main className="relative z-10 w-full max-w-md mx-auto px-4 sm:px-6 py-8 my-auto animate-slide-up">
+        <div className="rasera-card rounded-3xl p-8 sm:p-10 shadow-2xl border border-[#004775]">
           
           {/* Top Logo & Friendly Welcome */}
-          <div className="text-center space-y-2 mb-8">
-            <div className="inline-flex h-14 w-14 rounded-2xl bg-[#002238] border border-[#004f7c] items-center justify-center shadow-lg p-2.5 mb-2 shadow-[#a2fff4]/5">
-              <LogoF className="h-8 w-8" />
+          <div className="text-center space-y-2.5 mb-8">
+            <div className="inline-flex h-16 w-16 rounded-2xl bg-[#002238] border border-[#004f7c] items-center justify-center shadow-lg p-3 mb-2 shadow-[#a2fff4]/10">
+              <LogoF className="h-9 w-9" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              {isRegister ? 'Create Your Account' : 'Welcome Back'}
+            <h1 className="text-3xl sm:text-4xl font-display font-extrabold tracking-tight text-white">
+              {isRegister ? 'Create Account' : 'Welcome Back'}
             </h1>
-            <p className="text-sm text-[#94a3b8] max-w-xs mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base text-[#94a3b8] max-w-xs mx-auto leading-relaxed">
               {isRegister 
                 ? 'Sign up to start forecasting with multi-model algorithms and AI insights.' 
                 : 'Enter your credentials to access your forecasting workspace.'}
@@ -168,7 +168,7 @@ export default function Login({ setToken, setUser, onBack }) {
 
           {/* Error Message */}
           {error && (
-            <div className="mb-5 p-3.5 rounded-xl bg-rose-950/70 border border-rose-500/50 text-rose-200 text-sm flex items-start space-x-2.5">
+            <div className="mb-5 p-4 rounded-xl bg-rose-950/80 border border-rose-500/50 text-rose-200 text-sm flex items-start space-x-2.5">
               <AlertCircle className="h-5 w-5 shrink-0 mt-0.5 text-rose-400" />
               <span>{error}</span>
             </div>
@@ -176,7 +176,7 @@ export default function Login({ setToken, setUser, onBack }) {
 
           {/* Success Message */}
           {authSuccessNotice && (
-            <div className="mb-5 p-3.5 rounded-xl bg-[#003429]/80 border border-[#a2fff4]/50 text-[#a2fff4] text-sm flex items-start space-x-2.5">
+            <div className="mb-5 p-4 rounded-xl bg-[#003429]/90 border border-[#a2fff4]/50 text-[#a2fff4] text-sm flex items-start space-x-2.5">
               <CheckCircle2 className="h-5 w-5 shrink-0 mt-0.5 text-[#a2fff4]" />
               <span>{authSuccessNotice}</span>
             </div>
@@ -187,7 +187,7 @@ export default function Login({ setToken, setUser, onBack }) {
             
             {isRegister && (
               <div>
-                <label className="block text-sm font-semibold text-[#cbd5e1] mb-1.5">
+                <label className="block text-sm font-semibold text-[#cbd5e1] mb-1.5 font-display">
                   Full Name
                 </label>
                 <div className="relative">
@@ -197,16 +197,16 @@ export default function Login({ setToken, setUser, onBack }) {
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Alex Rivera"
                     required
-                    className="w-full bg-[#001726] border border-[#003b64] focus:border-[#a2fff4] focus:ring-2 focus:ring-[#a2fff4]/20 text-white rounded-xl px-4 py-3 text-sm transition-all placeholder:text-[#94a3b8]/50 outline-none"
+                    className="w-full bg-[#001726] border border-[#003b64] focus:border-[#a2fff4] focus:ring-2 focus:ring-[#a2fff4]/20 text-white rounded-xl px-4 py-3.5 text-base transition-all placeholder:text-[#94a3b8]/50 outline-none"
                   />
-                  <User className="h-4 w-4 text-[#94a3b8] absolute right-3.5 top-3.5" />
+                  <User className="h-5 w-5 text-[#94a3b8] absolute right-4 top-4" />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-semibold text-[#cbd5e1] mb-1.5">
-                Email Address
+              <label className="block text-sm font-semibold text-[#cbd5e1] mb-1.5 font-display">
+                Work Email Address
               </label>
               <div className="relative">
                 <input
@@ -215,14 +215,14 @@ export default function Login({ setToken, setUser, onBack }) {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@company.com"
                   required
-                  className="w-full bg-[#001726] border border-[#003b64] focus:border-[#a2fff4] focus:ring-2 focus:ring-[#a2fff4]/20 text-white rounded-xl px-4 py-3 text-sm transition-all placeholder:text-[#94a3b8]/50 outline-none"
+                  className="w-full bg-[#001726] border border-[#003b64] focus:border-[#a2fff4] focus:ring-2 focus:ring-[#a2fff4]/20 text-white rounded-xl px-4 py-3.5 text-base transition-all placeholder:text-[#94a3b8]/50 outline-none"
                 />
-                <Mail className="h-4 w-4 text-[#94a3b8] absolute right-3.5 top-3.5" />
+                <Mail className="h-5 w-5 text-[#94a3b8] absolute right-4 top-4" />
               </div>
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center justify-between mb-1.5 font-display">
                 <label className="block text-sm font-semibold text-[#cbd5e1]">
                   Password
                 </label>
@@ -245,26 +245,26 @@ export default function Login({ setToken, setUser, onBack }) {
                   onKeyUp={handleKeyDown}
                   placeholder="••••••••••••"
                   required
-                  className="w-full bg-[#001726] border border-[#003b64] focus:border-[#a2fff4] focus:ring-2 focus:ring-[#a2fff4]/20 text-white rounded-xl px-4 py-3 text-sm transition-all placeholder:text-[#94a3b8]/50 outline-none"
+                  className="w-full bg-[#001726] border border-[#003b64] focus:border-[#a2fff4] focus:ring-2 focus:ring-[#a2fff4]/20 text-white rounded-xl px-4 py-3.5 text-base transition-all placeholder:text-[#94a3b8]/50 outline-none font-mono"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-[#94a3b8] hover:text-white absolute right-3.5 top-3.5 transition-colors"
+                  className="text-[#94a3b8] hover:text-white absolute right-4 top-4 transition-colors"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
 
               {capsLockActive && (
-                <div className="text-xs text-amber-400 mt-1.5 flex items-center space-x-1 font-medium">
+                <div className="text-xs text-amber-400 mt-1.5 flex items-center space-x-1 font-medium font-mono">
                   <span>⚠️ Caps Lock is turned on</span>
                 </div>
               )}
 
               {/* Password Strength Meter when Registering */}
               {isRegister && password && (
-                <div className="mt-2.5 space-y-1.5">
+                <div className="mt-2.5 space-y-1.5 font-mono">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-[#94a3b8]">Password strength:</span>
                     <span className="text-white font-semibold">{pwdStrength.text}</span>
@@ -284,11 +284,11 @@ export default function Login({ setToken, setUser, onBack }) {
             </div>
 
             {/* Submit Action */}
-            <div className="pt-2">
+            <div className="pt-3">
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3.5 px-5 rounded-xl bg-gradient-to-r from-[#a2fff4] via-[#6aceff] to-[#3b82f6] hover:opacity-95 text-[#00131c] font-extrabold text-sm sm:text-base flex items-center justify-center space-x-2 transition-all shadow-lg shadow-[#6aceff]/20 active:scale-[0.99] disabled:opacity-50"
+                className="btn-radiant w-full py-4 px-5 rounded-xl text-base flex items-center justify-center space-x-2 font-extrabold"
               >
                 {isLoading ? (
                   <div className="flex items-center space-x-2 font-bold">
@@ -298,7 +298,7 @@ export default function Login({ setToken, setUser, onBack }) {
                 ) : (
                   <>
                     <span>{isRegister ? 'Create Account' : 'Sign In'}</span>
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-5 w-5 text-[#00131c]" />
                   </>
                 )}
               </button>
@@ -329,8 +329,8 @@ export default function Login({ setToken, setUser, onBack }) {
 
       {/* Forgot Password Modal */}
       {showForgotModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="rasera-card rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="rasera-card rounded-3xl p-7 sm:p-9 max-w-md w-full shadow-2xl relative space-y-4 border border-[#004775]">
             
             <button
               onClick={() => {
@@ -343,23 +343,23 @@ export default function Login({ setToken, setUser, onBack }) {
             </button>
 
             <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 rounded-xl bg-[#002f4d] border border-[#00558a] flex items-center justify-center text-[#a2fff4]">
+              <div className="h-11 w-11 rounded-xl bg-[#002f4d] border border-[#00558a] flex items-center justify-center text-[#a2fff4]">
                 <KeyRound className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Reset Password</h3>
+                <h3 className="text-xl font-display font-bold text-white">Reset Password</h3>
                 <p className="text-xs text-[#94a3b8]">Recover access to your account</p>
               </div>
             </div>
 
             {forgotSubmitted ? (
-              <div className="p-4 rounded-2xl bg-[#003429]/80 border border-[#a2fff4]/50 text-[#a2fff4] text-sm space-y-2">
+              <div className="p-4 rounded-2xl bg-[#003429]/90 border border-[#a2fff4]/50 text-[#a2fff4] text-sm space-y-2">
                 <div className="font-semibold flex items-center space-x-2">
                   <CheckCircle2 className="h-5 w-5 text-[#a2fff4]" />
                   <span>Reset Link Sent</span>
                 </div>
                 <p className="text-[#cbd5e1] text-xs">
-                  We have sent instructions to <strong className="text-white">{forgotEmail}</strong> if an account exists.
+                  We have sent instructions to <strong className="text-white font-mono">{forgotEmail}</strong> if an account exists.
                 </p>
                 <button
                   type="button"
@@ -367,7 +367,7 @@ export default function Login({ setToken, setUser, onBack }) {
                     setShowForgotModal(false);
                     setForgotSubmitted(false);
                   }}
-                  className="mt-3 w-full py-2.5 bg-gradient-to-r from-[#a2fff4] to-[#6aceff] text-[#00131c] font-bold rounded-xl text-sm transition-opacity hover:opacity-95"
+                  className="btn-radiant mt-3 w-full py-3 text-sm rounded-xl"
                 >
                   Back to Sign In
                 </button>
@@ -389,11 +389,11 @@ export default function Login({ setToken, setUser, onBack }) {
                   onChange={(e) => setForgotEmail(e.target.value)}
                   placeholder="name@company.com"
                   required
-                  className="w-full bg-[#001726] border border-[#003b64] focus:border-[#a2fff4] focus:ring-2 focus:ring-[#a2fff4]/20 text-white rounded-xl px-4 py-3 text-sm transition-colors placeholder:text-[#94a3b8]/50 outline-none"
+                  className="w-full bg-[#001726] border border-[#003b64] focus:border-[#a2fff4] focus:ring-2 focus:ring-[#a2fff4]/20 text-white rounded-xl px-4 py-3.5 text-sm transition-colors placeholder:text-[#94a3b8]/50 outline-none"
                 />
                 <button
                   type="submit"
-                  className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#a2fff4] via-[#6aceff] to-[#3b82f6] text-[#00131c] font-extrabold text-sm transition-opacity hover:opacity-95 shadow-md shadow-[#6aceff]/20"
+                  className="btn-radiant w-full py-3.5 px-4 rounded-xl text-sm"
                 >
                   Send Reset Link
                 </button>
@@ -408,9 +408,9 @@ export default function Login({ setToken, setUser, onBack }) {
       <footer className="relative z-20 w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 flex items-center justify-between text-xs text-[#94a3b8] border-t border-[#003b64]">
         <div className="flex items-center space-x-2">
           <LogoF className="h-4 w-4" />
-          <span className="font-semibold text-white">SmartForecast AI</span>
+          <span className="font-display font-semibold text-white">SmartForecast AI</span>
         </div>
-        <div>
+        <div className="font-mono">
           <span>Enterprise Forecasting Workspace</span>
         </div>
       </footer>
