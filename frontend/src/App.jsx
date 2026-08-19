@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { 
   BarChart3, 
@@ -6,10 +6,20 @@ import {
   Settings, 
   LayoutDashboard, 
   LogOut, 
-  User as UserIcon, 
   Database,
   Lock,
-  ArrowRight
+  ArrowRight,
+  Sparkles,
+  Layers,
+  Table,
+  Cpu,
+  Activity,
+  Calendar,
+  CheckCircle2,
+  AlertCircle,
+  FileSpreadsheet,
+  Zap,
+  Sliders
 } from 'lucide-react';
 import FileUpload from './components/FileUpload';
 import ModelSelector from './components/ModelSelector';
@@ -35,6 +45,9 @@ function App() {
     }
   });
   const [showLogin, setShowLogin] = useState(false);
+
+  // Active Dashboard Tab
+  const [activeTab, setActiveTab] = useState('workbench'); // 'workbench' | 'benchmark' | 'inspector'
 
   const [uploadedData, setUploadedData] = useState(null);
   const [fileInfo, setFileInfo] = useState(null);
@@ -89,7 +102,7 @@ function App() {
       setForecastResult(null);
       setCompareResults(null);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to upload CSV. Please verify formatting.');
+      setError(err.response?.data?.detail || 'Failed to upload CSV. Please verify date and value columns.');
     } finally {
       setIsLoading(false);
     }
@@ -103,7 +116,7 @@ function App() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setUploadedData(res.data.data);
-      setFileInfo({ name: 'sample_sales_data.csv', size: 4096 });
+      setFileInfo({ name: 'sample_enterprise_arr.csv', size: 4096 });
       setForecastResult(null);
       setCompareResults(null);
     } catch (err) {
@@ -127,6 +140,7 @@ function App() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setForecastResult(res.data);
+      setActiveTab('workbench');
     } catch (err) {
       setError(err.response?.data?.detail || 'Forecast generation failed.');
     } finally {
@@ -147,8 +161,9 @@ function App() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setCompareResults(res.data.comparisons);
+      setActiveTab('benchmark');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Model comparison failed.');
+      setError(err.response?.data?.detail || 'Model comparison benchmark failed.');
     } finally {
       setIsCompareLoading(false);
     }
@@ -161,6 +176,21 @@ function App() {
     setCompareResults(null);
     setError(null);
   };
+
+  // Compute dataset summary stats
+  const datasetStats = useMemo(() => {
+    if (!uploadedData || !Array.isArray(uploadedData) || uploadedData.length === 0) {
+      return null;
+    }
+    const count = uploadedData.length;
+    const values = uploadedData.map(d => Number(d.value)).filter(v => !isNaN(v));
+    const minVal = values.length ? Math.min(...values) : 0;
+    const maxVal = values.length ? Math.max(...values) : 0;
+    const avgVal = values.length ? (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2) : 0;
+    const startDate = uploadedData[0]?.date || 'N/A';
+    const endDate = uploadedData[uploadedData.length - 1]?.date || 'N/A';
+    return { count, minVal, maxVal, avgVal, startDate, endDate };
+  }, [uploadedData]);
 
   if (!token) {
     if (showLogin) {
@@ -198,7 +228,7 @@ function App() {
                     Enterprise
                   </span>
                 </div>
-                <span className="text-xs text-[#97dcff]/70 font-medium">Predictive Workspace</span>
+                <span className="text-xs text-[#97dcff]/70 font-medium">Predictive Intelligence Dashboard</span>
               </div>
             </div>
 
@@ -235,16 +265,133 @@ function App() {
         </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="relative z-10 flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+      {/* Dashboard Sub-Header / KPI Summary Cards */}
+      <div className="relative z-10 bg-[#001726]/60 border-b border-[#003b64] py-5 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-4">
+          
+          {/* Card 1: Data Source Status */}
+          <div className="rasera-card p-4 rounded-xl flex items-center space-x-3">
+            <div className="h-10 w-10 rounded-lg bg-[#002f4d] border border-[#00558a] flex items-center justify-center text-[#a2fff4]">
+              <Database className="h-5 w-5" />
+            </div>
+            <div className="truncate">
+              <span className="text-[11px] font-bold uppercase text-[#97dcff]/70 block">Ingested Dataset</span>
+              <span className="text-sm font-bold text-white truncate block">
+                {fileInfo?.name || 'No Data Ingested'}
+              </span>
+              <span className="text-[10px] text-[#94a3b8]">
+                {datasetStats ? `${datasetStats.count} data points` : 'Awaiting CSV'}
+              </span>
+            </div>
+          </div>
+
+          {/* Card 2: Temporal Span */}
+          <div className="rasera-card p-4 rounded-xl flex items-center space-x-3">
+            <div className="h-10 w-10 rounded-lg bg-[#002f4d] border border-[#00558a] flex items-center justify-center text-[#6aceff]">
+              <Calendar className="h-5 w-5" />
+            </div>
+            <div className="truncate">
+              <span className="text-[11px] font-bold uppercase text-[#97dcff]/70 block">Time Span</span>
+              <span className="text-sm font-bold text-white truncate block">
+                {datasetStats ? `${datasetStats.startDate} → ${datasetStats.endDate}` : '—'}
+              </span>
+              <span className="text-[10px] text-[#94a3b8]">
+                {datasetStats ? `Mean Value: ${datasetStats.avgVal}` : 'Upload data to inspect'}
+              </span>
+            </div>
+          </div>
+
+          {/* Card 3: Active Model */}
+          <div className="rasera-card p-4 rounded-xl flex items-center space-x-3">
+            <div className="h-10 w-10 rounded-lg bg-[#002f4d] border border-[#00558a] flex items-center justify-center text-[#a2fff4]">
+              <Cpu className="h-5 w-5" />
+            </div>
+            <div className="truncate">
+              <span className="text-[11px] font-bold uppercase text-[#97dcff]/70 block">Active Model</span>
+              <span className="text-sm font-bold text-white truncate block">
+                {selectedModel} ({forecastPeriod}D)
+              </span>
+              <span className="text-[10px] text-[#a2fff4]">
+                {forecastResult ? 'Forecast Active' : 'Ready to Run'}
+              </span>
+            </div>
+          </div>
+
+          {/* Card 4: Engine Status */}
+          <div className="rasera-card p-4 rounded-xl flex items-center space-x-3">
+            <div className="h-10 w-10 rounded-lg bg-[#002f4d] border border-[#00558a] flex items-center justify-center text-emerald-400">
+              <Activity className="h-5 w-5" />
+            </div>
+            <div className="truncate">
+              <span className="text-[11px] font-bold uppercase text-[#97dcff]/70 block">Runtime Engine</span>
+              <span className="text-sm font-bold text-emerald-400 truncate block">
+                &lt; 38ms Latency
+              </span>
+              <span className="text-[10px] text-[#94a3b8]">In-Memory Ephemeral</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Dashboard View Navigation Tabs */}
+      <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-6">
+        <div className="flex items-center space-x-2 border-b border-[#003b64] pb-4">
+          <button
+            onClick={() => setActiveTab('workbench')}
+            className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center space-x-2 transition-all ${
+              activeTab === 'workbench'
+                ? 'bg-gradient-to-r from-[#a2fff4] to-[#6aceff] text-[#00131c] shadow-lg shadow-[#6aceff]/20'
+                : 'text-[#cbd5e1] hover:text-white hover:bg-[#002238]'
+            }`}
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            <span>Forecasting Studio</span>
+          </button>
+
+          <button
+            onClick={() => {
+              if (compareResults) {
+                setActiveTab('benchmark');
+              } else {
+                handleCompare();
+              }
+            }}
+            className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center space-x-2 transition-all ${
+              activeTab === 'benchmark'
+                ? 'bg-gradient-to-r from-[#a2fff4] to-[#6aceff] text-[#00131c] shadow-lg shadow-[#6aceff]/20'
+                : 'text-[#cbd5e1] hover:text-white hover:bg-[#002238]'
+            }`}
+          >
+            <Layers className="h-4 w-4" />
+            <span>Model Benchmark Matrix</span>
+            {compareResults && (
+              <span className="h-2 w-2 rounded-full bg-[#a2fff4] shadow-[0_0_4px_#a2fff4]" />
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('inspector')}
+            className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center space-x-2 transition-all ${
+              activeTab === 'inspector'
+                ? 'bg-gradient-to-r from-[#a2fff4] to-[#6aceff] text-[#00131c] shadow-lg shadow-[#6aceff]/20'
+                : 'text-[#cbd5e1] hover:text-white hover:bg-[#002238]'
+            }`}
+          >
+            <Table className="h-4 w-4" />
+            <span>Data Inspector</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content Dashboard */}
+      <main className="relative z-10 flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
         
         {error && (
           <div className="mb-6 bg-rose-950/70 border-l-4 border-rose-500 p-4 rounded-xl shadow-md">
             <div className="flex">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-rose-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
+                <AlertCircle className="h-5 w-5 text-rose-400" />
               </div>
               <div className="ml-3">
                 <p className="text-sm text-rose-200">{error}</p>
@@ -253,78 +400,156 @@ function App() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
-          {/* Left Column: Controls */}
-          <div className="lg:col-span-4 space-y-6">
-            <FileUpload 
-              onUpload={handleUpload} 
-              file={fileInfo} 
-              onClear={handleClearData}
-              isLoading={isLoading}
-            />
+        {/* Tab 1: Main Forecast Studio Workbench */}
+        {activeTab === 'workbench' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <ModelSelector 
-              selectedModel={selectedModel} 
-              onChange={setSelectedModel} 
-            />
-            
-            <ForecastPeriodSlider 
-              period={forecastPeriod} 
-              onChange={setForecastPeriod}
-              disabled={isLoading}
-            />
-            
-            <button
-              onClick={handleForecast}
-              disabled={!uploadedData || isLoading}
-              className="w-full flex items-center justify-center px-6 py-4 border border-transparent text-base font-extrabold rounded-2xl text-[#00131c] bg-gradient-to-r from-[#a2fff4] via-[#6aceff] to-[#3b82f6] hover:opacity-95 disabled:opacity-40 disabled:cursor-not-allowed shadow-xl shadow-[#6aceff]/20 transition-all active:scale-[0.99]"
-            >
-              {isLoading && !isCompareLoading ? (
-                <div className="h-5 w-5 border-2 border-[#00131c] border-t-transparent rounded-full animate-spin mr-2" />
-              ) : (
-                <LayoutDashboard className="h-5 w-5 mr-2" />
+            {/* Left Column: Controls Workbench */}
+            <div className="lg:col-span-4 space-y-6">
+              <FileUpload 
+                onUpload={handleUpload} 
+                file={fileInfo} 
+                onClear={handleClearData}
+                isLoading={isLoading}
+              />
+              
+              <ModelSelector 
+                selectedModel={selectedModel} 
+                onChange={setSelectedModel} 
+              />
+              
+              <ForecastPeriodSlider 
+                period={forecastPeriod} 
+                onChange={setForecastPeriod}
+                disabled={isLoading}
+              />
+              
+              <button
+                onClick={handleForecast}
+                disabled={!uploadedData || isLoading}
+                className="w-full flex items-center justify-center px-6 py-4 border border-transparent text-base font-extrabold rounded-2xl text-[#00131c] bg-gradient-to-r from-[#a2fff4] via-[#6aceff] to-[#3b82f6] hover:opacity-95 disabled:opacity-40 disabled:cursor-not-allowed shadow-xl shadow-[#6aceff]/20 transition-all active:scale-[0.99]"
+              >
+                {isLoading && !isCompareLoading ? (
+                  <div className="h-5 w-5 border-2 border-[#00131c] border-t-transparent rounded-full animate-spin mr-2" />
+                ) : (
+                  <Sparkles className="h-5 w-5 mr-2" />
+                )}
+                Generate Forecast
+              </button>
+              
+              <button
+                onClick={handleCompare}
+                disabled={!uploadedData || isLoading || isCompareLoading}
+                className="w-full flex items-center justify-center px-6 py-3.5 border border-[#004775] text-sm font-semibold rounded-2xl text-[#a2fff4] bg-[#002238] hover:bg-[#002f4d] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              >
+                {isCompareLoading ? (
+                  <div className="h-4 w-4 border-2 border-[#a2fff4] border-t-transparent rounded-full animate-spin mr-2" />
+                ) : (
+                  <Layers className="h-4 w-4 mr-2 text-[#a2fff4]" />
+                )}
+                Compare All Models
+              </button>
+            </div>
+
+            {/* Right Column: Visualization & Results */}
+            <div className="lg:col-span-8 space-y-6">
+              <ForecastChart 
+                historicalData={uploadedData} 
+                forecastData={forecastResult} 
+              />
+
+              {forecastResult && (
+                <>
+                  <MetricsCard metrics={forecastResult.metrics} />
+                  <AIExplanation explanation={forecastResult.explanation} />
+                  <DownloadReport 
+                    forecastData={forecastResult}
+                    metrics={forecastResult.metrics}
+                    modelName={selectedModel}
+                    periods={forecastPeriod}
+                    explanation={forecastResult.explanation}
+                  />
+                </>
               )}
-              Generate Forecast
-            </button>
-            
-            <button
-              onClick={handleCompare}
-              disabled={!uploadedData || isLoading || isCompareLoading}
-              className="w-full flex items-center justify-center px-6 py-3.5 border border-[#004775] text-sm font-semibold rounded-2xl text-[#a2fff4] bg-[#002238] hover:bg-[#002f4d] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-            >
-              {isCompareLoading ? (
-                <div className="h-4 w-4 border-2 border-[#a2fff4] border-t-transparent rounded-full animate-spin mr-2" />
-              ) : (
-                <Settings className="h-4 w-4 mr-2 text-[#a2fff4]" />
-              )}
-              Compare All Models
-            </button>
+            </div>
           </div>
+        )}
 
-          {/* Right Column: Visualization & Results */}
-          <div className="lg:col-span-8 space-y-6">
-            <ForecastChart 
-              historicalData={uploadedData} 
-              forecastData={forecastResult} 
+        {/* Tab 2: Model Benchmark Matrix */}
+        {activeTab === 'benchmark' && (
+          <div className="space-y-6">
+            <div className="rasera-card p-6 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-white">Parallel Model Benchmark Execution</h3>
+                <p className="text-sm text-[#94a3b8] mt-1">
+                  Cross-validates Meta Prophet, Auto-ARIMA, Holt-Winters, and Moving Average across historical folds.
+                </p>
+              </div>
+              <button
+                onClick={handleCompare}
+                disabled={!uploadedData || isCompareLoading}
+                className="px-5 py-2.5 bg-gradient-to-r from-[#a2fff4] to-[#6aceff] text-[#00131c] font-bold text-sm rounded-xl hover:opacity-95 disabled:opacity-40 shadow-md flex items-center space-x-2"
+              >
+                {isCompareLoading ? (
+                  <div className="h-4 w-4 border-2 border-[#00131c] border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Layers className="h-4 w-4" />
+                )}
+                <span>Re-run Benchmark</span>
+              </button>
+            </div>
+
+            <CompareModels 
+              results={compareResults} 
+              bestModel={compareResults?.[0]?.model} 
+              isLoading={isCompareLoading} 
             />
+          </div>
+        )}
 
-            {forecastResult && (
-              <>
-                <MetricsCard metrics={forecastResult.metrics} />
-                <AIExplanation explanation={forecastResult.explanation} />
-                <DownloadReport 
-                  forecastData={forecastResult}
-                  model={selectedModel}
-                  explanation={forecastResult.explanation}
-                />
-              </>
-            )}
+        {/* Tab 3: Raw Data Inspector */}
+        {activeTab === 'inspector' && (
+          <div className="rasera-card rounded-2xl overflow-hidden shadow-xl border border-[#004775]">
+            <div className="p-6 border-b border-[#003b64] flex justify-between items-center bg-[#001726]/90">
+              <div>
+                <h3 className="text-base font-bold text-white">Ingested Dataset Schema &amp; Records</h3>
+                <p className="text-xs text-[#94a3b8] mt-0.5">
+                  {uploadedData ? `${uploadedData.length} records verified with date and target values` : 'No dataset uploaded'}
+                </p>
+              </div>
+            </div>
 
-            {compareResults && (
-              <CompareModels comparisons={compareResults} />
+            {uploadedData && uploadedData.length > 0 ? (
+              <div className="overflow-x-auto max-h-[500px]">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-[#001a2c] text-xs font-bold text-[#97dcff] uppercase sticky top-0 border-b border-[#003b64]">
+                    <tr>
+                      <th className="py-3.5 px-6">Row #</th>
+                      <th className="py-3.5 px-6">Timestamp / Date</th>
+                      <th className="py-3.5 px-6">Target Metric Value</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#002f4d] bg-[#001424]/90 font-mono text-xs">
+                    {uploadedData.map((row, idx) => (
+                      <tr key={idx} className="hover:bg-[#00243d] transition-colors">
+                        <td className="py-3 px-6 text-[#94a3b8]">{idx + 1}</td>
+                        <td className="py-3 px-6 text-white">{row.date}</td>
+                        <td className="py-3 px-6 text-[#a2fff4] font-bold">{row.value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="p-12 text-center text-[#94a3b8]">
+                <Database className="h-10 w-10 mx-auto mb-3 text-[#004775]" />
+                <p className="text-white font-semibold">No Data Available</p>
+                <p className="text-xs text-[#94a3b8] mt-1">Upload a CSV or load the sample dataset to view raw points.</p>
+              </div>
             )}
           </div>
-        </div>
+        )}
+
       </main>
 
       {/* Footer */}
@@ -334,10 +559,14 @@ function App() {
             <LogoF className="h-4 w-4" />
             <span className="text-white font-bold">SmartForecast AI</span>
             <span>•</span>
-            <span>Enterprise Workspace</span>
+            <span>Predictive Intelligence Workspace</span>
           </div>
-          <div>
-            <span>Multi-Model Parallel Inference</span>
+          <div className="flex items-center space-x-4">
+            <span className="text-[#a2fff4] flex items-center space-x-1.5">
+              <span className="h-2 w-2 rounded-full bg-[#a2fff4] shadow-[0_0_4px_#a2fff4]" />
+              <span>Engine Ready</span>
+            </span>
+            <span>Fast In-Memory Processing</span>
           </div>
         </div>
       </footer>
