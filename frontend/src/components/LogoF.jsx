@@ -1,8 +1,9 @@
 import React from 'react';
 
 /**
- * Stylish High-Contrast 'F' Monogram Symbol
- * Vibrant Indigo to Cyan gradient badge with a crisp white 'F' and Amber forecast node.
+ * 'F' Monogram Symbol:
+ * - First half: Solid white top forecast wing + Amber horizon node
+ * - Second half: Crisp white drawn border stem & arm for the 'F'
  */
 export default function LogoF({ className = "h-9 w-9" }) {
   return (
@@ -13,24 +14,33 @@ export default function LogoF({ className = "h-9 w-9" }) {
       className={`shrink-0 ${className}`}
     >
       <defs>
-        <linearGradient id="logoFDiffGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+        <linearGradient id="logoFBadgeGrad" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#4f46e5" />
           <stop offset="50%" stopColor="#2563eb" />
           <stop offset="100%" stopColor="#06b6d4" />
         </linearGradient>
       </defs>
 
-      {/* Distinct Indigo-Cyan Rounded Gradient Badge */}
-      <rect width="36" height="36" rx="9" fill="url(#logoFDiffGrad)" />
+      {/* Rounded Soft Gradient Badge */}
+      <rect width="36" height="36" rx="9" fill="url(#logoFBadgeGrad)" />
 
-      {/* Bold Crisp White 'F' Monogram */}
+      {/* First Half: Top Forecast Wing (Solid White) */}
       <path 
-        d="M9 8 H 27 C 28.2 8 28.8 9.5 28 10.4 L 24 14.5 H 14.5 V 17.5 H 22 C 22.8 17.5 23.5 18.2 23.5 19 V 20.5 C 23.5 21.3 22.8 22 H 14.5 V 28 C 14.5 28.8 13.8 29.5 13 V 29.5 C 12.2 29.5 11.5 28.8 11.5 28 V 10.5 C 11.5 9.1 10.4 8 9 8 Z" 
+        d="M 9 8 H 26 C 27.5 8 28.3 9.6 27.2 10.7 L 22.5 16 H 9 V 8 Z" 
         fill="#ffffff" 
       />
 
-      {/* Luminous Gold/Amber Predictive Horizon Node */}
-      <circle cx="25.5" cy="11.5" r="2.2" fill="#fbbf24" />
+      {/* Top Amber Predictive Horizon Node */}
+      <circle cx="25" cy="11" r="2.5" fill="#fbbf24" />
+
+      {/* Second Half: Drawn Crisp White Border & Stem for 'F' */}
+      <path 
+        d="M 9.5 8 V 27.5 M 9.5 17.5 H 19.5" 
+        stroke="#ffffff" 
+        strokeWidth="3.5" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+      />
     </svg>
   );
 }
