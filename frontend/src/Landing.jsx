@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import LogoF from './components/LogoF';
 import { 
   TrendingUp, 
   ArrowRight, 
@@ -536,8 +537,8 @@ export default function Landing({ onLoginClick }) {
             className="flex items-center space-x-3 cursor-pointer group" 
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
-            <div className="h-8 w-8 rounded-lg bg-zinc-900 border border-zinc-700/80 flex items-center justify-center shadow-inner group-hover:border-cyan-500/50 transition-colors">
-              <TrendingUp className="h-4 w-4 text-cyan-400" />
+            <div className="h-8 w-8 rounded-lg bg-zinc-900 border border-zinc-700/80 flex items-center justify-center shadow-inner group-hover:border-cyan-500/50 transition-colors p-1">
+              <LogoF className="h-5 w-5" />
             </div>
             <div className="flex items-center space-x-2.5">
               <span className="text-sm font-semibold tracking-tight text-white font-mono">SmartForecast</span>
@@ -1419,8 +1420,8 @@ export default function Landing({ onLoginClick }) {
       {/* CTA Bottom Banner: Direct to Login */}
       <section className="relative z-10 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-zinc-800/60">
         <div className="surface-panel rounded-2xl border border-zinc-800 p-8 sm:p-12 text-center max-w-4xl mx-auto space-y-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 opacity-10">
-            <TrendingUp className="h-48 w-48 text-cyan-400" />
+          <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+            <LogoF className="h-56 w-56 text-cyan-400" glow={false} />
           </div>
 
           <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
@@ -1447,6 +1448,7 @@ export default function Landing({ onLoginClick }) {
       <footer className="relative z-10 border-t border-zinc-800/80 bg-[#07080d] py-8 text-xs text-zinc-500 font-mono">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
+            <LogoF className="h-4 w-4" glow={false} />
             <span className="text-zinc-300 font-semibold">SmartForecast AI</span>
             <span>•</span>
             <span>High-Throughput Time-Series Analytics</span>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import LogoF from './components/LogoF';
 import { 
   TrendingUp, 
   Lock, 
@@ -190,8 +191,8 @@ export default function Login({ setToken, setUser, onBack }) {
       {/* Top Header Bar */}
       <header className="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between border-b border-zinc-800/80">
         <div className="flex items-center space-x-3 cursor-pointer" onClick={onBack}>
-          <div className="h-8 w-8 rounded-lg bg-zinc-900 border border-zinc-700/80 flex items-center justify-center shadow-inner">
-            <TrendingUp className="h-4 w-4 text-cyan-400" />
+          <div className="h-8 w-8 rounded-lg bg-zinc-900 border border-zinc-700/80 flex items-center justify-center shadow-inner p-1">
+            <LogoF className="h-5 w-5" />
           </div>
           <div className="flex items-center space-x-2">
             <span className="text-sm font-semibold tracking-tight text-white font-mono">SmartForecast</span>
@@ -580,7 +581,10 @@ export default function Login({ setToken, setUser, onBack }) {
 
       {/* Footer */}
       <footer className="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between text-xs text-zinc-500 font-mono border-t border-zinc-800/80">
-        <div>SmartForecast AI • v2.4.2</div>
+        <div className="flex items-center space-x-2">
+          <LogoF className="h-4 w-4" glow={false} />
+          <span>SmartForecast AI • v2.4.2</span>
+        </div>
         <div className="flex items-center space-x-2 text-zinc-400">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
           <span>All Systems Operational</span>

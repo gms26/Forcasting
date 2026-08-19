@@ -10,6 +10,7 @@ import {
 
 import Login from './Login';
 import Landing from './Landing';
+import LogoF from './components/LogoF';
 import FileUpload from './components/FileUpload';
 import ModelSelector from './components/ModelSelector';
 import ForecastChart from './components/ForecastChart';
@@ -239,12 +240,12 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center space-x-3">
-              <div className="h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-md shadow-blue-500/20">
-                <BarChart3 className="h-5 w-5 text-white" />
+              <div className="h-9 w-9 rounded-lg bg-slate-900 border border-slate-700/80 flex items-center justify-center shadow-md p-1">
+                <LogoF className="h-5 w-5" />
               </div>
               <div>
-                <span className="text-lg font-bold text-gray-900 tracking-tight">SmartForecast <span className="text-blue-600">AI</span></span>
-                <span className="hidden sm:inline-block ml-2 text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">Enterprise</span>
+                <span className="text-lg font-bold text-gray-900 tracking-tight">SmartForecast <span className="text-cyan-600 font-mono">AI</span></span>
+                <span className="hidden sm:inline-block ml-2 text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200">Enterprise</span>
               </div>
             </div>
 
