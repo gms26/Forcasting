@@ -8,25 +8,25 @@
     max-width: 100%;
     width: 100%;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #090a0f;
-    color: #f3f4f6;
+    background-color: #f8fafc;
+    color: #0f172a;
     letter-spacing: -0.01em;
   }
 
-  /* Refined, low-profile scrollbar */
+  /* Refined, smooth scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #090a0f;
+    background: #f1f5f9;
   }
   ::-webkit-scrollbar-thumb {
-    background: #1f293d;
+    background: #cbd5e1;
     border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #334155;
+    background: #94a3b8;
   }
 
   /* Monospace font settings */
@@ -36,75 +36,35 @@
 }
 
 @layer utilities {
-  /* Ultra-Crisp Dark Surface Panels */
-  .surface-panel {
-    background: #0d111a;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+  /* Crisp Card Surfaces */
+  .app-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
   }
 
-  .surface-panel-hover {
+  .app-card-hover {
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .surface-panel-hover:hover {
-    border-color: rgba(56, 189, 248, 0.3);
-    background: #101622;
+  .app-card-hover:hover {
+    border-color: #93c5fd;
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1), 0 8px 10px -6px rgba(59, 130, 246, 0.05);
+    transform: translateY(-2px);
   }
 
-  /* Linear / Vercel style subtle glass */
-  .pro-glass {
-    background: rgba(13, 17, 26, 0.82);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-  }
-
-  /* Developer Grid Background */
-  .dev-grid-pattern {
+  /* Subtle Clean Mesh Pattern */
+  .clean-mesh-pattern {
     background-size: 32px 32px;
     background-image: 
-      linear-gradient(to right, rgba(255, 255, 255, 0.028) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+      linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
   }
 
-  .dev-dot-pattern {
-    background-size: 24px 24px;
-    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-  }
-
-  /* Subtle Ambient Glows - restrained, not oversaturated */
-  .dev-radial-glow {
-    background: 
-      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(56, 189, 248, 0.09) 0%, transparent 80%),
-      radial-gradient(ellipse 50% 30% at 85% 20%, rgba(99, 102, 241, 0.06) 0%, transparent 70%);
-  }
-
-  /* Mono Metric Numbers */
+  /* Monospace Tabular Number formatting */
   .num-stat {
     font-family: 'JetBrains Mono', monospace;
     font-variant-numeric: tabular-nums;
   }
-
-  /* Interactive Command Keyboard Badges */
-  .kbd-badge {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.68rem;
-    padding: 0.15rem 0.4rem;
-    border-radius: 4px;
-    background: #161e2e;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #94a3b8;
-    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.4);
-  }
-}
-
-/* Smooth chart transition animations */
-@keyframes subtle-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-}
-
-.animate-subtle-float {
-  animation: subtle-float 3s ease-in-out infinite;
 }
 
 @keyframes live-dot {
