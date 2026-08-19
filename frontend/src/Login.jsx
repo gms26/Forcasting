@@ -280,6 +280,14 @@ export default function Login({ setToken, setUser }) {
               </button>
             </div>
 
+            {/* Render Wakeup Notice */}
+            <div className="mb-5 p-3.5 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-cyan-400 text-xs flex items-start space-x-2.5 animate-fadeIn">
+              <span className="font-bold flex-shrink-0">ℹ️</span>
+              <span className="leading-relaxed">
+                Note: The backend is hosted on Render's free tier. It may take up to 50 seconds to wake up from sleep on the first request. Please be patient while authenticating.
+              </span>
+            </div>
+
             {/* Error Message Alert */}
             {error && (
               <div className="mb-5 p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs flex items-start space-x-2.5 animate-fadeIn">
