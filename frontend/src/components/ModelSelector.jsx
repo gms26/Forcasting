@@ -1,61 +1,74 @@
 import React from 'react';
-import { Info } from 'lucide-react';
 
 const MODELS = [
   {
-    id: 'Moving Average',
-    name: 'Moving Average',
-    description: 'Simple baseline model using a 7-day rolling average. Best for short-term smoothing.'
+    id: 'Prophet',
+    name: 'Meta Prophet',
+    tag: 'Seasonal',
+    description: 'Decomposable additive model handling missing data, holidays, and multi-period seasonality.'
   },
   {
     id: 'ARIMA',
-    name: 'ARIMA',
-    description: 'Auto-Regressive Integrated Moving Average. Excellent for non-seasonal data with clear trends.'
-  },
-  {
-    id: 'Prophet',
-    name: 'Prophet (by Meta)',
-    description: 'Robust model handling missing data and outliers well. Great for daily data with strong seasonality.'
+    name: 'Auto-ARIMA',
+    tag: 'Autoregressive',
+    description: 'Autoregressive Integrated Moving Average. Optimal for series with stationary lag dependencies.'
   },
   {
     id: 'Holt-Winters',
     name: 'Holt-Winters',
-    description: 'Triple exponential smoothing. Captures both trend and seasonality effectively.'
+    tag: 'Exponential',
+    description: 'Triple exponential smoothing with adaptive trend gradients and seasonal dampening.'
+  },
+  {
+    id: 'Moving Average',
+    name: 'Moving Average',
+    tag: 'Baseline',
+    description: 'Rolling window average for simple smoothing and baseline loss benchmarking.'
   }
 ];
 
 export default function ModelSelector({ selectedModel, onChange }) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Forecasting Model</h3>
+    <div className="rasera-card rounded-2xl p-6 shadow-md">
+      <h3 className="text-base font-bold text-white mb-4">Forecasting Model</h3>
       <div className="space-y-3">
-        {MODELS.map((model) => (
-          <div 
-            key={model.id}
-            className={`relative flex items-start p-3 border rounded-lg cursor-pointer transition-colors ${
-              selectedModel === model.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
-            }`}
-            onClick={() => onChange(model.id)}
-          >
-            <div className="flex items-center h-5">
-              <input
-                type="radio"
-                name="model"
-                checked={selectedModel === model.id}
-                onChange={() => onChange(model.id)}
-                className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300"
-              />
-            </div>
-            <div className="ml-3 flex-1 flex justify-between">
-              <div>
-                <label className="text-sm font-medium text-gray-900 cursor-pointer">
-                  {model.name}
-                </label>
-                <p className="text-xs text-gray-500 mt-1 pr-6">{model.description}</p>
+        {MODELS.map((model) => {
+          const isSelected = selectedModel === model.id;
+          return (
+            <div 
+              key={model.id}
+              className={`relative flex items-start p-3.5 border rounded-xl cursor-pointer transition-all ${
+                isSelected 
+                  ? 'border-[#a2fff4]/70 bg-[#002f4d] shadow-md' 
+                  : 'border-[#003b64] hover:border-[#004f7c] bg-[#001726]/70'
+              }`}
+              onClick={() => onChange(model.id)}
+            >
+              <div className="flex items-center h-5 mt-0.5">
+                <input
+                  type="radio"
+                  name="model"
+                  checked={isSelected}
+                  onChange={() => onChange(model.id)}
+                  className="h-4 w-4 text-[#00131c] accent-[#a2fff4] cursor-pointer"
+                />
+              </div>
+              <div className="ml-3 flex-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-bold text-white cursor-pointer">
+                    {model.name}
+                  </label>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    isSelected ? 'bg-[#a2fff4] text-[#00131c]' : 'bg-[#002842] text-[#97dcff]'
+                  }`}>
+                    {model.tag}
+                  </span>
+                </div>
+                <p className="text-xs text-[#94a3b8] mt-1 leading-relaxed">{model.description}</p>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
