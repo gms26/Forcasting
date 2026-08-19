@@ -2,124 +2,94 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   BarChart3, 
-  LogOut, 
+  TrendingUp, 
+  Settings, 
   LayoutDashboard, 
-  Settings,
-  Database
+  LogOut, 
+  User as UserIcon, 
+  Database,
+  Lock,
+  ArrowRight
 } from 'lucide-react';
-
-import Login from './Login';
-import Landing from './Landing';
-import LogoF from './components/LogoF';
 import FileUpload from './components/FileUpload';
 import ModelSelector from './components/ModelSelector';
-import ForecastChart from './components/ForecastChart';
-import AIExplanation from './components/AIExplanation';
-import MetricsCard from './components/MetricsCard';
 import ForecastPeriodSlider from './components/ForecastPeriodSlider';
+import ForecastChart from './components/ForecastChart';
+import MetricsCard from './components/MetricsCard';
+import AIExplanation from './components/AIExplanation';
 import CompareModels from './components/CompareModels';
 import DownloadReport from './components/DownloadReport';
+import Landing from './Landing';
+import Login from './Login';
+import LogoF from './components/LogoF';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-export default function App() {
-  const [token, setToken] = useState(localStorage.getItem('token'));
+function App() {
+  const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [user, setUser] = useState(() => {
     try {
-      const savedUser = localStorage.getItem('user');
-      return savedUser ? JSON.parse(savedUser) : null;
+      return JSON.parse(localStorage.getItem('user')) || null;
     } catch {
       return null;
     }
   });
-  
-  // App State
   const [showLogin, setShowLogin] = useState(false);
+
   const [uploadedData, setUploadedData] = useState(null);
   const [fileInfo, setFileInfo] = useState(null);
-  const [selectedModel, setSelectedModel] = useState('Moving Average');
+  const [selectedModel, setSelectedModel] = useState('Prophet');
   const [forecastPeriod, setForecastPeriod] = useState(30);
-  
-  // Results State
   const [forecastResult, setForecastResult] = useState(null);
-  const [aiExplanation, setAiExplanation] = useState('');
   const [compareResults, setCompareResults] = useState(null);
-  const [bestModel, setBestModel] = useState(null);
-  
-  // Loading States
   const [isLoading, setIsLoading] = useState(false);
-  const [isAiLoading, setIsAiLoading] = useState(false);
   const [isCompareLoading, setIsCompareLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
 
-  // Clear results when inputs change
+  // Clear auth error interceptor
   useEffect(() => {
-    setForecastResult(null);
-    setAiExplanation('');
-    setCompareResults(null);
-    setBestModel(null);
-    setError('');
-  }, [uploadedData, selectedModel, forecastPeriod]);
-
-  // Setup Axios interceptor for auth
-  useEffect(() => {
-    const requestInterceptor = axios.interceptors.request.use(
-      (config) => {
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      (error) => Promise.reject(error)
-    );
-
-    const responseInterceptor = axios.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response?.status === 401) {
+    const interceptor = axios.interceptors.response.use(
+      response => response,
+      err => {
+        if (err.response && err.response.status === 401) {
           handleLogout();
         }
-        return Promise.reject(error);
+        return Promise.reject(err);
       }
     );
-
-    return () => {
-      axios.interceptors.request.eject(requestInterceptor);
-      axios.interceptors.response.eject(responseInterceptor);
-    };
-  }, [token]);
+    return () => axios.interceptors.response.eject(interceptor);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    setToken(null);
+    setToken('');
     setUser(null);
-    // Reset state
+    setShowLogin(false);
     setUploadedData(null);
-    setFileInfo(null);
     setForecastResult(null);
-    setAiExplanation('');
     setCompareResults(null);
   };
 
   const handleUpload = async (file) => {
     setIsLoading(true);
-    setError('');
-    
+    setError(null);
     const formData = new FormData();
     formData.append('file', file);
-    
+
     try {
-      const response = await axios.post(`${API_BASE}/upload`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const res = await axios.post(`${API_BASE}/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
+        }
       });
-      if (!Array.isArray(response.data)) {
-        throw new Error("Invalid response format from server. The API might not be configured correctly.");
-      }
-      setUploadedData(response.data);
-      setFileInfo(file);
+      setUploadedData(res.data.data);
+      setFileInfo({ name: file.name, size: file.size });
+      setForecastResult(null);
+      setCompareResults(null);
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Error uploading file.');
+      setError(err.response?.data?.detail || 'Failed to upload CSV. Please verify formatting.');
     } finally {
       setIsLoading(false);
     }
@@ -127,74 +97,38 @@ export default function App() {
 
   const handleSampleData = async () => {
     setIsLoading(true);
-    setError('');
-    
+    setError(null);
     try {
-      const response = await axios.get(`${API_BASE}/sample`);
-      if (!Array.isArray(response.data)) {
-        throw new Error("Invalid response format from server. The API might not be configured correctly.");
-      }
-      setUploadedData(response.data);
-      setFileInfo({ name: 'sample_data.csv', size: 1024 * 45 }); // Dummy size
+      const res = await axios.get(`${API_BASE}/sample-data`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      setUploadedData(res.data.data);
+      setFileInfo({ name: 'sample_sales_data.csv', size: 4096 });
+      setForecastResult(null);
+      setCompareResults(null);
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Error loading sample data.');
+      setError('Failed to load sample dataset.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleClearData = () => {
-    setUploadedData(null);
-    setFileInfo(null);
-  };
-
-  const generateInsight = async (forecastData) => {
-    setIsAiLoading(true);
-    try {
-      const histValues = uploadedData.map(d => d.value);
-      const foreValues = forecastData.forecast;
-      
-      const response = await axios.post(`${API_BASE}/explain`, {
-        model_name: selectedModel,
-        periods: forecastPeriod,
-        historical_values: histValues,
-        forecast_values: foreValues,
-        mae: forecastData.mae,
-        rmse: forecastData.rmse,
-        mape: forecastData.mape
-      });
-      setAiExplanation(response.data.explanation);
-    } catch (err) {
-      console.error('Error generating AI explanation:', err);
-      // Don't set main error, just show fallback in component if needed
-      setAiExplanation("AI explanation failed to generate. Please ensure your Gemini API key is configured correctly.");
-    } finally {
-      setIsAiLoading(false);
-    }
-  };
-
   const handleForecast = async () => {
     if (!uploadedData) return;
-    
     setIsLoading(true);
-    setError('');
-    setForecastResult(null);
-    setAiExplanation('');
-    
+    setError(null);
+
     try {
-      const response = await axios.post(`${API_BASE}/forecast`, {
+      const res = await axios.post(`${API_BASE}/forecast`, {
         data: uploadedData,
         model: selectedModel,
         periods: forecastPeriod
+      }, {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-      
-      setForecastResult(response.data);
-      
-      // Fire and forget AI explanation
-      generateInsight(response.data);
-      
+      setForecastResult(res.data);
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Error running forecast.');
+      setError(err.response?.data?.detail || 'Forecast generation failed.');
     } finally {
       setIsLoading(false);
     }
@@ -202,25 +136,30 @@ export default function App() {
 
   const handleCompare = async () => {
     if (!uploadedData) return;
-    
     setIsCompareLoading(true);
-    setError('');
-    
+    setError(null);
+
     try {
-      const response = await axios.post(`${API_BASE}/compare`, {
+      const res = await axios.post(`${API_BASE}/compare`, {
         data: uploadedData,
-        model: selectedModel, // Model is required by schema, but compare runs all
         periods: forecastPeriod
+      }, {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-      
-      setCompareResults(response.data.results);
-      setBestModel(response.data.best_model);
-      
+      setCompareResults(res.data.comparisons);
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Error comparing models.');
+      setError(err.response?.data?.detail || 'Model comparison failed.');
     } finally {
       setIsCompareLoading(false);
     }
+  };
+
+  const handleClearData = () => {
+    setUploadedData(null);
+    setFileInfo(null);
+    setForecastResult(null);
+    setCompareResults(null);
+    setError(null);
   };
 
   if (!token) {
@@ -234,48 +173,58 @@ export default function App() {
   const userDisplayName = user?.name || (user?.email ? user.email.split('@')[0] : 'Analyst');
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#00111a] text-[#f1f5f9] flex flex-col font-sans relative selection:bg-[#a2fff4] selection:text-[#00131c]">
+      
+      {/* Background Ambience */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute inset-0 rasera-mesh-pattern opacity-70" />
+        <div className="absolute inset-0 rasera-radial-glow" />
+      </div>
+
       {/* Navbar */}
-      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+      <nav className="bg-[#001726]/85 backdrop-blur-xl border-b border-[#003b64] sticky top-0 z-50 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-center p-1.5">
-                <LogoF className="h-6 w-6" />
+          <div className="flex justify-between h-20 items-center">
+            
+            {/* Brand */}
+            <div className="flex items-center space-x-3.5">
+              <div className="h-11 w-11 rounded-2xl bg-[#002238] border border-[#004f7c] shadow-lg flex items-center justify-center p-1.5 shadow-[#a2fff4]/5">
+                <LogoF className="h-7 w-7" />
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center space-x-2">
-                  <span className="text-lg font-bold tracking-tight text-slate-900">SmartForecast</span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                  <span className="text-xl font-bold tracking-tight text-white">SmartForecast</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#a2fff4]/15 text-[#a2fff4] border border-[#a2fff4]/30">
                     Enterprise
                   </span>
                 </div>
-                <span className="text-xs text-slate-500 font-medium">Predictive Workspace</span>
+                <span className="text-xs text-[#97dcff]/70 font-medium">Predictive Workspace</span>
               </div>
             </div>
 
+            {/* Actions */}
             <div className="flex items-center space-x-3">
               <button 
                 onClick={handleSampleData}
                 disabled={isLoading}
-                className="text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 px-3.5 py-2 rounded-lg transition-colors flex items-center shadow-sm"
+                className="text-xs sm:text-sm font-semibold text-[#a2fff4] bg-[#002842] hover:bg-[#00375a] border border-[#a2fff4]/30 px-4 py-2.5 rounded-xl transition-all flex items-center shadow-md"
               >
-                <Database className="h-3.5 w-3.5 mr-1.5 text-blue-600" />
+                <Database className="h-4 w-4 mr-2 text-[#a2fff4]" />
                 Load Sample Data
               </button>
 
               {/* User Profile Pill */}
-              <div className="flex items-center pl-2 pr-3 py-1 bg-slate-50 border border-slate-200/80 rounded-full">
-                <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center text-xs font-bold shadow-sm mr-2">
+              <div className="flex items-center pl-2 pr-3 py-1.5 bg-[#002238] border border-[#004775] rounded-full">
+                <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-[#a2fff4] to-[#3b82f6] text-[#00131c] flex items-center justify-center text-xs font-extrabold shadow-sm mr-2.5">
                   {userInitial}
                 </div>
                 <div className="hidden md:flex flex-col text-left mr-2">
-                  <span className="text-xs font-semibold text-gray-800 leading-tight max-w-[130px] truncate">{userDisplayName}</span>
-                  <span className="text-[10px] text-gray-400 leading-tight max-w-[130px] truncate">{user?.email || 'Authenticated'}</span>
+                  <span className="text-xs font-bold text-white leading-tight max-w-[130px] truncate">{userDisplayName}</span>
+                  <span className="text-[10px] text-[#94a3b8] leading-tight max-w-[130px] truncate">{user?.email || 'Authenticated'}</span>
                 </div>
                 <button 
                   onClick={handleLogout}
-                  className="text-gray-400 hover:text-rose-600 p-1 rounded-full hover:bg-rose-50 transition-colors ml-1"
+                  className="text-[#94a3b8] hover:text-rose-400 p-1.5 rounded-full hover:bg-rose-950/40 transition-colors ml-1"
                   title="Sign Out"
                 >
                   <LogOut className="h-4 w-4" />
@@ -287,18 +236,18 @@ export default function App() {
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+      <main className="relative z-10 flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
         
         {error && (
-          <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-md shadow-sm">
+          <div className="mb-6 bg-rose-950/70 border-l-4 border-rose-500 p-4 rounded-xl shadow-md">
             <div className="flex">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <svg className="h-5 w-5 text-rose-400" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm text-red-700">{error}</p>
+                <p className="text-sm text-rose-200">{error}</p>
               </div>
             </div>
           </div>
@@ -328,10 +277,10 @@ export default function App() {
             <button
               onClick={handleForecast}
               disabled={!uploadedData || isLoading}
-              className="w-full flex items-center justify-center px-6 py-4 border border-transparent text-base font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all"
+              className="w-full flex items-center justify-center px-6 py-4 border border-transparent text-base font-extrabold rounded-2xl text-[#00131c] bg-gradient-to-r from-[#a2fff4] via-[#6aceff] to-[#3b82f6] hover:opacity-95 disabled:opacity-40 disabled:cursor-not-allowed shadow-xl shadow-[#6aceff]/20 transition-all active:scale-[0.99]"
             >
               {isLoading && !isCompareLoading ? (
-                <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                <div className="h-5 w-5 border-2 border-[#00131c] border-t-transparent rounded-full animate-spin mr-2" />
               ) : (
                 <LayoutDashboard className="h-5 w-5 mr-2" />
               )}
@@ -341,12 +290,12 @@ export default function App() {
             <button
               onClick={handleCompare}
               disabled={!uploadedData || isLoading || isCompareLoading}
-              className="w-full flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-sm font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full flex items-center justify-center px-6 py-3.5 border border-[#004775] text-sm font-semibold rounded-2xl text-[#a2fff4] bg-[#002238] hover:bg-[#002f4d] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
               {isCompareLoading ? (
-                <div className="h-4 w-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin mr-2" />
+                <div className="h-4 w-4 border-2 border-[#a2fff4] border-t-transparent rounded-full animate-spin mr-2" />
               ) : (
-                <Settings className="h-4 w-4 mr-2" />
+                <Settings className="h-4 w-4 mr-2 text-[#a2fff4]" />
               )}
               Compare All Models
             </button>
@@ -358,47 +307,43 @@ export default function App() {
               historicalData={uploadedData} 
               forecastData={forecastResult} 
             />
-            
+
             {forecastResult && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <MetricsCard metrics={{
-                  mae: forecastResult.mae,
-                  rmse: forecastResult.rmse,
-                  mape: forecastResult.mape
-                }} />
-                
+              <>
+                <MetricsCard metrics={forecastResult.metrics} />
+                <AIExplanation explanation={forecastResult.explanation} />
                 <DownloadReport 
                   forecastData={forecastResult}
-                  metrics={{
-                    mae: forecastResult.mae,
-                    rmse: forecastResult.rmse,
-                    mape: forecastResult.mape
-                  }}
-                  explanation={aiExplanation}
-                  modelName={forecastResult.model_name}
-                  periods={forecastPeriod}
+                  model={selectedModel}
+                  explanation={forecastResult.explanation}
                 />
-              </div>
+              </>
             )}
-            
-            {/* Show Compare Results if triggered */}
-            {(compareResults || isCompareLoading) && (
-              <CompareModels 
-                results={compareResults} 
-                bestModel={bestModel}
-                isLoading={isCompareLoading} 
-              />
+
+            {compareResults && (
+              <CompareModels comparisons={compareResults} />
             )}
-            
-            <AIExplanation 
-              explanation={aiExplanation} 
-              isLoading={isAiLoading}
-              onRegenerate={() => generateInsight(forecastResult)}
-            />
-            
           </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-[#003b64] bg-[#001424] py-6 text-xs text-[#94a3b8] font-medium">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center space-x-2">
+            <LogoF className="h-4 w-4" />
+            <span className="text-white font-bold">SmartForecast AI</span>
+            <span>•</span>
+            <span>Enterprise Workspace</span>
+          </div>
+          <div>
+            <span>Multi-Model Parallel Inference</span>
+          </div>
+        </div>
+      </footer>
+
     </div>
   );
 }
+
+export default App;
