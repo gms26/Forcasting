@@ -93,7 +93,6 @@ async def register(request: RegisterRequest):
 
 @app.post("/auth/login")
 async def login(request: LoginRequest):
-    # Accept either email or username
     user_identifier = (request.email or request.username or "").strip().lower()
     if not user_identifier:
         raise HTTPException(
@@ -103,7 +102,6 @@ async def login(request: LoginRequest):
     
     user = USERS_DB.get(user_identifier)
     
-    # If user doesn't exist yet, auto-provision seamless account so any user email works immediately
     if not user:
         if len(request.password) < 3:
             raise HTTPException(
@@ -140,13 +138,33 @@ async def login(request: LoginRequest):
     }
 
 @app.get("/sample")
+@app.get("/sample-data")
 async def get_sample():
     sample_path = os.path.join(os.path.dirname(__file__), "..", "sample_data", "sales_data.csv")
     if not os.path.exists(sample_path):
-        raise HTTPException(status_code=404, detail="Sample data not found.")
+        # Fallback sample records if file path resolution varies
+        records = [
+            {"date": "2024-01-01", "value": 120.5},
+            {"date": "2024-01-02", "value": 124.8},
+            {"date": "2024-01-03", "value": 119.2},
+            {"date": "2024-01-04", "value": 131.0},
+            {"date": "2024-01-05", "value": 135.4},
+            {"date": "2024-01-06", "value": 128.9},
+            {"date": "2024-01-07", "value": 142.1},
+            {"date": "2024-01-08", "value": 148.6},
+            {"date": "2024-01-09", "value": 145.2},
+            {"date": "2024-01-10", "value": 153.8},
+            {"date": "2024-01-11", "value": 158.0},
+            {"date": "2024-01-12", "value": 162.4},
+            {"date": "2024-01-13", "value": 159.1},
+            {"date": "2024-01-14", "value": 167.5},
+            {"date": "2024-01-15", "value": 172.8}
+        ]
+        return {"data": records}
     
     df = pd.read_csv(sample_path)
-    return df.to_dict(orient="records")
+    records = df.to_dict(orient="records")
+    return {"data": records}
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
@@ -156,9 +174,8 @@ async def upload_file(file: UploadFile = File(...)):
     content = await file.read()
     try:
         df = parse_data(content, is_json=False)
-        # Convert date back to string for JSON serialization
         df['date'] = df['date'].dt.strftime('%Y-%m-%d')
-        return df.to_dict(orient="records")
+        return {"data": df.to_dict(orient="records")}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -208,16 +225,17 @@ async def compare_models(request: ForecastRequest):
     for name, module in models.items():
         try:
             res = module.run_forecast(data, periods)
-            res["model_name"] = name
             results.append({
-                "model_name": name,
-                "mae": res["mae"],
-                "rmse": res["rmse"],
-                "mape": res["mape"]
+                "model": name,
+                "metrics": {
+                    "mae": res["metrics"]["mae"],
+                    "rmse": res["metrics"]["rmse"],
+                    "mape": res["metrics"]["mape"]
+                }
             })
             
-            if res["mape"] < lowest_mape:
-                lowest_mape = res["mape"]
+            if res["metrics"]["mape"] < lowest_mape:
+                lowest_mape = res["metrics"]["mape"]
                 best_model = name
         except Exception as e:
             print(f"Error running {name}: {e}")
@@ -227,44 +245,9 @@ async def compare_models(request: ForecastRequest):
         raise HTTPException(status_code=500, detail="All models failed.")
         
     return {
-        "results": results,
+        "comparisons": results,
         "best_model": best_model
     }
-
-class ExplainRequest(BaseModel):
-    model_name: str
-    periods: int
-    historical_values: List[float]
-    forecast_values: List[float]
-    mae: float
-    rmse: float
-    mape: float
-
-@app.post("/explain")
-async def explain_forecast(request: ExplainRequest):
-    # Determine basic trend direction
-    first_hist = request.historical_values[0] if request.historical_values else 0
-    last_hist = request.historical_values[-1] if request.historical_values else 0
-    last_fore = request.forecast_values[-1] if request.forecast_values else 0
-    
-    if last_fore > last_hist:
-        trend = "upward"
-    elif last_fore < last_hist:
-        trend = "downward"
-    else:
-        trend = "stable"
-        
-    explanation = get_gemini_explanation(
-        model_name=request.model_name,
-        periods=request.periods,
-        historical_values=request.historical_values,
-        forecast_values=request.forecast_values,
-        trend_direction=trend,
-        mae=request.mae,
-        rmse=request.rmse,
-        mape=request.mape
-    )
-    return {"explanation": explanation}
 
 class DownloadPDFRequest(BaseModel):
     model_name: str
@@ -282,7 +265,7 @@ async def download_pdf(request: DownloadPDFRequest):
     return StreamingResponse(
         pdf_buffer, 
         media_type="application/pdf", 
-        headers={"Content-Disposition": f"attachment; filename=forecast_report.pdf"}
+        headers={"Content-Disposition": "attachment; filename=forecast_report.pdf"}
     )
 
 class DownloadCSVRequest(BaseModel):
@@ -306,5 +289,5 @@ async def download_csv(request: DownloadCSVRequest):
     return StreamingResponse(
         iter([csv_buffer.getvalue()]), 
         media_type="text/csv", 
-        headers={"Content-Disposition": f"attachment; filename=forecast_data.csv"}
+        headers={"Content-Disposition": "attachment; filename=forecast_data.csv"}
     )

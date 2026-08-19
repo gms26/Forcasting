@@ -70,24 +70,24 @@ export default function DownloadReport({ forecastData, metrics, explanation, mod
   };
 
   return (
-    <div className="ai-card p-6">
-      <div className="flex items-center space-x-2 text-white mb-4">
-        <Download className="h-5 w-5 text-cyan-400" />
-        <h3 className="text-base font-bold text-white">Export Results</h3>
+    <div className="dash-card p-6">
+      <div className="flex items-center space-x-2 text-gray-900 mb-4">
+        <Download className="h-5 w-5 text-blue-600" />
+        <h3 className="text-base font-bold text-gray-900">Export Results</h3>
       </div>
       
       {error && (
-        <div className="mb-4 text-xs text-rose-300 bg-rose-950/60 p-3 rounded-xl border border-rose-800">
+        <div className="mb-4 text-xs text-rose-700 bg-rose-50 p-3 rounded-xl border border-rose-200">
           {error}
         </div>
       )}
 
       <div className="space-y-3">
-        {/* PDF Download Button */}
+        {/* PDF Download Button matching screenshot */}
         <button
           onClick={handleDownloadPDF}
           disabled={isPdfLoading}
-          className="btn-ai-radiant w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl text-sm disabled:opacity-50"
+          className="btn-primary w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl text-sm disabled:opacity-50"
         >
           {isPdfLoading ? (
             <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -97,16 +97,16 @@ export default function DownloadReport({ forecastData, metrics, explanation, mod
           <span>Download PDF Report</span>
         </button>
 
-        {/* CSV Download Button */}
+        {/* CSV Download Button matching screenshot */}
         <button
           onClick={handleDownloadCSV}
           disabled={isCsvLoading}
-          className="btn-ai-glass w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl text-sm disabled:opacity-50"
+          className="btn-secondary w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl text-sm disabled:opacity-50"
         >
           {isCsvLoading ? (
-            <div className="h-4 w-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+            <div className="h-4 w-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
           ) : (
-            <FileSpreadsheet className="h-4 w-4 text-cyan-400" />
+            <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
           )}
           <span>Export Forecast Data (CSV)</span>
         </button>

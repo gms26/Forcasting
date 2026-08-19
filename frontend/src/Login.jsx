@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import LogoF from './components/LogoF';
 import { 
-  Lock, 
   Mail, 
   User, 
   Eye, 
@@ -26,12 +25,26 @@ export default function Login({ setToken, setUser, onBack }) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showSleepNotice, setShowSleepNotice] = useState(false);
   const [authSuccessNotice, setAuthSuccessNotice] = useState('');
 
   // Password reset modal state
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotSubmitted, setForgotSubmitted] = useState(false);
+
+  // Dynamically show the Render sleep notice ONLY if request takes > 2.5 seconds (server is sleeping)
+  useEffect(() => {
+    let timer;
+    if (isLoading) {
+      timer = setTimeout(() => {
+        setShowSleepNotice(true);
+      }, 2500);
+    } else {
+      setShowSleepNotice(false);
+    }
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
@@ -77,36 +90,26 @@ export default function Login({ setToken, setUser, onBack }) {
     } catch (err) {
       const errorMsg = err.response?.data?.detail || 'Authentication failed. Please verify your credentials.';
       setError(errorMsg);
+    } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#070c18] text-[#f1f5f9] flex flex-col justify-between relative selection:bg-cyan-500 selection:text-[#070c18]">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between relative">
       
-      {/* Background Ambience */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute inset-0 ai-grid-pattern opacity-80" />
-        <div className="absolute inset-0 ai-radial-glow" />
-      </div>
-
       {/* Top Header Bar */}
-      <header className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 flex items-center justify-between">
+      <header className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 flex items-center justify-between">
         <div 
-          className="flex items-center space-x-3 cursor-pointer group" 
+          className="flex items-center space-x-3 cursor-pointer" 
           onClick={onBack}
         >
-          <div className="h-10 w-10 rounded-xl bg-[#0d1e38] border border-[#1e3a5f] flex items-center justify-center p-1.5 shadow-md shadow-cyan-500/10 group-hover:border-cyan-400 transition-colors">
+          <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center p-1.5 border border-blue-100">
             <LogoF className="h-6 w-6" />
           </div>
           <div className="flex flex-col">
-            <div className="flex items-center space-x-2">
-              <span className="text-xl font-bold tracking-tight text-white">SmartForecast</span>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-700/60">
-                AI
-              </span>
-            </div>
-            <span className="text-xs text-slate-400 font-medium">Predictive Workspace</span>
+            <span className="text-xl font-bold tracking-tight text-gray-900">SmartForecast AI</span>
+            <span className="text-xs text-gray-500 font-medium">Predictive Workspace</span>
           </div>
         </div>
 
@@ -114,7 +117,7 @@ export default function Login({ setToken, setUser, onBack }) {
           <button
             type="button"
             onClick={onBack}
-            className="text-xs sm:text-sm font-semibold text-slate-300 hover:text-white flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-[#0d1e38] border border-[#1e3a5f] hover:border-cyan-500/40 transition-all shadow-xs"
+            className="text-xs sm:text-sm font-semibold text-gray-700 hover:text-gray-900 flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-white border border-gray-200 hover:border-gray-300 transition-all shadow-2xs"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Home</span>
@@ -123,44 +126,46 @@ export default function Login({ setToken, setUser, onBack }) {
       </header>
 
       {/* Main Centered Login Card */}
-      <main className="relative z-10 w-full max-w-md mx-auto px-4 sm:px-6 py-8 my-auto">
-        <div className="ai-card p-8 sm:p-10 shadow-2xl border border-[#1e3a5f]">
+      <main className="w-full max-w-md mx-auto px-4 sm:px-6 py-8 my-auto">
+        <div className="dash-card p-8 sm:p-10 shadow-md">
           
           {/* Top Logo & Welcome */}
           <div className="text-center space-y-2 mb-6">
-            <div className="inline-flex h-14 w-14 rounded-2xl bg-[#0d1e38] border border-[#1e3a5f] items-center justify-center p-2 mb-1 shadow-lg shadow-cyan-500/15">
-              <LogoF className="h-8 w-8" />
+            <div className="inline-flex h-12 w-12 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 items-center justify-center p-2 mb-1">
+              <LogoF className="h-7 w-7" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">
               {isRegister ? 'Create Account' : 'Welcome Back'}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-xs mx-auto leading-relaxed">
+            <p className="text-xs sm:text-sm text-gray-500 max-w-xs mx-auto leading-relaxed">
               {isRegister 
                 ? 'Sign up to start forecasting with multi-model algorithms and Gemini AI.' 
                 : 'Sign in to access your predictive analytics dashboard.'}
             </p>
           </div>
 
-          {/* Render Wakeup Notice */}
-          <div className="mb-5 p-3.5 rounded-xl bg-[#091830] border border-cyan-500/40 text-cyan-300 text-xs flex items-start space-x-2.5 shadow-sm">
-            <Info className="h-4 w-4 shrink-0 text-cyan-400 mt-0.5" />
-            <span className="leading-relaxed">
-              <strong>Note:</strong> The backend is hosted on Render free tier. If the server is asleep, the first request may take up to 50 seconds to wake up. Please be patient while authenticating.
-            </span>
-          </div>
+          {/* Render Wakeup Notice - ONLY SHOWN WHEN RENDER IS IN SLEEP Mode */}
+          {showSleepNotice && (
+            <div className="mb-5 p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 text-xs flex items-start space-x-2.5 animate-fade-in">
+              <Info className="h-4 w-4 shrink-0 text-blue-600 mt-0.5" />
+              <span className="leading-relaxed">
+                <strong>Server Waking Up:</strong> Render free tier backend is spinning up from idle sleep (~50s max). Please hold on...
+              </span>
+            </div>
+          )}
 
           {/* Error Message */}
           {error && (
-            <div className="mb-5 p-3.5 rounded-xl bg-rose-950/80 border border-rose-500/50 text-rose-200 text-xs flex items-start space-x-2.5">
-              <AlertCircle className="h-4 w-4 shrink-0 text-rose-400 mt-0.5" />
+            <div className="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start space-x-2.5">
+              <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {/* Success Message */}
           {authSuccessNotice && (
-            <div className="mb-5 p-3.5 rounded-xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 text-xs flex items-start space-x-2.5">
-              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400 mt-0.5" />
+            <div className="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-start space-x-2.5">
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 mt-0.5" />
               <span>{authSuccessNotice}</span>
             </div>
           )}
@@ -170,7 +175,7 @@ export default function Login({ setToken, setUser, onBack }) {
             
             {isRegister && (
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider font-mono">
+                <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider font-mono">
                   Full Name
                 </label>
                 <div className="relative">
@@ -180,15 +185,15 @@ export default function Login({ setToken, setUser, onBack }) {
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Alex Rivera"
                     required
-                    className="w-full bg-[#080e1b] border border-[#1e3a5f] focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 text-white rounded-xl px-4 py-3 text-sm transition-all placeholder:text-slate-500 outline-none"
+                    className="w-full bg-white border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-900 rounded-xl px-4 py-3 text-sm transition-all placeholder:text-gray-400 outline-none"
                   />
-                  <User className="h-4 w-4 text-slate-500 absolute right-4 top-3.5" />
+                  <User className="h-4 w-4 text-gray-400 absolute right-4 top-3.5" />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wider font-mono">
+              <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider font-mono">
                 Work Email Address
               </label>
               <div className="relative">
@@ -198,22 +203,22 @@ export default function Login({ setToken, setUser, onBack }) {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@company.com"
                   required
-                  className="w-full bg-[#080e1b] border border-[#1e3a5f] focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 text-white rounded-xl px-4 py-3 text-sm transition-all placeholder:text-slate-500 outline-none"
+                  className="w-full bg-white border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-900 rounded-xl px-4 py-3 text-sm transition-all placeholder:text-gray-400 outline-none"
                 />
-                <Mail className="h-4 w-4 text-slate-500 absolute right-4 top-3.5" />
+                <Mail className="h-4 w-4 text-gray-400 absolute right-4 top-3.5" />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider font-mono">
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider font-mono">
                   Password
                 </label>
                 {!isRegister && (
                   <button
                     type="button"
                     onClick={() => setShowForgotModal(true)}
-                    className="text-xs text-cyan-400 hover:underline font-semibold transition-colors"
+                    className="text-xs text-blue-600 hover:underline font-semibold"
                   >
                     Forgot password?
                   </button>
@@ -226,12 +231,12 @@ export default function Login({ setToken, setUser, onBack }) {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
                   required
-                  className="w-full bg-[#080e1b] border border-[#1e3a5f] focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 text-white rounded-xl px-4 py-3 text-sm transition-all placeholder:text-slate-500 outline-none font-mono"
+                  className="w-full bg-white border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-900 rounded-xl px-4 py-3 text-sm transition-all placeholder:text-gray-400 outline-none font-mono"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-slate-500 hover:text-white absolute right-4 top-3.5 transition-colors"
+                  className="text-gray-400 hover:text-gray-700 absolute right-4 top-3.5 transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -243,12 +248,12 @@ export default function Login({ setToken, setUser, onBack }) {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="btn-ai-radiant w-full flex items-center justify-center space-x-2 py-3.5 px-5 rounded-xl text-sm disabled:opacity-50"
+                className="btn-primary w-full flex items-center justify-center space-x-2 py-3.5 px-5 rounded-xl text-sm disabled:opacity-50"
               >
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
                     <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Authenticating...</span>
+                    <span>Connecting...</span>
                   </div>
                 ) : (
                   <>
@@ -262,7 +267,7 @@ export default function Login({ setToken, setUser, onBack }) {
           </form>
 
           {/* Toggle Mode Footer */}
-          <div className="mt-6 pt-5 border-t border-[#14233c] text-center text-xs sm:text-sm text-slate-400">
+          <div className="mt-6 pt-5 border-t border-gray-100 text-center text-xs sm:text-sm text-gray-500">
             <span>
               {isRegister ? 'Already have an account?' : "Don't have an account yet?"}
             </span>{' '}
@@ -273,7 +278,7 @@ export default function Login({ setToken, setUser, onBack }) {
                 setError('');
                 setAuthSuccessNotice('');
               }}
-              className="text-cyan-400 hover:underline font-bold ml-1 transition-colors"
+              className="text-blue-600 hover:underline font-bold ml-1"
             >
               {isRegister ? 'Sign In' : 'Sign Up'}
             </button>
@@ -284,37 +289,37 @@ export default function Login({ setToken, setUser, onBack }) {
 
       {/* Forgot Password Modal */}
       {showForgotModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="ai-card p-7 sm:p-9 max-w-md w-full shadow-2xl relative space-y-4 border border-[#1e3a5f]">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-7 sm:p-9 max-w-md w-full shadow-xl relative space-y-4 border border-gray-200">
             
             <button
               onClick={() => {
                 setShowForgotModal(false);
                 setForgotSubmitted(false);
               }}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white"
+              className="absolute top-5 right-5 text-gray-400 hover:text-gray-700"
             >
               <X className="h-5 w-5" />
             </button>
 
             <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 rounded-xl bg-[#0d1e38] border border-cyan-500/30 text-cyan-400 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
                 <KeyRound className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Reset Password</h3>
-                <p className="text-xs text-slate-400">Recover access to your account</p>
+                <h3 className="text-lg font-bold text-gray-900">Reset Password</h3>
+                <p className="text-xs text-gray-500">Recover access to your account</p>
               </div>
             </div>
 
             {forgotSubmitted ? (
-              <div className="p-4 rounded-xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 text-xs space-y-2">
+              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs space-y-2">
                 <div className="font-semibold flex items-center space-x-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                   <span>Reset Link Sent</span>
                 </div>
-                <p className="text-slate-300 text-xs">
-                  We have sent instructions to <strong className="text-white font-mono">{forgotEmail}</strong> if an account exists.
+                <p className="text-gray-600 text-xs">
+                  We have sent instructions to <strong className="text-gray-900 font-mono">{forgotEmail}</strong> if an account exists.
                 </p>
                 <button
                   type="button"
@@ -322,7 +327,7 @@ export default function Login({ setToken, setUser, onBack }) {
                     setShowForgotModal(false);
                     setForgotSubmitted(false);
                   }}
-                  className="btn-ai-radiant mt-3 w-full py-2.5 text-xs rounded-xl"
+                  className="btn-primary mt-3 w-full py-2.5 text-xs rounded-xl"
                 >
                   Back to Sign In
                 </button>
@@ -335,7 +340,7 @@ export default function Login({ setToken, setUser, onBack }) {
                 }}
                 className="space-y-4 text-sm"
               >
-                <p className="text-slate-400 text-xs leading-relaxed">
+                <p className="text-gray-600 text-xs leading-relaxed">
                   Enter your email address and we will send you a secure recovery link to reset your password.
                 </p>
                 <input
@@ -344,11 +349,11 @@ export default function Login({ setToken, setUser, onBack }) {
                   onChange={(e) => setForgotEmail(e.target.value)}
                   placeholder="name@company.com"
                   required
-                  className="w-full bg-[#080e1b] border border-[#1e3a5f] focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 text-white rounded-xl px-4 py-3 text-xs transition-colors placeholder:text-slate-500 outline-none"
+                  className="w-full bg-white border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-900 rounded-xl px-4 py-3 text-xs transition-colors placeholder:text-gray-400 outline-none"
                 />
                 <button
                   type="submit"
-                  className="btn-ai-radiant w-full py-3 px-4 rounded-xl text-xs"
+                  className="btn-primary w-full py-3 px-4 rounded-xl text-xs"
                 >
                   Send Reset Link
                 </button>
@@ -360,10 +365,10 @@ export default function Login({ setToken, setUser, onBack }) {
       )}
 
       {/* Footer */}
-      <footer className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 flex items-center justify-between text-xs text-slate-400 border-t border-[#1e3a5f]">
+      <footer className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 flex items-center justify-between text-xs text-gray-500 border-t border-gray-200">
         <div className="flex items-center space-x-2">
           <LogoF className="h-4 w-4" />
-          <span className="font-bold text-white">SmartForecast AI</span>
+          <span className="font-bold text-gray-900">SmartForecast AI</span>
         </div>
         <span className="font-mono">Enterprise Forecasting Workspace</span>
       </footer>

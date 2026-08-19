@@ -20,7 +20,7 @@ export default function ForecastChart({ historicalData, forecastData }) {
     // Convert historical data
     const hist = historicalData.map(d => ({
       date: d.date,
-      historical: d.value,
+      historical: Number(d.value),
       forecast: null,
       confidenceLower: null,
       confidenceUpper: null
@@ -48,14 +48,14 @@ export default function ForecastChart({ historicalData, forecastData }) {
 
   if (!chartData || chartData.length === 0) {
     return (
-      <div className="h-96 flex flex-col items-center justify-center bg-[#0d1527] rounded-2xl border border-[#1e3a5f] p-6 text-center shadow-lg">
-        <div className="h-12 w-12 rounded-2xl bg-[#13233f] text-cyan-400 border border-cyan-500/30 flex items-center justify-center mb-3 shadow-md shadow-cyan-500/10">
+      <div className="h-96 flex flex-col items-center justify-center bg-white rounded-2xl border border-gray-200 p-6 text-center shadow-xs">
+        <div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
           </svg>
         </div>
-        <p className="text-white font-bold text-base">Forecast Visualization</p>
-        <p className="text-xs text-slate-400 mt-1 max-w-sm">Upload a CSV dataset to plot historical observations and forecast predictive trajectories.</p>
+        <p className="text-gray-900 font-bold text-base">Forecast Visualization</p>
+        <p className="text-xs text-gray-500 mt-1 max-w-sm">Upload a CSV dataset or load sample data to plot historical observations and forecast predictive trajectories.</p>
       </div>
     );
   }
@@ -65,8 +65,8 @@ export default function ForecastChart({ historicalData, forecastData }) {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-[#0b1328] p-3.5 border border-[#1e3a5f] shadow-2xl rounded-xl">
-          <p className="font-bold text-white mb-1.5 text-xs font-mono">{label}</p>
+        <div className="bg-white p-3.5 border border-gray-200 shadow-xl rounded-xl">
+          <p className="font-bold text-gray-900 mb-1.5 text-xs font-mono">{label}</p>
           {payload.map((entry, index) => {
             if (entry.dataKey === 'confidenceUpper' || entry.dataKey === 'confidenceLower') {
               return null;
@@ -77,9 +77,9 @@ export default function ForecastChart({ historicalData, forecastData }) {
                   className="w-2.5 h-2.5 rounded-full shadow-xs" 
                   style={{ backgroundColor: entry.color }}
                 />
-                <span className="text-slate-300 capitalize">{entry.name}:</span>
-                <span className="font-bold text-white num-stat font-mono">
-                  {entry.value !== null && entry.value !== undefined ? entry.value.toFixed(2) : 'N/A'}
+                <span className="text-gray-600 capitalize">{entry.name}:</span>
+                <span className="font-bold text-gray-900 num-stat font-mono">
+                  {entry.value !== null && entry.value !== undefined ? Number(entry.value).toFixed(2) : 'N/A'}
                 </span>
               </div>
             );
@@ -91,47 +91,47 @@ export default function ForecastChart({ historicalData, forecastData }) {
   };
 
   return (
-    <div className="ai-card p-6">
+    <div className="dash-card p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-base font-bold text-white">Forecast Visualization</h3>
+        <h3 className="text-base font-bold text-gray-900">Forecast Visualization</h3>
         {forecastData && (
-          <span className="text-xs font-bold text-cyan-300 bg-cyan-950/70 px-3 py-1 rounded-full border border-cyan-500/40 font-mono shadow-xs">
-            Live Trajectory
+          <span className="text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1 rounded-full border border-blue-200 font-mono">
+            Forecast Active
           </span>
         )}
       </div>
 
-      <div className="h-96 w-full bg-[#080e1b] rounded-xl border border-[#14233c] p-2">
+      <div className="h-96 w-full bg-white rounded-xl p-2">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={chartData}
             margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#162540" />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
             <XAxis 
               dataKey="date" 
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
+              tick={{ fontSize: 11, fill: '#64748b' }}
               tickMargin={10}
               minTickGap={30}
-              stroke="#1e3a5f"
+              stroke="#cbd5e1"
             />
             <YAxis 
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
+              tick={{ fontSize: 11, fill: '#64748b' }}
               tickMargin={10}
               axisLine={false}
               tickLine={false}
-              stroke="#1e3a5f"
+              stroke="#cbd5e1"
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend 
               verticalAlign="top" 
               height={36} 
               iconType="circle" 
-              wrapperStyle={{ color: '#cbd5e1', fontSize: '12px' }} 
+              wrapperStyle={{ color: '#475569', fontSize: '12px' }} 
             />
             
             {forecastStartDate && (
-              <ReferenceLine x={forecastStartDate} stroke="#22d3ee" strokeDasharray="3 3" />
+              <ReferenceLine x={forecastStartDate} stroke="#cbd5e1" strokeDasharray="3 3" />
             )}
 
             <Area 
@@ -139,15 +139,15 @@ export default function ForecastChart({ historicalData, forecastData }) {
               dataKey="confidenceUpper" 
               name="Confidence Interval"
               stroke="none" 
-              fill="#06b6d4" 
-              fillOpacity={0.25} 
+              fill="#fed7aa" 
+              fillOpacity={0.4} 
               legendType="circle"
             />
             <Area 
               type="monotone" 
               dataKey="confidenceLower" 
               stroke="none" 
-              fill="#080e1b" 
+              fill="#ffffff" 
               fillOpacity={1} 
               legendType="none"
             />
@@ -156,20 +156,20 @@ export default function ForecastChart({ historicalData, forecastData }) {
               type="monotone" 
               dataKey="historical" 
               name="Historical Data"
-              stroke="#38bdf8" 
+              stroke="#3b82f6" 
               strokeWidth={2.5}
               dot={false}
-              activeDot={{ r: 4, stroke: '#38bdf8' }}
+              activeDot={{ r: 4, stroke: '#3b82f6' }}
             />
             <Line 
               type="monotone" 
               dataKey="forecast" 
-              name="Forecast Horizon"
-              stroke="#22d3ee" 
+              name="Forecast"
+              stroke="#f97316" 
               strokeWidth={2.5}
               strokeDasharray="5 5"
               dot={false}
-              activeDot={{ r: 4, stroke: '#22d3ee' }}
+              activeDot={{ r: 4, stroke: '#f97316' }}
             />
           </ComposedChart>
         </ResponsiveContainer>
