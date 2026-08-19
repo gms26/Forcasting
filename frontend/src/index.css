@@ -8,9 +8,9 @@
     max-width: 100%;
     width: 100%;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #f8fafc;
-    color: #0f172a;
-    letter-spacing: -0.011em;
+    background-color: #070c18;
+    color: #f1f5f9;
+    letter-spacing: -0.012em;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -24,14 +24,14 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #f1f5f9;
+    background: #070c18;
   }
   ::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: #1e293b;
     border-radius: 6px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: #334155;
   }
 
   /* Monospace font settings */
@@ -42,57 +42,70 @@
 }
 
 @layer utilities {
-  /* Crisp Enterprise White Cards matching asset screenshot */
-  .dash-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+  /* Intelligent AI Forecasting Cards */
+  .ai-card {
+    background: rgba(13, 21, 39, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(30, 58, 95, 0.65);
     border-radius: 1rem;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
   }
 
-  .dash-card-hover {
+  .ai-card-hover {
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .ai-card-hover:hover {
+    border-color: rgba(34, 211, 238, 0.5);
+    box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.2), 0 8px 24px -4px rgba(0, 0, 0, 0.6);
+    transform: translateY(-2px);
+  }
+
+  /* Radiant AI Action Button */
+  .btn-ai-radiant {
+    background: linear-gradient(135deg, #06b6d4 0%, #2563eb 50%, #4f46e5 100%);
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 4px 20px -2px rgba(6, 182, 212, 0.35);
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .dash-card-hover:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+  .btn-ai-radiant:hover {
+    background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 50%, #6366f1 100%);
+    box-shadow: 0 6px 28px -2px rgba(34, 211, 238, 0.45);
+    transform: translateY(-1px);
+  }
+  .btn-ai-radiant:active {
+    transform: translateY(0.5px);
   }
 
-  /* Primary Blue Button matching screenshot */
-  .btn-primary {
-    background-color: #2563eb;
+  /* Secondary Glassmorphic Button */
+  .btn-ai-glass {
+    background: rgba(15, 29, 54, 0.85);
+    border: 1px solid rgba(30, 58, 95, 0.8);
+    color: #67e8f9;
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn-ai-glass:hover {
+    background: rgba(19, 37, 71, 0.95);
+    border-color: rgba(34, 211, 238, 0.5);
     color: #ffffff;
-    font-weight: 600;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    transition: all 0.15s ease-in-out;
-  }
-  .btn-primary:hover {
-    background-color: #1d4ed8;
-  }
-  .btn-primary:active {
-    background-color: #1e40af;
+    transform: translateY(-1px);
   }
 
-  /* Secondary Neutral Button */
-  .btn-secondary {
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    color: #334155;
-    font-weight: 600;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-    transition: all 0.15s ease-in-out;
-  }
-  .btn-secondary:hover {
-    background-color: #f8fafc;
-    border-color: #cbd5e1;
-    color: #0f172a;
+  /* Ambient Radial Glow */
+  .ai-radial-glow {
+    background: 
+      radial-gradient(ellipse 70% 50% at 50% -10%, rgba(6, 182, 212, 0.15) 0%, transparent 75%),
+      radial-gradient(ellipse 60% 40% at 85% 20%, rgba(37, 99, 235, 0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 40% at 15% 80%, rgba(79, 70, 229, 0.12) 0%, transparent 65%);
   }
 
-  /* Grid pattern overlay */
-  .grid-pattern {
-    background-size: 32px 32px;
+  /* Forecasting Fine Grid Pattern */
+  .ai-grid-pattern {
+    background-size: 36px 36px;
     background-image: 
-      linear-gradient(to right, rgba(226, 232, 240, 0.6) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(226, 232, 240, 0.6) 1px, transparent 1px);
+      linear-gradient(to right, rgba(34, 211, 238, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(34, 211, 238, 0.035) 1px, transparent 1px);
   }
 }
