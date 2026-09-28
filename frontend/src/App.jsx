@@ -440,10 +440,10 @@ export default function App() {
           <div className="flex items-center space-x-2 font-medium">
             <span className="text-slate-900 font-bold">SmartForecast AI</span>
             <span>•</span>
-            <span>Enterprise Predictive Intelligence</span>
+            <span>Forecasting workspace</span>
           </div>
           <div className="font-mono text-[11px] text-slate-400">
-            <span>Fast In-Memory Computation</span>
+            <span>Four forecasting methods</span>
           </div>
         </div>
       </footer>

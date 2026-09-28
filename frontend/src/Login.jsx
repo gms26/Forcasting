@@ -107,7 +107,7 @@ export default function Login({ setToken, setUser, onBack }) {
           <LogoF className="h-9 w-9" />
           <div className="flex flex-col">
             <span className="text-xl font-bold tracking-tight text-gray-900">SmartForecast AI</span>
-            <span className="text-xs text-gray-500 font-medium">Predictive Workspace</span>
+            <span className="text-xs text-gray-500 font-medium">Forecasting workspace</span>
           </div>
         </div>
 
@@ -171,11 +171,12 @@ export default function Login({ setToken, setUser, onBack }) {
             
             {isRegister && (
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider font-mono">
-                  Full Name
+                <label htmlFor="register-name" className="block text-sm font-semibold text-slate-700 mb-1.5">
+                  Full name
                 </label>
                 <div className="relative">
                   <input
+                    id="register-name"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -189,11 +190,12 @@ export default function Login({ setToken, setUser, onBack }) {
             )}
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider font-mono">
-                Work Email Address
+              <label htmlFor="account-email" className="block text-sm font-semibold text-slate-700 mb-1.5">
+                Work email
               </label>
               <div className="relative">
                 <input
+                  id="account-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -207,7 +209,7 @@ export default function Login({ setToken, setUser, onBack }) {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider font-mono">
+                <label htmlFor="account-password" className="block text-sm font-semibold text-slate-700">
                   Password
                 </label>
                 {!isRegister && (
@@ -222,6 +224,7 @@ export default function Login({ setToken, setUser, onBack }) {
               </div>
               <div className="relative">
                 <input
+                  id="account-password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -366,7 +369,7 @@ export default function Login({ setToken, setUser, onBack }) {
           <LogoF className="h-4 w-4" />
           <span className="font-bold text-gray-900">SmartForecast AI</span>
         </div>
-        <span className="font-mono">Enterprise Forecasting Workspace</span>
+            <span>Forecasts for practical planning</span>
       </footer>
 
     </div>
