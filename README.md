@@ -15,6 +15,46 @@ An AI-powered time series forecasting dashboard where users can upload CSV data,
 - 📄 **Export Reports**: Download comprehensive PDF reports and CSV data of your forecasts.
 - 🔒 **Secure Auth**: JWT-based authentication to secure your dashboard.
 
+## System Architecture
+
+```mermaid
+flowchart LR
+    subgraph Client [Client Side]
+        A([React Frontend]) -->|CSV Upload| B(Vite & Tailwind)
+        B -->|Visualize| C{Recharts}
+    end
+
+    subgraph Server [Backend FastAPI]
+        D[Uvicorn Server] -->|Parse & Clean| E[(Pandas/Numpy)]
+        E --> F((Forecasting Engine))
+    end
+
+    subgraph Engine [AI Models]
+        F --> G[ARIMA]
+        F --> H[Prophet]
+        F --> I[Holt-Winters]
+    end
+
+    subgraph Insights [Gen AI]
+        J{Google Gemini}
+    end
+
+    %% Connections
+    B <-->|JWT Auth| D
+    B -->|API Requests| D
+    F -->|Predictions| B
+    E -.->|Context| J
+    J -.->|Business Insights| B
+
+    classDef client fill:#e0f7fa,stroke:#006064,stroke-width:2px;
+    classDef server fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+    classDef ai fill:#ede7f6,stroke:#4527a0,stroke-width:2px;
+
+    class A,B,C client;
+    class D,E server;
+    class F,G,H,I,J ai;
+```
+
 ## Tech Stack
 | Frontend | Backend | AI/ML |
 |----------|---------|-------|
