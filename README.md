@@ -17,42 +17,60 @@ An AI-powered time series forecasting dashboard where users can upload CSV data,
 
 ## System Architecture
 
+### Component Architecture
 ```mermaid
-flowchart LR
-    subgraph Client [Client Side]
-        A([React Frontend]) -->|CSV Upload| B(Vite & Tailwind)
-        B -->|Visualize| C{Recharts}
+flowchart TD
+    subgraph Client [Frontend - React/Vite]
+        UI([User Interface])
+        Chart[Recharts Visualization]
     end
 
-    subgraph Server [Backend FastAPI]
-        D[Uvicorn Server] -->|Parse & Clean| E[(Pandas/Numpy)]
-        E --> F((Forecasting Engine))
+    subgraph Server [Backend - FastAPI]
+        API[Uvicorn API Router]
+        Data[(Pandas/Numpy)]
+        Engine{Forecasting Engine}
     end
 
-    subgraph Engine [AI Models]
-        F --> G[ARIMA]
-        F --> H[Prophet]
-        F --> I[Holt-Winters]
+    subgraph Models [AI Models]
+        ARIMA[ARIMA]
+        Prophet[Prophet]
+        HW[Holt-Winters]
     end
 
-    subgraph Insights [Gen AI]
-        J{Google Gemini}
+    subgraph GenAI [External Services]
+        Gemini[Google Gemini API]
     end
 
-    %% Connections
-    B <-->|JWT Auth| D
-    B -->|API Requests| D
-    F -->|Predictions| B
-    E -.->|Context| J
-    J -.->|Business Insights| B
+    %% Flow
+    UI -->|CSV Data + JWT| API
+    API -->|Clean & Parse| Data
+    Data --> Engine
+    Engine --> ARIMA & Prophet & HW
+    ARIMA & Prophet & HW -->|Predictions| API
+    API -->|Forecast Context| Gemini
+    Gemini -->|Business Insights| API
+    API -->|JSON Response| Chart
+```
 
-    classDef client fill:#e0f7fa,stroke:#006064,stroke-width:2px;
-    classDef server fill:#fff3e0,stroke:#e65100,stroke-width:2px;
-    classDef ai fill:#ede7f6,stroke:#4527a0,stroke-width:2px;
+### Data Flow
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant Frontend as React App
+    participant Backend as FastAPI
+    participant Models as AI Engine
+    participant Gemini as Google API
 
-    class A,B,C client;
-    class D,E server;
-    class F,G,H,I,J ai;
+    User->>Frontend: Uploads CSV & Selects Model
+    Frontend->>Backend: POST /forecast (Data + Token)
+    Backend->>Backend: Clean data (Pandas)
+    Backend->>Models: Run Predictions
+    Models-->>Backend: Return Forecast & Metrics
+    Backend->>Gemini: Request Business Insights
+    Gemini-->>Backend: AI Recommendations
+    Backend-->>Frontend: Return full JSON payload
+    Frontend->>User: Display Interactive Charts
 ```
 
 ## Tech Stack
