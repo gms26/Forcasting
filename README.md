@@ -32,6 +32,7 @@ flowchart TD
     end
 
     subgraph Models [AI Models]
+        MA[Moving Average]
         ARIMA[ARIMA]
         Prophet[Prophet]
         HW[Holt-Winters]
@@ -45,8 +46,8 @@ flowchart TD
     UI -->|CSV Data + JWT| API
     API -->|Clean & Parse| Data
     Data --> Engine
-    Engine --> ARIMA & Prophet & HW
-    ARIMA & Prophet & HW -->|Predictions| API
+    Engine --> MA & ARIMA & Prophet & HW
+    MA & ARIMA & Prophet & HW -->|Predictions| API
     API -->|Forecast Context| Gemini
     Gemini -->|Business Insights| API
     API -->|JSON Response| Chart
